@@ -15,7 +15,8 @@ let isReady = false;
 
 client.once('ready', () => {
   isReady = true;
-  console.log(`Logged in as ${client.user?.tag}!`);
+  // Removed console.log
+
 });
 
 if (!isReady && process.env.DISCORD_BOT_TOKEN) {

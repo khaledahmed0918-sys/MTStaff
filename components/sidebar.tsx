@@ -15,9 +15,9 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-[#111827]/80 backdrop-blur-xl border-l border-white/5 flex flex-col h-full z-20 shadow-2xl">
-      <div className="p-6 flex items-center gap-4 border-b border-white/5">
-        <div className="w-10 h-10 relative rounded-full overflow-hidden border-2 border-blue-500/50">
+    <aside className="w-64 bg-[#050505]/80 backdrop-blur-xl border-l border-white/10 flex flex-col h-full z-20 shadow-2xl">
+      <div className="p-6 flex items-center gap-4 border-b border-white/10">
+        <div className="w-10 h-10 relative rounded-xl overflow-hidden border border-white/10">
           <Image
             src="https://i.postimg.cc/jdLhSPtq/HEIF-Image.jpg"
             alt="Logo"
@@ -26,10 +26,10 @@ export function Sidebar() {
             referrerPolicy="no-referrer"
           />
         </div>
-        <h2 className="font-bold text-lg text-blue-100 tracking-wide">MT Community</h2>
+        <h2 className="font-bold text-lg text-white tracking-tight">MT Dashboard</h2>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2 mt-4">
+      <nav className="flex-1 p-4 space-y-1 mt-4">
         {links.map((link) => {
           const isActive = pathname === link.href;
           const Icon = link.icon;
@@ -37,9 +37,9 @@ export function Sidebar() {
             <Link
               key={link.href}
               href={link.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                 isActive
-                  ? 'bg-blue-600/20 text-blue-400 border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.1)]'
+                  ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                   : 'text-gray-400 hover:bg-white/5 hover:text-white'
               }`}
             >
@@ -50,10 +50,10 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/5">
+      <div className="p-4 border-t border-white/10">
         <Link
           href="/api/auth/logout"
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors"
+          className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"
         >
           <LogOut className="w-5 h-5" />
           <span className="font-medium">تسجيل الخروج</span>
