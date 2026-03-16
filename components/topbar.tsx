@@ -1,9 +1,9 @@
+'use client';
+import { useState } from 'react';
 import Image from 'next/image';
 
 export function Topbar({ user }: { user: any }) {
-  const avatarUrl = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : 'https://cdn.discordapp.com/embed/avatars/0.png';
+  const [imgSrc, setImgSrc] = useState(user.avatar || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=');
 
   return (
     <header className="h-20 bg-[#111827]/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-8 z-20 shadow-lg">
@@ -15,11 +15,12 @@ export function Topbar({ user }: { user: any }) {
         </div>
         <div className="w-12 h-12 relative rounded-full overflow-hidden border-2 border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
           <Image
-            src={avatarUrl}
+            src={imgSrc}
             alt={user.username}
             fill
             className="object-cover"
             referrerPolicy="no-referrer"
+            onError={() => setImgSrc('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=')}
           />
         </div>
       </div>
