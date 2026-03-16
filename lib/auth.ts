@@ -14,7 +14,6 @@ export async function getSession() {
       username: string;
       discriminator: string;
       avatar: string;
-      accessToken: string;
     };
   } catch (err) {
     return null;

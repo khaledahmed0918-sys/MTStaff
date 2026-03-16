@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sign } from 'jsonwebtoken';
 import { serialize } from 'cookie';
+import { getUserInfo } from '@/lib/bot';
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code');
@@ -57,14 +58,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(new URL('/?error=user_failed', req.url));
     }
 
-    // Create JWT
+    // جلب بيانات المستخدم باستخدام البوت (بدون استخدام التوكن الخاص بالمستخدم)
+    const botUserInfo = await getUserInfo(process.env.DISCORD_GUILD_ID!, userData.id);
+
+    if (!botUserInfo) {
+      console.error('Bot user info error');
+      return NextResponse.redirect(new URL('/?error=user_failed', req.url));
+    }
+
+    // Create JWT (بدون تخزين التوكن الخاص بالمستخدم)
     const token = sign(
       {
-        id: userData.id,
-        username: userData.username,
-        discriminator: userData.discriminator,
-        avatar: userData.avatar,
-        accessToken: tokenData.access_token,
+        id: botUserInfo.id,
+        username: botUserInfo.username,
+        discriminator: botUserInfo.discriminator,
+        avatar: botUserInfo.avatar,
       },
       jwtSecret,
       { expiresIn: '7d' }
@@ -72,7 +80,7 @@ export async function GET(req: NextRequest) {
 
     const cookie = serialize('auth_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // تم التعديل لجعل الموقع يعمل على HTTP
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: '/',
