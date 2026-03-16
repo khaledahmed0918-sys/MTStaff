@@ -93,7 +93,7 @@ export default function SearchPage() {
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 relative rounded-full overflow-hidden border-2 border-blue-500/30">
                   {user.avatar ? (
-                    <Image src={user.avatar} alt={user.username} fill className="object-cover" unoptimized />
+                    <Image src={user.avatar} alt={user.username} fill className="object-cover" unoptimized referrerPolicy="no-referrer" />
                   ) : (
                     <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-lg">{user.username.charAt(0)}</div>
                   )}
@@ -129,7 +129,7 @@ export default function SearchPage() {
 
             {/* Expanded Details */}
             {expandedId === user.id && (
-              <div className="border-t border-white/10 bg-[#0a0f1a]/50 p-6">
+              <div className="border-t border-white/10 bg-[#0a0f1a]/80 p-6">
                 {loadingDetails ? (
                   <div className="flex justify-center py-8">
                     <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
@@ -137,9 +137,9 @@ export default function SearchPage() {
                 ) : expandedData ? (
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Warns */}
-                    <div className="bg-[#111827] border border-yellow-500/20 rounded-xl overflow-hidden flex flex-col h-80">
+                    <div className="bg-[#111827] border border-yellow-500/20 rounded-xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-yellow-500/40 transition-colors duration-300">
                       <div className="bg-yellow-500/10 p-3 border-b border-yellow-500/20 flex items-center gap-2">
-                        <ShieldAlert className="w-4 h-4 text-yellow-500" />
+                        <ShieldAlert className="w-4 h-4 text-yellow-500 group-hover:scale-110 transition-transform" />
                         <h4 className="font-bold text-yellow-400 text-sm">التحذيرات ({expandedData.db.warns?.length || 0})</h4>
                       </div>
                       <div className="p-3 flex-1 overflow-y-auto custom-scrollbar space-y-2">
@@ -147,12 +147,12 @@ export default function SearchPage() {
                           <p className="text-gray-500 text-center text-sm py-4">لا يوجد</p>
                         ) : (
                           expandedData.db.warns.map((w: any, i: number) => (
-                            <div key={i} className="bg-white/5 rounded-lg p-3 text-sm">
+                            <div key={i} className="bg-white/5 border border-white/5 hover:border-yellow-500/30 rounded-lg p-3 text-sm transition-colors">
                               <div className="flex justify-between text-xs text-gray-400 mb-1">
-                                <span>#{w.warn_number}</span>
+                                <span className="font-mono text-yellow-300 bg-yellow-500/10 px-1.5 py-0.5 rounded">#{w.warn_number}</span>
                                 <span>{new Date(w.date_warn).toLocaleDateString('ar-SA')}</span>
                               </div>
-                              <p className="text-gray-200">{w.reason}</p>
+                              <p className="text-gray-200 mt-2">{w.reason}</p>
                             </div>
                           ))
                         )}
@@ -160,9 +160,9 @@ export default function SearchPage() {
                     </div>
 
                     {/* Timeouts */}
-                    <div className="bg-[#111827] border border-orange-500/20 rounded-xl overflow-hidden flex flex-col h-80">
+                    <div className="bg-[#111827] border border-orange-500/20 rounded-xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-orange-500/40 transition-colors duration-300">
                       <div className="bg-orange-500/10 p-3 border-b border-orange-500/20 flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-orange-500" />
+                        <Clock className="w-4 h-4 text-orange-500 group-hover:scale-110 transition-transform" />
                         <h4 className="font-bold text-orange-400 text-sm">التايم أوت ({expandedData.db.timeouts?.length || 0})</h4>
                       </div>
                       <div className="p-3 flex-1 overflow-y-auto custom-scrollbar space-y-2">
@@ -170,13 +170,13 @@ export default function SearchPage() {
                           <p className="text-gray-500 text-center text-sm py-4">لا يوجد</p>
                         ) : (
                           expandedData.db.timeouts.map((t: any, i: number) => (
-                            <div key={i} className="bg-white/5 rounded-lg p-3 text-sm">
+                            <div key={i} className="bg-white/5 border border-white/5 hover:border-orange-500/30 rounded-lg p-3 text-sm transition-colors">
                               <div className="flex justify-between text-xs text-gray-400 mb-1">
-                                <span>#{t.timeout_number}</span>
+                                <span className="font-mono text-orange-300 bg-orange-500/10 px-1.5 py-0.5 rounded">#{t.timeout_number}</span>
                                 <span>{new Date(t.date).toLocaleDateString('ar-SA')}</span>
                               </div>
-                              <div className="text-xs text-orange-300 mb-1">المدة: {t.time}</div>
-                              <p className="text-gray-200">{t.reason}</p>
+                              <div className="text-xs text-orange-300 mb-1 bg-orange-500/10 inline-block px-2 py-0.5 rounded">المدة: {t.time}</div>
+                              <p className="text-gray-200 mt-1">{t.reason}</p>
                             </div>
                           ))
                         )}
@@ -184,9 +184,9 @@ export default function SearchPage() {
                     </div>
 
                     {/* Bans */}
-                    <div className="bg-[#111827] border border-red-500/20 rounded-xl overflow-hidden flex flex-col h-80">
+                    <div className="bg-[#111827] border border-red-500/20 rounded-xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-red-500/40 transition-colors duration-300">
                       <div className="bg-red-500/10 p-3 border-b border-red-500/20 flex items-center gap-2">
-                        <Ban className="w-4 h-4 text-red-500" />
+                        <Ban className="w-4 h-4 text-red-500 group-hover:scale-110 transition-transform" />
                         <h4 className="font-bold text-red-400 text-sm">الباند ({expandedData.db.bans?.length || 0})</h4>
                       </div>
                       <div className="p-3 flex-1 overflow-y-auto custom-scrollbar space-y-2">
@@ -194,13 +194,18 @@ export default function SearchPage() {
                           <p className="text-gray-500 text-center text-sm py-4">لا يوجد</p>
                         ) : (
                           expandedData.db.bans.map((b: any, i: number) => (
-                            <div key={i} className="bg-white/5 rounded-lg p-3 text-sm">
+                            <div key={i} className="bg-white/5 border border-white/5 hover:border-red-500/30 rounded-lg p-3 text-sm transition-colors">
                               <div className="flex justify-between text-xs text-gray-400 mb-1">
-                                <span>#{b.ban_number}</span>
+                                <span className="font-mono text-red-300 bg-red-500/10 px-1.5 py-0.5 rounded">#{b.ban_number}</span>
                                 <span>{new Date(b.date).toLocaleDateString('ar-SA')}</span>
                               </div>
-                              <div className="text-xs text-red-300 mb-1">المدة: {b.time}</div>
-                              <p className="text-gray-200">{b.reason}</p>
+                              <div className="flex gap-2 mb-1">
+                                <span className="text-xs text-red-300 bg-red-500/10 px-2 py-0.5 rounded">المدة: {b.time}</span>
+                                {b.unbanned && (
+                                  <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">مفكوك</span>
+                                )}
+                              </div>
+                              <p className="text-gray-200 mt-1">{b.reason}</p>
                             </div>
                           ))
                         )}

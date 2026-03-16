@@ -19,32 +19,17 @@ export async function GET(req: NextRequest) {
     const discordInfo = await getUserInfo(guildId, q);
 
     if (discordInfo) {
-      let warnsCount = 0;
-      let timeoutsCount = 0;
-      let bansCount = 0;
-      let streaks = null;
+      const [warnsRes, timeoutsRes, bansRes, streaksRes] = await Promise.allSettled([
+        query(`SELECT COUNT(*) as count FROM "warns_${q}"`),
+        query(`SELECT COUNT(*) as count FROM "timeouts_${q}"`),
+        query(`SELECT COUNT(*) as count FROM "bans_${q}"`),
+        query(`SELECT * FROM streaks WHERE user_id = $1`, [q])
+      ]);
 
-      try {
-        const warnsRes = await query(`SELECT COUNT(*) as count FROM "warns_${q}"`);
-        warnsCount = parseInt(warnsRes.rows[0].count, 10);
-      } catch (e) {}
-
-      try {
-        const timeoutsRes = await query(`SELECT COUNT(*) as count FROM "timeouts_${q}"`);
-        timeoutsCount = parseInt(timeoutsRes.rows[0].count, 10);
-      } catch (e) {}
-
-      try {
-        const bansRes = await query(`SELECT COUNT(*) as count FROM "bans_${q}"`);
-        bansCount = parseInt(bansRes.rows[0].count, 10);
-      } catch (e) {}
-
-      try {
-        const streaksRes = await query(`SELECT * FROM streaks WHERE user_id = $1`, [q]);
-        if (streaksRes.rows.length > 0) {
-          streaks = streaksRes.rows[0];
-        }
-      } catch (e) {}
+      const warnsCount = warnsRes.status === 'fulfilled' ? parseInt(warnsRes.value.rows[0].count, 10) : 0;
+      const timeoutsCount = timeoutsRes.status === 'fulfilled' ? parseInt(timeoutsRes.value.rows[0].count, 10) : 0;
+      const bansCount = bansRes.status === 'fulfilled' ? parseInt(bansRes.value.rows[0].count, 10) : 0;
+      const streaks = streaksRes.status === 'fulfilled' && streaksRes.value.rows.length > 0 ? streaksRes.value.rows[0] : null;
 
       return NextResponse.json({
         results: [

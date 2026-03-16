@@ -131,9 +131,9 @@ export default function MyInfoPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Warns */}
-        <div className="bg-[#111827]/60 backdrop-blur-md border border-yellow-500/20 rounded-2xl overflow-hidden shadow-lg flex flex-col">
+        <div className="bg-[#111827]/60 backdrop-blur-md border border-yellow-500/20 rounded-2xl overflow-hidden shadow-lg flex flex-col group hover:border-yellow-500/40 transition-colors duration-300">
           <div className="bg-yellow-500/10 p-4 border-b border-yellow-500/20 flex items-center gap-3">
-            <ShieldAlert className="w-5 h-5 text-yellow-500" />
+            <ShieldAlert className="w-5 h-5 text-yellow-500 group-hover:scale-110 transition-transform" />
             <h2 className="font-bold text-yellow-400 text-lg">سجل التحذيرات ({warns.length})</h2>
           </div>
           <div className="p-4 flex-1 overflow-y-auto max-h-[400px] custom-scrollbar space-y-3">
@@ -141,7 +141,7 @@ export default function MyInfoPage() {
               <p className="text-gray-500 text-center py-8">لا يوجد تحذيرات</p>
             ) : (
               warns.map((warn: any, i: number) => (
-                <div key={i} className="bg-white/5 border border-white/5 rounded-xl p-4 hover:bg-white/10 transition-colors">
+                <div key={i} className="bg-[#0a0f1a] border border-white/5 rounded-xl p-4 hover:border-yellow-500/30 transition-all duration-300">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-mono bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-md">#{warn.warn_number}</span>
                     <span className="text-xs text-gray-400">{new Date(warn.date_warn).toLocaleString('ar-SA')}</span>
@@ -161,9 +161,9 @@ export default function MyInfoPage() {
         </div>
 
         {/* Timeouts */}
-        <div className="bg-[#111827]/60 backdrop-blur-md border border-orange-500/20 rounded-2xl overflow-hidden shadow-lg flex flex-col">
+        <div className="bg-[#111827]/60 backdrop-blur-md border border-orange-500/20 rounded-2xl overflow-hidden shadow-lg flex flex-col group hover:border-orange-500/40 transition-colors duration-300">
           <div className="bg-orange-500/10 p-4 border-b border-orange-500/20 flex items-center gap-3">
-            <Clock className="w-5 h-5 text-orange-500" />
+            <Clock className="w-5 h-5 text-orange-500 group-hover:scale-110 transition-transform" />
             <h2 className="font-bold text-orange-400 text-lg">سجل التايم أوت ({timeouts.length})</h2>
           </div>
           <div className="p-4 flex-1 overflow-y-auto max-h-[400px] custom-scrollbar space-y-3">
@@ -171,7 +171,7 @@ export default function MyInfoPage() {
               <p className="text-gray-500 text-center py-8">لا يوجد تايم أوت</p>
             ) : (
               timeouts.map((to: any, i: number) => (
-                <div key={i} className="bg-white/5 border border-white/5 rounded-xl p-4 hover:bg-white/10 transition-colors">
+                <div key={i} className="bg-[#0a0f1a] border border-white/5 rounded-xl p-4 hover:border-orange-500/30 transition-all duration-300">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-mono bg-orange-500/20 text-orange-300 px-2 py-1 rounded-md">#{to.timeout_number}</span>
                     <span className="text-xs text-gray-400">{new Date(to.date).toLocaleString('ar-SA')}</span>
@@ -187,9 +187,9 @@ export default function MyInfoPage() {
         </div>
 
         {/* Bans */}
-        <div className="bg-[#111827]/60 backdrop-blur-md border border-red-500/20 rounded-2xl overflow-hidden shadow-lg flex flex-col">
+        <div className="bg-[#111827]/60 backdrop-blur-md border border-red-500/20 rounded-2xl overflow-hidden shadow-lg flex flex-col group hover:border-red-500/40 transition-colors duration-300">
           <div className="bg-red-500/10 p-4 border-b border-red-500/20 flex items-center gap-3">
-            <Ban className="w-5 h-5 text-red-500" />
+            <Ban className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform" />
             <h2 className="font-bold text-red-400 text-lg">سجل الباند ({bans.length})</h2>
           </div>
           <div className="p-4 flex-1 overflow-y-auto max-h-[400px] custom-scrollbar space-y-3">
@@ -197,7 +197,7 @@ export default function MyInfoPage() {
               <p className="text-gray-500 text-center py-8">لا يوجد باند</p>
             ) : (
               bans.map((ban: any, i: number) => (
-                <div key={i} className="bg-white/5 border border-white/5 rounded-xl p-4 hover:bg-white/10 transition-colors">
+                <div key={i} className="bg-[#0a0f1a] border border-white/5 rounded-xl p-4 hover:border-red-500/30 transition-all duration-300">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-mono bg-red-500/20 text-red-300 px-2 py-1 rounded-md">#{ban.ban_number}</span>
                     <span className="text-xs text-gray-400">{new Date(ban.date).toLocaleString('ar-SA')}</span>
