@@ -28,6 +28,7 @@ export default async function DashboardHome() {
             fill
             className="object-cover opacity-60"
             referrerPolicy="no-referrer"
+            unoptimized
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-[#0a0f1a]" />
@@ -43,6 +44,7 @@ export default async function DashboardHome() {
                 fill
                 className="object-cover"
                 referrerPolicy="no-referrer"
+                unoptimized
               />
             ) : (
               <div className="w-full h-full bg-blue-600 flex items-center justify-center text-3xl font-bold">
