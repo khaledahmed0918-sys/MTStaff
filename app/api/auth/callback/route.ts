@@ -16,18 +16,25 @@ export async function GET(req: NextRequest) {
   const redirectUri = `${appUrl}/api/auth/callback`;
 
   try {
+    const params = new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: redirectUri,
+    });
+
+    console.log('DEBUG: Sending token request to Discord');
+    console.log('DEBUG: Client ID:', clientId);
+    console.log('DEBUG: Redirect URI:', redirectUri);
+    console.log('DEBUG: Client Secret:', clientSecret ? `${clientSecret.substring(0, 4)}****` : 'MISSING');
+
     const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        client_id: clientId,
-        client_secret: clientSecret,
-        grant_type: 'authorization_code',
-        code,
-        redirect_uri: redirectUri,
-      }),
+      body: params,
     });
 
     const tokenData = await tokenResponse.json();
