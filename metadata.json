@@ -1,0 +1,5 @@
+{
+  "name": "MT Community Dashboard",
+  "description": "Dashboard for MT Community Discord server with user stats, logs, and server info.",
+  "requestFramePermissions": []
+}
