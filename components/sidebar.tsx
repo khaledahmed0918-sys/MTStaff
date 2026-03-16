@@ -24,6 +24,7 @@ export function Sidebar() {
             fill
             className="object-cover"
             referrerPolicy="no-referrer"
+            unoptimized
           />
         </div>
         <h2 className="font-bold text-lg text-white tracking-tight">MT Dashboard</h2>

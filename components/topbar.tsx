@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 export function Topbar({ user }: { user: any }) {
+  if (!user) return null;
   const [imgSrc, setImgSrc] = useState(user.avatar || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=');
 
   return (
