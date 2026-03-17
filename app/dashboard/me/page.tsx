@@ -20,29 +20,39 @@ export default function MyInfoPage() {
     async function fetchMyInfo() {
       try {
         const resMe = await fetch('/api/me', { cache: 'no-store' });
+        if (!resMe.ok) throw new Error('Failed to fetch session');
         const me = await resMe.json();
         
-        if (me.id) {
-          const res = await fetch(`/api/user/${me.id}`, { cache: 'no-store' });
+        if (me.user && me.user.id) {
+          const res = await fetch(`/api/user/${me.user.id}`, { cache: 'no-store' });
           const userData = await res.json();
           
-          if (!userData.discord) {
-            userData.discord = {
-              id: me.id,
-              username: me.username || 'غير معروف',
-              discriminator: me.discriminator || '0000',
-              avatar: me.avatar ? `https://cdn.discordapp.com/avatars/${me.id}/${me.avatar}.png` : null,
+          // Initialize with safe defaults
+          const initializedData = {
+            discord: userData.discord || {
+              id: me.user.id,
+              username: me.user.name || 'غير معروف',
+              avatar: me.user.image || null,
               createdAt: null,
-            };
-          }
-          if (!userData.db) {
-            userData.db = { warns: [], timeouts: [], bans: [], streaks: null };
-          }
+            },
+            db: {
+              warns: userData.db?.warns || [],
+              timeouts: userData.db?.timeouts || [],
+              bans: userData.db?.bans || [],
+              streaks: userData.db?.streaks || null,
+              messages: userData.db?.messages || null,
+              voice: userData.db?.voice || null,
+              coins: userData.db?.coins || null,
+              tasks: userData.db?.tasks || [],
+            }
+          };
           
-          setData(userData);
+          setData(initializedData);
+        } else {
+          throw new Error('User ID not found');
         }
       } catch (err) {
-        // Error handling removed
+        console.error('Error fetching profile:', err);
       } finally {
         setLoading(false);
       }
