@@ -33,12 +33,12 @@ export const authOptions = {
   },
   cookies: {
     sessionToken: {
-      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.session-token`,
+      name: "next-auth.session-token",
       options: {
         httpOnly: true,
-        sameSite: "none", // REQUIRED for iframe compatibility
+        sameSite: "lax", // Lax is safer for HTTP
         path: "/",
-        secure: process.env.NODE_ENV === "production", // Only secure in production
+        secure: false, // Must be false for HTTP
       },
     },
   },
