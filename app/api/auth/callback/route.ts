@@ -73,17 +73,17 @@ export async function GET(req: NextRequest) {
 
     const cookie = serialize('auth_token', token, {
       httpOnly: true,
-      secure: false, // تم التعديل لجعل الموقع يعمل على HTTP
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: '/',
     });
 
-    const response = NextResponse.redirect(new URL('/dashboard', req.url));
+    const response = NextResponse.redirect(new URL('/dashboard', appUrl));
     response.headers.set('Set-Cookie', cookie);
 
     return response;
   } catch (err) {
-    return NextResponse.redirect(new URL('/?error=oauth_failed', req.url));
+    return NextResponse.redirect(new URL('/?error=oauth_failed', appUrl || req.url));
   }
 }
