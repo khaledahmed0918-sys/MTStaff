@@ -12,21 +12,20 @@ export function Topbar({ user }: { user: any }) {
   if (!user) return null;
 
   return (
-    <header className="h-20 bg-[#111827]/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 md:px-8 z-20 shadow-lg">
+    <header className="h-16 bg-[#050505]/95 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 md:px-6 z-20 shadow-sm">
       <div className="flex items-center gap-4">
         <button 
           onClick={toggle}
           className="md:hidden p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
         >
-          <Menu className="w-6 h-6" />
+          <Menu className="w-5 h-5" />
         </button>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <div className="text-right hidden md:block">
-          <p className="text-sm font-semibold text-white">{profile.global_name || profile.username || user.name}</p>
-          {profile.discriminator && profile.discriminator !== '0' && <p className="text-xs text-blue-400">#{profile.discriminator}</p>}
+          <p className="text-sm font-medium text-white">{profile.global_name || profile.username || user.name}</p>
         </div>
-        <div className="w-10 h-10 md:w-12 md:h-12 relative rounded-full overflow-hidden border-2 border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+        <div className="w-9 h-9 relative rounded-full overflow-hidden border border-white/10">
           <Image
             src={imgSrc}
             alt={profile.username || user.name || 'User'}
