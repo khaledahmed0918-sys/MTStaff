@@ -59,7 +59,7 @@ export function LoginForm() {
                 damping: 20,
                 delay: 0.2 
               }}
-              className="w-28 h-28 relative mb-6 rounded-2xl overflow-hidden border border-white/20 shadow-[0_0_40px_rgba(59,130,246,0.3)] group"
+              className="w-28 h-28 relative mb-6 rounded-full overflow-hidden border border-white/20 shadow-[0_0_40px_rgba(59,130,246,0.3)] group"
             >
               <Image
                 src="https://i.postimg.cc/jdLhSPtq/HEIF-Image.jpg"
