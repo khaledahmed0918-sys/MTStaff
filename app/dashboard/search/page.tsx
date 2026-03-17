@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar } from 'lucide-react';
+import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
 import { formatDateEn, formatVoiceTime, parseDiscordEmoji } from '@/lib/utils';
 
@@ -210,7 +210,7 @@ export default function SearchPage() {
                 ) : expandedData?.db ? (
                   <div className="space-y-6">
                     {/* New Stats Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                       {/* Messages */}
                       <div className="bg-[#111827] border border-blue-500/20 rounded-xl p-4 shadow-lg">
                         <div className="flex items-center gap-2 mb-3">
@@ -280,6 +280,18 @@ export default function SearchPage() {
                         </div>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between"><span className="text-gray-400">الرصيد:</span> <span className="text-white font-mono">{expandedData.db.coins?.coins || 0}</span></div>
+                        </div>
+                      </div>
+
+                      {/* Tasks */}
+                      <div className="bg-[#111827] border border-emerald-500/20 rounded-xl p-4 shadow-lg">
+                        <div className="flex items-center gap-2 mb-3">
+                          <ListTodo className="w-5 h-5 text-emerald-400" />
+                          <h4 className="font-bold text-emerald-400">المهام</h4>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between"><span className="text-gray-400">المكتملة:</span> <span className="text-white font-mono">{expandedData.db.tasks?.completed || 0}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-400">قيد التنفيذ:</span> <span className="text-white font-mono">{expandedData.db.tasks?.pending || 0}</span></div>
                         </div>
                       </div>
                     </div>

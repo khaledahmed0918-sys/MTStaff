@@ -21,7 +21,7 @@ export default async function DashboardHome() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="relative h-64 rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+      <div className="relative aspect-video w-full rounded-3xl overflow-hidden shadow-2xl border border-white/10">
         {displayInfo.banner ? (
           <CachedImage
             src={displayInfo.banner}
