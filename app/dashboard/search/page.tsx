@@ -2,14 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare } from 'lucide-react';
-import Image from 'next/image';
-
-const formatDate = (dateString: any) => {
-  if (!dateString) return 'غير محدد';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return 'تاريخ غير صالح';
-  return date.toLocaleDateString('ar-SA');
-};
+import CachedImage from '@/components/cached-image';
+import { formatDateEn, formatVoiceTime, parseDiscordEmoji } from '@/lib/utils';
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
@@ -26,7 +20,7 @@ export default function SearchPage() {
         const data = await res.json();
         setResults(data.results || []);
       } catch (err) {
-        console.error(err);
+        // Error handling removed
       } finally {
         setLoading(false);
       }
@@ -46,7 +40,7 @@ export default function SearchPage() {
       const data = await res.json();
       setResults(data.results || []);
     } catch (err) {
-      console.error(err);
+      // Error handling removed
     } finally {
       setLoading(false);
     }
@@ -66,7 +60,7 @@ export default function SearchPage() {
       const data = await res.json();
       setExpandedData(data);
     } catch (err) {
-      console.error(err);
+      // Error handling removed
     } finally {
       setLoadingDetails(false);
     }
@@ -110,33 +104,41 @@ export default function SearchPage() {
           <div key={user.id} className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 relative">
             {/* Banner */}
             {user.banner ? (
-              <div className="h-24 w-full relative">
-                <Image src={user.banner} alt="Banner" fill className="object-cover opacity-60" unoptimized referrerPolicy="no-referrer" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/80 to-transparent" />
+              <div className="h-32 w-full relative overflow-hidden">
+                <div 
+                  className="absolute inset-0 bg-cover bg-center blur-md scale-110 opacity-50"
+                  style={{ backgroundImage: `url(${user.banner})` }}
+                />
+                <CachedImage src={user.banner} alt="Banner" fill className="object-cover relative z-10" referrerPolicy="no-referrer" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-[#111827]/50 to-transparent z-20" />
               </div>
             ) : (
-              <div className="h-24 w-full bg-gradient-to-r from-blue-900/40 to-purple-900/40 relative">
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/80 to-transparent" />
+              <div className="h-32 w-full relative overflow-hidden" style={{ backgroundColor: user.bannerColor || '#1e1e2e' }}>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-[#111827]/50 to-transparent" />
               </div>
             )}
 
             <div 
-              className="p-4 flex flex-col md:flex-row items-start md:items-center justify-between cursor-pointer hover:bg-white/5 transition-colors relative z-10 -mt-12"
+              className="p-4 flex flex-col md:flex-row items-start md:items-center justify-between cursor-pointer hover:bg-white/5 transition-colors relative z-30 -mt-16"
               onClick={() => toggleExpand(user.id)}
             >
               <div className="flex items-center gap-4">
-                <div className="w-20 h-20 relative rounded-full overflow-hidden border-4 border-[#111827] bg-[#111827]">
-                  {user.avatar ? (
-                    <Image src={user.avatar} alt={user.username} fill className="object-cover" unoptimized referrerPolicy="no-referrer" />
-                  ) : (
-                    <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-2xl">{user.username.charAt(0)}</div>
-                  )}
+                <div className="relative">
+                  <div className="w-24 h-24 relative rounded-full overflow-hidden border-4 border-[#111827] bg-[#111827] z-10">
+                    {user.avatar ? (
+                      <CachedImage src={user.avatar} alt={user.username} fill className="object-cover" referrerPolicy="no-referrer" />
+                    ) : (
+                      <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-3xl">{user.username.charAt(0)}</div>
+                    )}
+                  </div>
                   {user.avatarDecoration && (
-                    <Image src={user.avatarDecoration} alt="Decoration" fill className="object-cover scale-110" unoptimized referrerPolicy="no-referrer" />
+                    <div className="absolute -inset-[20%] z-20 pointer-events-none">
+                      <CachedImage src={user.avatarDecoration} alt="Decoration" fill className="object-contain" referrerPolicy="no-referrer" />
+                    </div>
                   )}
                 </div>
                 <div className="mt-8 md:mt-0">
-                  <h3 className="font-bold text-xl" style={{ color: user.highestRoleColor || '#ffffff' }}>
+                  <h3 className="font-bold text-2xl" style={{ color: user.highestRoleColor || '#ffffff' }}>
                     {user.displayName} <span className="text-sm text-gray-400 font-normal">({user.username})</span>
                   </h3>
                   <p className="text-sm text-gray-400 font-mono">{user.id}</p>
@@ -173,11 +175,11 @@ export default function SearchPage() {
                 <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                     <h4 className="text-gray-400 text-sm mb-2">تاريخ إنشاء الحساب</h4>
-                    <p className="text-white font-mono">{formatDate(user.createdAt)}</p>
+                    <p className="text-white font-mono">{formatDateEn(user.createdAt)}</p>
                   </div>
                   <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                     <h4 className="text-gray-400 text-sm mb-2">تاريخ الانضمام للسيرفر</h4>
-                    <p className="text-white font-mono">{formatDate(user.joinedAt)}</p>
+                    <p className="text-white font-mono">{formatDateEn(user.joinedAt)}</p>
                   </div>
                 </div>
                 
@@ -186,9 +188,19 @@ export default function SearchPage() {
                     <h4 className="text-gray-400 text-sm mb-2">الرتب</h4>
                     <div className="flex flex-wrap gap-2">
                       {user.roles.map((role: any) => (
-                        <span key={role.id} className="px-2 py-1 rounded text-xs font-medium border border-white/10" style={{ backgroundColor: `${role.color}20`, color: role.color !== '#000000' ? role.color : '#ffffff' }}>
-                          {role.name}
-                        </span>
+                        <div 
+                          key={role.id} 
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/10"
+                          style={{ 
+                            backgroundColor: role.color !== '#000000' ? `${role.color}20` : 'rgba(255,255,255,0.05)', 
+                            color: role.color !== '#000000' ? role.color : '#ffffff' 
+                          }}
+                        >
+                          {role.icon && (
+                            <CachedImage src={role.icon} alt={role.name} width={16} height={16} className="rounded-sm" />
+                          )}
+                          <span>{role.name}</span>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -223,13 +235,13 @@ export default function SearchPage() {
                       <div className="bg-[#111827] border border-purple-500/20 rounded-xl p-4 shadow-lg">
                         <div className="flex items-center gap-2 mb-3">
                           <Clock className="w-5 h-5 text-purple-400" />
-                          <h4 className="font-bold text-purple-400">الصوت (ثواني)</h4>
+                          <h4 className="font-bold text-purple-400">الصوت</h4>
                         </div>
                         <div className="space-y-2 text-sm">
-                          <div className="flex justify-between"><span className="text-gray-400">الكل:</span> <span className="text-white font-mono">{expandedData.db.voice?.all || 0}</span></div>
-                          <div className="flex justify-between"><span className="text-gray-400">اليوم:</span> <span className="text-white font-mono">{expandedData.db.voice?.top_day || 0}</span></div>
-                          <div className="flex justify-between"><span className="text-gray-400">الأسبوع:</span> <span className="text-white font-mono">{expandedData.db.voice?.top_week || 0}</span></div>
-                          <div className="flex justify-between"><span className="text-gray-400">الشهر:</span> <span className="text-white font-mono">{expandedData.db.voice?.top_month || 0}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-400">الكل:</span> <span className="text-white font-mono">{formatVoiceTime(expandedData.db.voice?.all || 0)}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-400">اليوم:</span> <span className="text-white font-mono">{formatVoiceTime(expandedData.db.voice?.top_day || 0)}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-400">الأسبوع:</span> <span className="text-white font-mono">{formatVoiceTime(expandedData.db.voice?.top_week || 0)}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-400">الشهر:</span> <span className="text-white font-mono">{formatVoiceTime(expandedData.db.voice?.top_month || 0)}</span></div>
                         </div>
                       </div>
 
@@ -240,7 +252,26 @@ export default function SearchPage() {
                           <h4 className="font-bold text-orange-400">الستريك</h4>
                         </div>
                         <div className="space-y-2 text-sm">
-                          <div className="flex justify-between"><span className="text-gray-400">الحالي:</span> <span className="text-white font-mono">{expandedData.db.streaks?.streak || 0} {expandedData.db.streaks?.streak_emoji || '🔥'}</span></div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">الحالي:</span> 
+                            <div className="flex items-center gap-1">
+                              <span className="text-white font-mono">{expandedData.db.streaks?.streak || 0}</span>
+                              {expandedData.db.streaks?.streak_emoji_url ? (
+                                <CachedImage src={expandedData.db.streaks.streak_emoji_url} alt="streak" width={16} height={16} />
+                              ) : expandedData.db.streaks?.streak_emoji ? (
+                                (() => {
+                                  const parsed = parseDiscordEmoji(expandedData.db.streaks.streak_emoji);
+                                  return parsed ? (
+                                    <CachedImage src={parsed} alt="streak" width={16} height={16} />
+                                  ) : (
+                                    <span>{expandedData.db.streaks.streak_emoji}</span>
+                                  );
+                                })()
+                              ) : (
+                                <Flame className="w-4 h-4 text-orange-500" />
+                              )}
+                            </div>
+                          </div>
                           <div className="flex justify-between"><span className="text-gray-400">السابق:</span> <span className="text-white font-mono">{expandedData.db.streaks?.old_streak || 0}</span></div>
                           <div className="flex justify-between"><span className="text-gray-400">الحمايات:</span> <span className="text-white font-mono">{expandedData.db.streaks?.shields || 0}</span></div>
                           <div className="flex justify-between"><span className="text-gray-400">رسائل اليوم:</span> <span className="text-white font-mono">{expandedData.db.streaks?.daily_messages || 0}/100</span></div>
@@ -274,7 +305,7 @@ export default function SearchPage() {
                             <div key={i} className="bg-white/5 border border-white/5 hover:border-yellow-500/30 rounded-lg p-3 text-sm transition-colors">
                               <div className="flex justify-between text-xs text-gray-400 mb-1">
                                 <span className="font-mono text-yellow-300 bg-yellow-500/10 px-1.5 py-0.5 rounded">#{w.warn_number}</span>
-                                <span>{formatDate(w.date_warn)}</span>
+                                <span>{formatDateEn(w.date_warn)}</span>
                               </div>
                               <p className="text-gray-200 mt-2">{w.reason}</p>
                             </div>
@@ -297,7 +328,7 @@ export default function SearchPage() {
                             <div key={i} className="bg-white/5 border border-white/5 hover:border-orange-500/30 rounded-lg p-3 text-sm transition-colors">
                               <div className="flex justify-between text-xs text-gray-400 mb-1">
                                 <span className="font-mono text-orange-300 bg-orange-500/10 px-1.5 py-0.5 rounded">#{t.timeout_number}</span>
-                                <span>{formatDate(t.date)}</span>
+                                <span>{formatDateEn(t.date)}</span>
                               </div>
                               <div className="text-xs text-orange-300 mb-1 bg-orange-500/10 inline-block px-2 py-0.5 rounded">المدة: {t.time}</div>
                               <p className="text-gray-200 mt-1">{t.reason}</p>
@@ -321,7 +352,7 @@ export default function SearchPage() {
                             <div key={i} className="bg-white/5 border border-white/5 hover:border-red-500/30 rounded-lg p-3 text-sm transition-colors">
                               <div className="flex justify-between text-xs text-gray-400 mb-1">
                                 <span className="font-mono text-red-300 bg-red-500/10 px-1.5 py-0.5 rounded">#{b.ban_number}</span>
-                                <span>{formatDate(b.date)}</span>
+                                <span>{formatDateEn(b.date)}</span>
                               </div>
                               <div className="flex gap-2 mb-1">
                                 <span className="text-xs text-red-300 bg-red-500/10 px-2 py-0.5 rounded">المدة: {b.time}</span>

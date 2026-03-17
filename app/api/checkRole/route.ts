@@ -14,7 +14,6 @@ export async function GET(req: NextRequest) {
     const result = await hasRole(guildId, userId, roleId);
     return NextResponse.json({ hasRole: result });
   } catch (err) {
-    console.error(err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -1,15 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare } from 'lucide-react';
-
-const formatDate = (dateString: any) => {
-  if (!dateString) return 'غير محدد';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return 'تاريخ غير صالح';
-  return date.toLocaleDateString('ar-SA');
-};
+import CachedImage from '@/components/cached-image';
+import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { formatVoiceTime, formatDateEn, parseDiscordEmoji } from '@/lib/utils';
 
 const formatDateTime = (dateString: any) => {
   if (!dateString) return 'غير محدد';
@@ -25,14 +19,11 @@ export default function MyInfoPage() {
   useEffect(() => {
     async function fetchMyInfo() {
       try {
-        // We need the user's ID. We can get it from a new endpoint or just decode the token.
-        // Actually, we can create an endpoint /api/me that returns the session ID and then fetches.
-        // Let's fetch /api/me first.
-        const resMe = await fetch('/api/me');
+        const resMe = await fetch('/api/me', { cache: 'no-store' });
         const me = await resMe.json();
         
         if (me.id) {
-          const res = await fetch(`/api/user/${me.id}`);
+          const res = await fetch(`/api/user/${me.id}`, { cache: 'no-store' });
           const userData = await res.json();
           
           if (!userData.discord) {
@@ -51,7 +42,7 @@ export default function MyInfoPage() {
           setData(userData);
         }
       } catch (err) {
-        console.error(err);
+        // Error handling removed
       } finally {
         setLoading(false);
       }
@@ -76,23 +67,33 @@ export default function MyInfoPage() {
   }
 
   const { discord, db = {} } = data;
-  const { warns = [], timeouts = [], bans = [], streaks } = db;
+  const { warns = [], timeouts = [], bans = [], streaks, tasks = [] } = db;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Profile Card */}
       <div className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative">
         {/* Banner */}
-        <div className="h-48 w-full relative bg-gradient-to-r from-blue-900 to-indigo-900">
-          {discord.banner && (
-            <Image
-              src={discord.banner}
-              alt="Banner"
-              fill
-              className="object-cover opacity-80"
-              referrerPolicy="no-referrer"
-              unoptimized
-            />
+        <div className="h-48 w-full relative bg-[#0a0f1a] overflow-hidden">
+          {discord.banner ? (
+            <>
+              <CachedImage
+                src={discord.banner}
+                alt="Banner Blur"
+                fill
+                className="object-cover opacity-30 blur-2xl scale-110"
+                referrerPolicy="no-referrer"
+              />
+              <CachedImage
+                src={discord.banner}
+                alt="Banner"
+                fill
+                className="object-contain"
+                referrerPolicy="no-referrer"
+              />
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-indigo-900" />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#111827] to-transparent" />
         </div>
@@ -100,21 +101,24 @@ export default function MyInfoPage() {
         {/* Avatar & Info */}
         <div className="px-8 pb-8 relative">
           <div className="flex flex-col md:flex-row gap-6 items-start md:items-end -mt-16 mb-6">
-            <div className="w-32 h-32 relative rounded-2xl overflow-hidden border-4 border-[#111827] shadow-[0_0_30px_rgba(59,130,246,0.4)] z-10 bg-[#111827]">
-              {discord.avatar ? (
-                <Image
-                  src={discord.avatar}
-                  alt={discord.username}
-                  fill
-                  className="object-cover"
-                  referrerPolicy="no-referrer"
-                  unoptimized
-                />
-              ) : (
-                <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-4xl">{discord.username.charAt(0)}</div>
-              )}
+            <div className="relative w-32 h-32 z-10">
+              <div className="w-full h-full relative rounded-full overflow-hidden border-4 border-[#111827] shadow-[0_0_30px_rgba(59,130,246,0.4)] bg-[#111827]">
+                {discord.avatar ? (
+                  <CachedImage
+                    src={discord.avatar}
+                    alt={discord.username}
+                    fill
+                    className="object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-4xl">{discord.username.charAt(0)}</div>
+                )}
+              </div>
               {discord.avatarDecoration && (
-                <Image src={discord.avatarDecoration} alt="Decoration" fill className="object-cover scale-110" unoptimized referrerPolicy="no-referrer" />
+                <div className="absolute -inset-4 z-20 pointer-events-none">
+                  <CachedImage src={discord.avatarDecoration} alt="Decoration" fill className="object-contain" referrerPolicy="no-referrer" />
+                </div>
               )}
             </div>
             <div className="flex-1 mt-16 md:mt-0">
@@ -128,12 +132,12 @@ export default function MyInfoPage() {
                 </div>
                 <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
                   <Calendar className="w-4 h-4 text-gray-500" />
-                  <span>تاريخ الإنشاء: {formatDate(discord.createdAt)}</span>
+                  <span>تاريخ الإنشاء: {formatDateEn(discord.createdAt)}</span>
                 </div>
                 {discord.joinedAt && (
                   <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
                     <Calendar className="w-4 h-4 text-gray-500" />
-                    <span>تاريخ الانضمام: {formatDate(discord.joinedAt)}</span>
+                    <span>تاريخ الانضمام: {formatDateEn(discord.joinedAt)}</span>
                   </div>
                 )}
               </div>
@@ -141,9 +145,10 @@ export default function MyInfoPage() {
               {discord.roles && discord.roles.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
                   {discord.roles.map((role: any) => (
-                    <span key={role.id} className="px-2 py-1 rounded text-xs font-medium border border-white/10" style={{ backgroundColor: `${role.color}20`, color: role.color !== '#000000' ? role.color : '#ffffff' }}>
+                    <div key={role.id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/10" style={{ backgroundColor: `${role.color}15`, color: role.color !== '#000000' ? role.color : '#ffffff' }}>
+                      {role.icon && <CachedImage src={role.icon} alt={role.name} width={16} height={16} className="rounded-full" />}
                       {role.name}
-                    </span>
+                    </div>
                   ))}
                 </div>
               )}
@@ -156,17 +161,24 @@ export default function MyInfoPage() {
                   <p className="text-orange-200 text-xs font-bold uppercase tracking-wider mb-1">الستريك الحالي</p>
                   <p className="text-3xl font-black text-white flex items-center justify-center gap-2">
                     {streaks.streak}
-                    {streaks.streak_emoji && (
-                      <span className="text-2xl drop-shadow-md">{streaks.streak_emoji}</span>
+                    {streaks.streak_emoji_url ? (
+                      <CachedImage src={streaks.streak_emoji_url} alt="Streak" width={28} height={28} />
+                    ) : streaks.streak_emoji ? (
+                      parseDiscordEmoji(streaks.streak_emoji) ? (
+                        <CachedImage src={parseDiscordEmoji(streaks.streak_emoji)!} alt="Streak" width={28} height={28} />
+                      ) : (
+                        <span className="text-2xl drop-shadow-md">{streaks.streak_emoji}</span>
+                      )
+                    ) : (
+                      <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
                     )}
-                    {!streaks.streak_emoji && <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />}
                   </p>
                 </div>
                 <div className="w-px h-12 bg-orange-500/20 mx-2" />
                 <div className="text-center">
                   <p className="text-orange-200 text-xs font-bold uppercase tracking-wider mb-1">رسائل اليوم</p>
                   <p className="text-xl font-bold text-white flex items-center justify-center gap-2">
-                    {streaks.daily_messages}
+                    {streaks.daily_messages}/100
                     <MessageSquare className="w-4 h-4 text-orange-400" />
                   </p>
                 </div>
@@ -200,13 +212,13 @@ export default function MyInfoPage() {
             <div className="p-2 bg-purple-500/10 rounded-lg">
               <Clock className="w-6 h-6 text-purple-400" />
             </div>
-            <h4 className="font-bold text-purple-400 text-lg">الصوت (ثواني)</h4>
+            <h4 className="font-bold text-purple-400 text-lg">الصوت</h4>
           </div>
           <div className="space-y-3 text-sm">
-            <div className="flex justify-between items-center"><span className="text-gray-400">الكل:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.voice?.all || 0}</span></div>
-            <div className="flex justify-between items-center"><span className="text-gray-400">اليوم:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.voice?.top_day || 0}</span></div>
-            <div className="flex justify-between items-center"><span className="text-gray-400">الأسبوع:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.voice?.top_week || 0}</span></div>
-            <div className="flex justify-between items-center"><span className="text-gray-400">الشهر:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.voice?.top_month || 0}</span></div>
+            <div className="flex justify-between items-center"><span className="text-gray-400">الكل:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{formatVoiceTime(db.voice?.all || 0)}</span></div>
+            <div className="flex justify-between items-center"><span className="text-gray-400">اليوم:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{formatVoiceTime(db.voice?.top_day || 0)}</span></div>
+            <div className="flex justify-between items-center"><span className="text-gray-400">الأسبوع:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{formatVoiceTime(db.voice?.top_week || 0)}</span></div>
+            <div className="flex justify-between items-center"><span className="text-gray-400">الشهر:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{formatVoiceTime(db.voice?.top_month || 0)}</span></div>
           </div>
         </div>
 
@@ -219,7 +231,7 @@ export default function MyInfoPage() {
             <h4 className="font-bold text-orange-400 text-lg">الستريك</h4>
           </div>
           <div className="space-y-3 text-sm">
-            <div className="flex justify-between items-center"><span className="text-gray-400">الحالي:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.streaks?.streak || 0} {db.streaks?.streak_emoji || '🔥'}</span></div>
+            <div className="flex justify-between items-center"><span className="text-gray-400">الحالي:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded flex items-center gap-1">{db.streaks?.streak || 0} {db.streaks?.streak_emoji_url ? <CachedImage src={db.streaks.streak_emoji_url} alt="streak" width={16} height={16} /> : db.streaks?.streak_emoji || '🔥'}</span></div>
             <div className="flex justify-between items-center"><span className="text-gray-400">السابق:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.streaks?.old_streak || 0}</span></div>
             <div className="flex justify-between items-center"><span className="text-gray-400">الحمايات:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.streaks?.shields || 0}</span></div>
             <div className="flex justify-between items-center"><span className="text-gray-400">رسائل اليوم:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.streaks?.daily_messages || 0}/100</span></div>
@@ -329,6 +341,45 @@ export default function MyInfoPage() {
         </div>
 
       </div>
+
+      {/* Tasks Section */}
+      <div className="bg-[#111827]/60 backdrop-blur-md border border-blue-500/20 rounded-2xl overflow-hidden shadow-lg flex flex-col group hover:border-blue-500/40 transition-colors duration-300">
+        <div className="bg-blue-500/10 p-4 border-b border-blue-500/20 flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
+          <h2 className="font-bold text-blue-400 text-lg">المهام ({tasks.length})</h2>
+        </div>
+        <div className="p-4 flex-1 overflow-y-auto max-h-[400px] custom-scrollbar space-y-3">
+          {tasks.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">لا يوجد مهام</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {tasks.map((task: any, i: number) => (
+                <div key={i} className={`bg-[#0a0f1a] border rounded-xl p-4 transition-all duration-300 ${task.completed ? 'border-emerald-500/30 hover:border-emerald-500/50' : 'border-blue-500/30 hover:border-blue-500/50'}`}>
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className={`font-bold ${task.completed ? 'text-emerald-400 line-through opacity-70' : 'text-blue-400'}`}>{task.title || 'مهمة بدون عنوان'}</h3>
+                    {task.completed ? (
+                      <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-md flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" />
+                        مكتملة
+                      </span>
+                    ) : (
+                      <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded-md">
+                        حالية
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-300 mb-3">{task.description || 'لا يوجد وصف'}</p>
+                  <div className="flex justify-between items-center text-xs text-gray-500">
+                    {task.dueDate && <span>تاريخ الانتهاء: {formatDateEn(task.dueDate)}</span>}
+                    {task.createdAt && <span>تاريخ الإنشاء: {formatDateEn(task.createdAt)}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
     </div>
   );
 }

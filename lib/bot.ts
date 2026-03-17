@@ -20,7 +20,37 @@ client.once('ready', () => {
 });
 
 if (!isReady && process.env.DISCORD_BOT_TOKEN) {
-  client.login(process.env.DISCORD_BOT_TOKEN).catch(console.error);
+  client.login(process.env.DISCORD_BOT_TOKEN).catch(() => {});
+}
+
+export async function getEmojiDetails(guildId: string, emojiIdOrString: string) {
+  try {
+    if (!emojiIdOrString) return null;
+    
+    let emojiId = emojiIdOrString;
+    const match = emojiIdOrString.match(/<a?:[^:]+:(\d+)>/);
+    if (match) {
+      emojiId = match[1];
+    }
+
+    if (!client.isReady()) {
+      await new Promise((resolve) => client.once('ready', resolve));
+    }
+
+    const guild = await client.guilds.fetch(guildId);
+    const emoji = guild.emojis.cache.get(emojiId);
+    
+    if (emoji) {
+      return {
+        name: emoji.name,
+        animated: emoji.animated,
+        url: emoji.url
+      };
+    }
+    return null;
+  } catch (err) {
+    return null;
+  }
 }
 
 export async function hasRole(guildId: string, userId: string, roleId: string) {
@@ -33,30 +63,34 @@ export async function hasRole(guildId: string, userId: string, roleId: string) {
     const member = await guild.members.fetch(userId);
     return member.roles.cache.has(roleId);
   } catch (err) {
-    console.error('Error checking role:', err);
     return false;
   }
 }
 
 export async function getServerInfo(guildId: string) {
   try {
-    if (!client.isReady()) {
-      await new Promise((resolve) => client.once('ready', resolve));
+    const response = await fetch(`https://discord.com/api/v10/guilds/${guildId}?with_counts=true`, {
+      headers: {
+        Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+      },
+      cache: 'no-store'
+    });
+    
+    if (!response.ok) {
+      return null;
     }
 
-    const guild = await client.guilds.fetch({ guild: guildId, withCounts: true });
-
+    const guild = await response.json();
     return {
       id: guild.id,
       name: guild.name,
-      icon: guild.iconURL({ forceStatic: false, size: 512 }),
-      banner: guild.bannerURL({ forceStatic: false, size: 1024 }),
-      memberCount: guild.approximateMemberCount || guild.memberCount || 0,
-      onlineCount: guild.approximatePresenceCount || 0,
-      ownerId: guild.ownerId,
+      icon: guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.${guild.icon.startsWith('a_') ? 'gif' : 'png'}?size=512` : null,
+      banner: guild.banner ? `https://cdn.discordapp.com/banners/${guild.id}/${guild.banner}.${guild.banner.startsWith('a_') ? 'gif' : 'png'}?size=1024` : null,
+      memberCount: guild.approximate_member_count || 0,
+      onlineCount: guild.approximate_presence_count || 0,
+      ownerId: guild.owner_id,
     };
   } catch (err) {
-    console.error('Error fetching server info:', err);
     return null;
   }
 }
@@ -90,10 +124,9 @@ export async function getUserInfo(guildId: string, userId: string) {
       roles: member.roles.cache
         .filter(r => r.name !== '@everyone')
         .sort((a, b) => b.position - a.position)
-        .map((r) => ({ id: r.id, name: r.name, color: r.hexColor })),
+        .map((r) => ({ id: r.id, name: r.name, color: r.hexColor, icon: r.iconURL() })),
     };
   } catch (err) {
-    console.error('Error fetching user info:', err);
     try {
       const user = await client.users.fetch(userId, { force: true });
       return {
@@ -112,7 +145,6 @@ export async function getUserInfo(guildId: string, userId: string) {
         roles: [],
       };
     } catch (fallbackErr) {
-      console.error('Error fetching fallback user info:', fallbackErr);
       return null;
     }
   }
@@ -153,11 +185,10 @@ export async function getRandomMembers(guildId: string, count: number = 10) {
         roles: member.roles.cache
           .filter(r => r.name !== '@everyone')
           .sort((a, b) => b.position - a.position)
-          .map((r) => ({ id: r.id, name: r.name, color: r.hexColor })),
+          .map((r) => ({ id: r.id, name: r.name, color: r.hexColor, icon: r.iconURL() })),
       };
     }));
   } catch (err) {
-    console.error('Error fetching random members:', err);
     return [];
   }
 }

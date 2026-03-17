@@ -1,5 +1,5 @@
 import { getServerInfo } from '@/lib/bot';
-import Image from 'next/image';
+import CachedImage from '@/components/cached-image';
 import { Users, UserCheck, Shield } from 'lucide-react';
 
 export default async function DashboardHome() {
@@ -23,13 +23,12 @@ export default async function DashboardHome() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="relative h-64 rounded-3xl overflow-hidden shadow-2xl border border-white/10">
         {displayInfo.banner ? (
-          <Image
+          <CachedImage
             src={displayInfo.banner}
             alt="Server Banner"
             fill
             className="object-cover opacity-60"
             referrerPolicy="no-referrer"
-            unoptimized
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-[#0a0f1a]" />
@@ -39,13 +38,12 @@ export default async function DashboardHome() {
         <div className="absolute bottom-0 left-0 right-0 p-8 flex items-end gap-6">
           <div className="w-24 h-24 relative rounded-2xl overflow-hidden border-4 border-[#0a0f1a] shadow-[0_0_30px_rgba(59,130,246,0.5)]">
             {displayInfo.icon ? (
-              <Image
+              <CachedImage
                 src={displayInfo.icon}
                 alt="Server Icon"
                 fill
                 className="object-cover"
                 referrerPolicy="no-referrer"
-                unoptimized
               />
             ) : (
               <div className="w-full h-full bg-blue-600 flex items-center justify-center text-3xl font-bold">

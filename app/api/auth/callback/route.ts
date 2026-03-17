@@ -25,11 +25,6 @@ export async function GET(req: NextRequest) {
       redirect_uri: redirectUri,
     });
 
-    console.log('DEBUG: Sending token request to Discord');
-    console.log('DEBUG: Client ID:', clientId);
-    console.log('DEBUG: Redirect URI:', redirectUri);
-    console.log('DEBUG: Client Secret:', clientSecret ? `${clientSecret.substring(0, 4)}****` : 'MISSING');
-
     const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
       method: 'POST',
       headers: {
@@ -41,7 +36,6 @@ export async function GET(req: NextRequest) {
     const tokenData = await tokenResponse.json();
 
     if (tokenData.error) {
-      console.error('Token error:', tokenData);
       return NextResponse.redirect(new URL('/?error=token_failed', req.url));
     }
 
@@ -54,7 +48,6 @@ export async function GET(req: NextRequest) {
     const userData = await userResponse.json();
 
     if (userData.error) {
-      console.error('User error:', userData);
       return NextResponse.redirect(new URL('/?error=user_failed', req.url));
     }
 
@@ -62,7 +55,6 @@ export async function GET(req: NextRequest) {
     const botUserInfo = await getUserInfo(process.env.DISCORD_GUILD_ID!, userData.id);
 
     if (!botUserInfo) {
-      console.error('Bot user info error');
       return NextResponse.redirect(new URL('/?error=user_failed', req.url));
     }
 
@@ -92,7 +84,6 @@ export async function GET(req: NextRequest) {
 
     return response;
   } catch (err) {
-    console.error('OAuth error:', err);
     return NextResponse.redirect(new URL('/?error=oauth_failed', req.url));
   }
 }

@@ -75,7 +75,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ results: [] });
   } catch (err) {
-    console.error('Search error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
