@@ -5,7 +5,10 @@ import { getUserInfo } from '@/lib/bot';
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code');
-  const appUrl = process.env.APP_URL;
+  let appUrl = process.env.APP_URL || '';
+  if (appUrl.endsWith('/')) {
+    appUrl = appUrl.slice(0, -1);
+  }
   const clientId = process.env.DISCORD_CLIENT_ID;
   const clientSecret = process.env.DISCORD_CLIENT_SECRET;
   const jwtSecret = process.env.JWT_SECRET || 'fallback_secret';

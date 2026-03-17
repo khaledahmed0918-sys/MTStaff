@@ -1,12 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import Image from 'next/image';
-import { LogIn, Shield, Users, Zap, Loader2 } from 'lucide-react';
+import { LogIn, Shield, Users, Zap, Loader2, AlertCircle } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const error = searchParams.get('error');
+
+  const getErrorMessage = (err: string) => {
+    switch (err) {
+      case 'missing_config': return 'إعدادات النظام غير مكتملة.';
+      case 'token_failed': return 'فشل في الحصول على رمز الدخول من ديسكورد.';
+      case 'user_failed': return 'يجب أن تكون عضواً في السيرفر لتتمكن من الدخول.';
+      case 'oauth_failed': return 'حدث خطأ أثناء عملية الربط مع ديسكورد.';
+      default: return 'حدث خطأ غير متوقع.';
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#09090b]">
@@ -85,10 +98,16 @@ export function LoginForm() {
                 هذا الموقع مخصص لإدارة مجتمع MT Community فقط
               </p>
 
-              <div className="space-y-4 mb-8">
-                <input type="text" placeholder="اسم المستخدم" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                <input type="password" placeholder="كلمة المرور" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              </div>
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400 text-sm text-right"
+                >
+                  <AlertCircle className="w-5 h-5 shrink-0" />
+                  <p>{getErrorMessage(error)}</p>
+                </motion.div>
+              )}
 
               <motion.a
                 href="/api/auth/login"
@@ -107,7 +126,7 @@ export function LoginForm() {
                 )}
                 
                 <span className="relative z-10">
-                  {isLoading ? 'جاري التحويل...' : 'تسجيل الدخول'}
+                  {isLoading ? 'جاري التحويل...' : 'تسجيل الدخول عبر ديسكورد'}
                 </span>
                 
                 {/* Button shine animation */}

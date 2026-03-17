@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   const clientId = process.env.DISCORD_CLIENT_ID;
-  const appUrl = process.env.APP_URL;
+  let appUrl = process.env.APP_URL || '';
+  if (appUrl.endsWith('/')) {
+    appUrl = appUrl.slice(0, -1);
+  }
   
   if (!clientId || !appUrl) {
     return NextResponse.json({ error: 'Missing configuration' }, { status: 500 });

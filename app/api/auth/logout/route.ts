@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { serialize } from 'cookie';
 
 export async function GET(req: NextRequest) {
-  const appUrl = process.env.APP_URL || '';
+  let appUrl = process.env.APP_URL || '';
+  if (appUrl.endsWith('/')) {
+    appUrl = appUrl.slice(0, -1);
+  }
   
   const cookie = serialize('auth_token', '', {
     httpOnly: true,
