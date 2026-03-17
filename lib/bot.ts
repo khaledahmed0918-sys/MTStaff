@@ -44,20 +44,15 @@ export async function getServerInfo(guildId: string) {
       await new Promise((resolve) => client.once('ready', resolve));
     }
 
-    const guild = await client.guilds.fetch(guildId);
-    await guild.members.fetch(); // Fetch all members
-
-    const onlineMembers = guild.members.cache.filter(
-      (member) => member.presence?.status === 'online' || member.presence?.status === 'dnd' || member.presence?.status === 'idle'
-    ).size;
+    const guild = await client.guilds.fetch({ guild: guildId, withCounts: true });
 
     return {
       id: guild.id,
       name: guild.name,
       icon: guild.iconURL({ forceStatic: false, size: 512 }),
       banner: guild.bannerURL({ forceStatic: false, size: 1024 }),
-      memberCount: guild.memberCount,
-      onlineCount: onlineMembers,
+      memberCount: guild.approximateMemberCount || guild.memberCount || 0,
+      onlineCount: guild.approximatePresenceCount || 0,
       ownerId: guild.ownerId,
     };
   } catch (err) {
@@ -89,6 +84,22 @@ export async function getUserInfo(guildId: string, userId: string) {
     };
   } catch (err) {
     console.error('Error fetching user info:', err);
-    return null;
+    try {
+      const user = await client.users.fetch(userId);
+      return {
+        id: user.id,
+        username: user.username,
+        discriminator: user.discriminator,
+        tag: user.tag,
+        avatar: user.displayAvatarURL({ forceStatic: false, size: 512 }),
+        banner: user.bannerURL({ forceStatic: false, size: 1024 }),
+        createdAt: user.createdAt,
+        joinedAt: null,
+        roles: [],
+      };
+    } catch (fallbackErr) {
+      console.error('Error fetching fallback user info:', fallbackErr);
+      return null;
+    }
   }
 }

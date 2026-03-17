@@ -34,6 +34,20 @@ export default function MyInfoPage() {
         if (me.id) {
           const res = await fetch(`/api/user/${me.id}`);
           const userData = await res.json();
+          
+          if (!userData.discord) {
+            userData.discord = {
+              id: me.id,
+              username: me.username || 'غير معروف',
+              discriminator: me.discriminator || '0000',
+              avatar: me.avatar ? `https://cdn.discordapp.com/avatars/${me.id}/${me.avatar}.png` : null,
+              createdAt: null,
+            };
+          }
+          if (!userData.db) {
+            userData.db = { warns: [], timeouts: [], bans: [], streaks: null };
+          }
+          
           setData(userData);
         }
       } catch (err) {
@@ -53,7 +67,7 @@ export default function MyInfoPage() {
     );
   }
 
-  if (!data || !data.discord) {
+  if (!data) {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-gray-400 text-lg">لم يتم العثور على بيانات.</p>
