@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
 
@@ -14,10 +14,25 @@ const formatDate = (dateString: any) => {
 export default function SearchPage() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedData, setExpandedData] = useState<any>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+
+  useEffect(() => {
+    const fetchDefault = async () => {
+      try {
+        const res = await fetch('/api/search');
+        const data = await res.json();
+        setResults(data.results || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDefault();
+  }, []);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,26 +107,43 @@ export default function SearchPage() {
         )}
 
         {results.map((user) => (
-          <div key={user.id} className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl transition-all duration-300">
+          <div key={user.id} className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 relative">
+            {/* Banner */}
+            {user.banner ? (
+              <div className="h-24 w-full relative">
+                <Image src={user.banner} alt="Banner" fill className="object-cover opacity-60" unoptimized referrerPolicy="no-referrer" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/80 to-transparent" />
+              </div>
+            ) : (
+              <div className="h-24 w-full bg-gradient-to-r from-blue-900/40 to-purple-900/40 relative">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111827]/80 to-transparent" />
+              </div>
+            )}
+
             <div 
-              className="p-4 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors"
+              className="p-4 flex flex-col md:flex-row items-start md:items-center justify-between cursor-pointer hover:bg-white/5 transition-colors relative z-10 -mt-12"
               onClick={() => toggleExpand(user.id)}
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 relative rounded-full overflow-hidden border-2 border-blue-500/30">
+                <div className="w-20 h-20 relative rounded-full overflow-hidden border-4 border-[#111827] bg-[#111827]">
                   {user.avatar ? (
                     <Image src={user.avatar} alt={user.username} fill className="object-cover" unoptimized referrerPolicy="no-referrer" />
                   ) : (
-                    <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-lg">{user.username.charAt(0)}</div>
+                    <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-2xl">{user.username.charAt(0)}</div>
+                  )}
+                  {user.avatarDecoration && (
+                    <Image src={user.avatarDecoration} alt="Decoration" fill className="object-cover scale-110" unoptimized referrerPolicy="no-referrer" />
                   )}
                 </div>
-                <div>
-                  <h3 className="font-bold text-white text-lg">{user.username} <span className="text-sm text-blue-400 font-normal">#{user.tag?.split('#')[1] || user.discriminator}</span></h3>
+                <div className="mt-8 md:mt-0">
+                  <h3 className="font-bold text-xl" style={{ color: user.highestRoleColor || '#ffffff' }}>
+                    {user.displayName} <span className="text-sm text-gray-400 font-normal">({user.username})</span>
+                  </h3>
                   <p className="text-sm text-gray-400 font-mono">{user.id}</p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-6 mt-4 md:mt-0 self-end md:self-auto">
                 <div className="hidden md:flex gap-4 text-sm">
                   <div className="flex items-center gap-1.5 text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded">
                     <ShieldAlert className="w-4 h-4" />
@@ -137,6 +169,30 @@ export default function SearchPage() {
             {/* Expanded Details */}
             {expandedId === user.id && (
               <div className="border-t border-white/10 bg-[#0a0f1a]/80 p-6">
+                {/* Roles and Dates */}
+                <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                    <h4 className="text-gray-400 text-sm mb-2">تاريخ إنشاء الحساب</h4>
+                    <p className="text-white font-mono">{formatDate(user.createdAt)}</p>
+                  </div>
+                  <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                    <h4 className="text-gray-400 text-sm mb-2">تاريخ الانضمام للسيرفر</h4>
+                    <p className="text-white font-mono">{formatDate(user.joinedAt)}</p>
+                  </div>
+                </div>
+                
+                {user.roles && user.roles.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="text-gray-400 text-sm mb-2">الرتب</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {user.roles.map((role: any) => (
+                        <span key={role.id} className="px-2 py-1 rounded text-xs font-medium border border-white/10" style={{ backgroundColor: `${role.color}20`, color: role.color !== '#000000' ? role.color : '#ffffff' }}>
+                          {role.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {loadingDetails ? (
                   <div className="flex justify-center py-8">
                     <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
@@ -146,8 +202,65 @@ export default function SearchPage() {
                     <p className="text-red-400 text-sm">حدث خطأ أثناء جلب البيانات: {expandedData.error}</p>
                   </div>
                 ) : expandedData?.db ? (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Warns */}
+                  <div className="space-y-6">
+                    {/* New Stats Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {/* Messages */}
+                      <div className="bg-[#111827] border border-blue-500/20 rounded-xl p-4 shadow-lg">
+                        <div className="flex items-center gap-2 mb-3">
+                          <MessageSquare className="w-5 h-5 text-blue-400" />
+                          <h4 className="font-bold text-blue-400">الرسائل</h4>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between"><span className="text-gray-400">الكل:</span> <span className="text-white font-mono">{expandedData.db.messages?.all || 0}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-400">اليوم:</span> <span className="text-white font-mono">{expandedData.db.messages?.top_day || 0}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-400">الأسبوع:</span> <span className="text-white font-mono">{expandedData.db.messages?.top_week || 0}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-400">الشهر:</span> <span className="text-white font-mono">{expandedData.db.messages?.top_month || 0}</span></div>
+                        </div>
+                      </div>
+
+                      {/* Voice */}
+                      <div className="bg-[#111827] border border-purple-500/20 rounded-xl p-4 shadow-lg">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Clock className="w-5 h-5 text-purple-400" />
+                          <h4 className="font-bold text-purple-400">الصوت (ثواني)</h4>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between"><span className="text-gray-400">الكل:</span> <span className="text-white font-mono">{expandedData.db.voice?.all || 0}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-400">اليوم:</span> <span className="text-white font-mono">{expandedData.db.voice?.top_day || 0}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-400">الأسبوع:</span> <span className="text-white font-mono">{expandedData.db.voice?.top_week || 0}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-400">الشهر:</span> <span className="text-white font-mono">{expandedData.db.voice?.top_month || 0}</span></div>
+                        </div>
+                      </div>
+
+                      {/* Streaks */}
+                      <div className="bg-[#111827] border border-orange-500/20 rounded-xl p-4 shadow-lg">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Flame className="w-5 h-5 text-orange-400" />
+                          <h4 className="font-bold text-orange-400">الستريك</h4>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between"><span className="text-gray-400">الحالي:</span> <span className="text-white font-mono">{expandedData.db.streaks?.streak || 0} {expandedData.db.streaks?.streak_emoji || '🔥'}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-400">السابق:</span> <span className="text-white font-mono">{expandedData.db.streaks?.old_streak || 0}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-400">الحمايات:</span> <span className="text-white font-mono">{expandedData.db.streaks?.shields || 0}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-400">رسائل اليوم:</span> <span className="text-white font-mono">{expandedData.db.streaks?.daily_messages || 0}/100</span></div>
+                        </div>
+                      </div>
+
+                      {/* Coins */}
+                      <div className="bg-[#111827] border border-yellow-500/20 rounded-xl p-4 shadow-lg">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center text-xs font-bold text-black">$</div>
+                          <h4 className="font-bold text-yellow-400">العملات</h4>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between"><span className="text-gray-400">الرصيد:</span> <span className="text-white font-mono">{expandedData.db.coins?.coins || 0}</span></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      {/* Warns */}
                     <div className="bg-[#111827] border border-yellow-500/20 rounded-xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-yellow-500/40 transition-colors duration-300">
                       <div className="bg-yellow-500/10 p-3 border-b border-yellow-500/20 flex items-center gap-2">
                         <ShieldAlert className="w-4 h-4 text-yellow-500 group-hover:scale-110 transition-transform" />
@@ -222,6 +335,7 @@ export default function SearchPage() {
                         )}
                       </div>
                     </div>
+                  </div>
                   </div>
                 ) : null}
               </div>

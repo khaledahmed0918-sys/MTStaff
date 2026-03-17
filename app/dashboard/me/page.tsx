@@ -101,7 +101,7 @@ export default function MyInfoPage() {
         <div className="px-8 pb-8 relative">
           <div className="flex flex-col md:flex-row gap-6 items-start md:items-end -mt-16 mb-6">
             <div className="w-32 h-32 relative rounded-2xl overflow-hidden border-4 border-[#111827] shadow-[0_0_30px_rgba(59,130,246,0.4)] z-10 bg-[#111827]">
-              {discord.avatar && (
+              {discord.avatar ? (
                 <Image
                   src={discord.avatar}
                   alt={discord.username}
@@ -110,12 +110,17 @@ export default function MyInfoPage() {
                   referrerPolicy="no-referrer"
                   unoptimized
                 />
+              ) : (
+                <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-4xl">{discord.username.charAt(0)}</div>
+              )}
+              {discord.avatarDecoration && (
+                <Image src={discord.avatarDecoration} alt="Decoration" fill className="object-cover scale-110" unoptimized referrerPolicy="no-referrer" />
               )}
             </div>
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                {discord.username}
-                <span className="text-lg text-blue-400 font-normal">#{discord.discriminator}</span>
+            <div className="flex-1 mt-16 md:mt-0">
+              <h1 className="text-3xl font-bold flex items-center gap-3" style={{ color: discord.highestRoleColor || '#ffffff' }}>
+                {discord.displayName || discord.username}
+                <span className="text-lg text-gray-400 font-normal">({discord.username})</span>
               </h1>
               <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-400">
                 <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
@@ -125,7 +130,23 @@ export default function MyInfoPage() {
                   <Calendar className="w-4 h-4 text-gray-500" />
                   <span>تاريخ الإنشاء: {formatDate(discord.createdAt)}</span>
                 </div>
+                {discord.joinedAt && (
+                  <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <span>تاريخ الانضمام: {formatDate(discord.joinedAt)}</span>
+                  </div>
+                )}
               </div>
+              
+              {discord.roles && discord.roles.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {discord.roles.map((role: any) => (
+                    <span key={role.id} className="px-2 py-1 rounded text-xs font-medium border border-white/10" style={{ backgroundColor: `${role.color}20`, color: role.color !== '#000000' ? role.color : '#ffffff' }}>
+                      {role.name}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Streaks Badge */}
@@ -151,6 +172,70 @@ export default function MyInfoPage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* New Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Messages */}
+        <div className="bg-[#111827]/80 backdrop-blur-xl border border-blue-500/20 rounded-2xl p-5 shadow-lg hover:border-blue-500/40 transition-colors">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-blue-500/10 rounded-lg">
+              <MessageSquare className="w-6 h-6 text-blue-400" />
+            </div>
+            <h4 className="font-bold text-blue-400 text-lg">الرسائل</h4>
+          </div>
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between items-center"><span className="text-gray-400">الكل:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.messages?.all || 0}</span></div>
+            <div className="flex justify-between items-center"><span className="text-gray-400">اليوم:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.messages?.top_day || 0}</span></div>
+            <div className="flex justify-between items-center"><span className="text-gray-400">الأسبوع:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.messages?.top_week || 0}</span></div>
+            <div className="flex justify-between items-center"><span className="text-gray-400">الشهر:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.messages?.top_month || 0}</span></div>
+          </div>
+        </div>
+
+        {/* Voice */}
+        <div className="bg-[#111827]/80 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-5 shadow-lg hover:border-purple-500/40 transition-colors">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-purple-500/10 rounded-lg">
+              <Clock className="w-6 h-6 text-purple-400" />
+            </div>
+            <h4 className="font-bold text-purple-400 text-lg">الصوت (ثواني)</h4>
+          </div>
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between items-center"><span className="text-gray-400">الكل:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.voice?.all || 0}</span></div>
+            <div className="flex justify-between items-center"><span className="text-gray-400">اليوم:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.voice?.top_day || 0}</span></div>
+            <div className="flex justify-between items-center"><span className="text-gray-400">الأسبوع:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.voice?.top_week || 0}</span></div>
+            <div className="flex justify-between items-center"><span className="text-gray-400">الشهر:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.voice?.top_month || 0}</span></div>
+          </div>
+        </div>
+
+        {/* Streaks */}
+        <div className="bg-[#111827]/80 backdrop-blur-xl border border-orange-500/20 rounded-2xl p-5 shadow-lg hover:border-orange-500/40 transition-colors">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-orange-500/10 rounded-lg">
+              <Flame className="w-6 h-6 text-orange-400" />
+            </div>
+            <h4 className="font-bold text-orange-400 text-lg">الستريك</h4>
+          </div>
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between items-center"><span className="text-gray-400">الحالي:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.streaks?.streak || 0} {db.streaks?.streak_emoji || '🔥'}</span></div>
+            <div className="flex justify-between items-center"><span className="text-gray-400">السابق:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.streaks?.old_streak || 0}</span></div>
+            <div className="flex justify-between items-center"><span className="text-gray-400">الحمايات:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.streaks?.shields || 0}</span></div>
+            <div className="flex justify-between items-center"><span className="text-gray-400">رسائل اليوم:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.streaks?.daily_messages || 0}/100</span></div>
+          </div>
+        </div>
+
+        {/* Coins */}
+        <div className="bg-[#111827]/80 backdrop-blur-xl border border-yellow-500/20 rounded-2xl p-5 shadow-lg hover:border-yellow-500/40 transition-colors">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-yellow-500/10 rounded-lg">
+              <div className="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center text-sm font-bold text-black">$</div>
+            </div>
+            <h4 className="font-bold text-yellow-400 text-lg">العملات</h4>
+          </div>
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between items-center"><span className="text-gray-400">الرصيد:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.coins?.coins || 0}</span></div>
           </div>
         </div>
       </div>

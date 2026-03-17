@@ -69,37 +69,95 @@ export async function getUserInfo(guildId: string, userId: string) {
 
     const guild = await client.guilds.fetch(guildId);
     const member = await guild.members.fetch(userId);
-    const user = member.user;
+    const user = await member.user.fetch(); // Fetch full user to get banner
+
+    const highestRole = member.roles.highest;
+    const highestRoleColor = highestRole.hexColor !== '#000000' ? highestRole.hexColor : '#ffffff';
 
     return {
       id: user.id,
       username: user.username,
+      displayName: user.globalName || user.displayName || user.username,
       discriminator: user.discriminator,
       tag: user.tag,
       avatar: user.displayAvatarURL({ forceStatic: false, size: 512 }),
+      avatarDecoration: user.avatarDecorationURL({ size: 512 }),
       banner: user.bannerURL({ forceStatic: false, size: 1024 }),
+      bannerColor: user.hexAccentColor,
       createdAt: user.createdAt,
       joinedAt: member.joinedAt,
-      roles: member.roles.cache.map((r) => ({ id: r.id, name: r.name, color: r.hexColor })),
+      highestRoleColor,
+      roles: member.roles.cache
+        .filter(r => r.name !== '@everyone')
+        .sort((a, b) => b.position - a.position)
+        .map((r) => ({ id: r.id, name: r.name, color: r.hexColor })),
     };
   } catch (err) {
     console.error('Error fetching user info:', err);
     try {
-      const user = await client.users.fetch(userId);
+      const user = await client.users.fetch(userId, { force: true });
       return {
         id: user.id,
         username: user.username,
+        displayName: user.globalName || user.displayName || user.username,
         discriminator: user.discriminator,
         tag: user.tag,
         avatar: user.displayAvatarURL({ forceStatic: false, size: 512 }),
+        avatarDecoration: user.avatarDecorationURL({ size: 512 }),
         banner: user.bannerURL({ forceStatic: false, size: 1024 }),
+        bannerColor: user.hexAccentColor,
         createdAt: user.createdAt,
         joinedAt: null,
+        highestRoleColor: '#ffffff',
         roles: [],
       };
     } catch (fallbackErr) {
       console.error('Error fetching fallback user info:', fallbackErr);
       return null;
     }
+  }
+}
+
+export async function getRandomMembers(guildId: string, count: number = 10) {
+  try {
+    if (!client.isReady()) {
+      await new Promise((resolve) => client.once('ready', resolve));
+    }
+
+    const guild = await client.guilds.fetch(guildId);
+    // Fetch a chunk of members to pick from, or use cache if large
+    const members = await guild.members.fetch({ limit: 100 });
+    
+    // Convert to array and shuffle
+    const membersArray = Array.from(members.values());
+    const shuffled = membersArray.sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, count);
+
+    return Promise.all(selected.map(async (member) => {
+      const user = member.user;
+      const highestRole = member.roles.highest;
+      const highestRoleColor = highestRole.hexColor !== '#000000' ? highestRole.hexColor : '#ffffff';
+      
+      return {
+        id: user.id,
+        username: user.username,
+        displayName: user.globalName || user.displayName || user.username,
+        discriminator: user.discriminator,
+        tag: user.tag,
+        avatar: user.displayAvatarURL({ forceStatic: false, size: 512 }),
+        avatarDecoration: user.avatarDecorationURL({ size: 512 }),
+        banner: user.bannerURL({ forceStatic: false, size: 1024 }),
+        createdAt: user.createdAt,
+        joinedAt: member.joinedAt,
+        highestRoleColor,
+        roles: member.roles.cache
+          .filter(r => r.name !== '@everyone')
+          .sort((a, b) => b.position - a.position)
+          .map((r) => ({ id: r.id, name: r.name, color: r.hexColor })),
+      };
+    }));
+  } catch (err) {
+    console.error('Error fetching random members:', err);
+    return [];
   }
 }

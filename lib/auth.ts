@@ -12,6 +12,7 @@ export async function getSession() {
     return decoded as {
       id: string;
       username: string;
+      displayName?: string;
       discriminator: string;
       avatar: string;
     };

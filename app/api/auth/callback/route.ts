@@ -71,6 +71,7 @@ export async function GET(req: NextRequest) {
       {
         id: botUserInfo.id,
         username: botUserInfo.username,
+        displayName: botUserInfo.displayName,
         discriminator: botUserInfo.discriminator,
         avatar: botUserInfo.avatar,
       },

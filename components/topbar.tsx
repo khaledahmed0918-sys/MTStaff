@@ -22,8 +22,8 @@ export function Topbar({ user }: { user: any }) {
       </div>
       <div className="flex items-center gap-4">
         <div className="text-right hidden md:block">
-          <p className="text-sm font-semibold text-white">{user.username}</p>
-          <p className="text-xs text-blue-400">#{user.discriminator}</p>
+          <p className="text-sm font-semibold text-white">{user.displayName || user.username}</p>
+          {user.discriminator !== '0' && <p className="text-xs text-blue-400">#{user.discriminator}</p>}
         </div>
         <div className="w-10 h-10 md:w-12 md:h-12 relative rounded-full overflow-hidden border-2 border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
           <Image
