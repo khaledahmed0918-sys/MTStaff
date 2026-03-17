@@ -11,11 +11,19 @@ function SidebarLink({ link, pathname, setIsOpen }: { link: any, pathname: strin
   const [isLoading, setIsLoading] = useState(false);
   const isActive = pathname === link.href;
   const Icon = link.icon;
+
+  // Reset loading if we are now on the page we were loading
+  if (isActive && isLoading) {
+    setIsLoading(false);
+  }
+
   return (
     <Link
       href={link.href}
       onClick={() => {
-        setIsLoading(true);
+        if (!isActive) {
+          setIsLoading(true);
+        }
         setIsOpen(false);
       }}
       className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${

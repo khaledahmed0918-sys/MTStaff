@@ -36,7 +36,7 @@ export default async function DashboardHome() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1a] via-transparent to-transparent" />
         
         <div className="absolute bottom-0 left-0 right-0 p-8 flex items-end gap-6">
-          <div className="w-24 h-24 relative rounded-2xl overflow-hidden border-4 border-[#0a0f1a] shadow-[0_0_30px_rgba(59,130,246,0.5)]">
+          <div className="w-24 h-24 relative rounded-full overflow-hidden border-4 border-[#0a0f1a] shadow-[0_0_30px_rgba(59,130,246,0.5)]">
             {displayInfo.icon ? (
               <CachedImage
                 src={displayInfo.icon}

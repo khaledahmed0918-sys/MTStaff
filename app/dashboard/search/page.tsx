@@ -116,7 +116,7 @@ export default function SearchPage() {
               onClick={() => toggleExpand(user.id)}
             >
               <div className="flex items-end gap-4">
-                <div className="w-32 h-32 relative rounded-lg overflow-hidden border-4 border-[#111827] bg-[#111827] z-10">
+                <div className="w-32 h-32 relative rounded-full overflow-hidden border-4 border-[#111827] bg-[#111827] z-10">
                   {user.avatar ? (
                     <CachedImage src={user.avatar} alt={user.username} fill className="object-cover" referrerPolicy="no-referrer" />
                   ) : (
