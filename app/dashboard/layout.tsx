@@ -5,6 +5,8 @@ import { Topbar } from '@/components/topbar';
 import { hasRole } from '@/lib/bot';
 import { NavProvider } from '@/components/nav-context';
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
 
