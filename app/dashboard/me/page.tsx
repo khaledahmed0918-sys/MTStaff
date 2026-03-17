@@ -74,7 +74,7 @@ export default function MyInfoPage() {
       {/* Profile Card */}
       <div className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative">
         {/* Banner */}
-        <div className="h-64 w-full relative bg-[#0a0f1a] overflow-hidden">
+        <div className="aspect-[5/2] w-full relative bg-[#0a0f1a] overflow-hidden">
           {discord.banner ? (
             <CachedImage
               src={discord.banner}
@@ -93,7 +93,7 @@ export default function MyInfoPage() {
         <div className="px-8 pb-8 relative">
           <div className="flex flex-col md:flex-row gap-6 items-start md:items-end -mt-16 mb-6">
             <div className="relative w-40 h-40 z-10">
-              <div className="w-full h-full relative rounded-lg overflow-hidden border-4 border-[#111827] shadow-[0_0_30px_rgba(59,130,246,0.4)] bg-[#111827]">
+              <div className="w-full h-full relative rounded-full overflow-hidden border-4 border-[#111827] shadow-[0_0_30px_rgba(59,130,246,0.4)] bg-[#111827]">
                 {discord.avatar ? (
                   <CachedImage
                     src={discord.avatar}

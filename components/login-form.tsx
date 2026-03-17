@@ -85,6 +85,11 @@ export function LoginForm() {
                 هذا الموقع مخصص لإدارة مجتمع MT Community فقط
               </p>
 
+              <div className="space-y-4 mb-8">
+                <input type="text" placeholder="اسم المستخدم" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <input type="password" placeholder="كلمة المرور" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+
               <motion.a
                 href="/api/auth/login"
                 onClick={() => setIsLoading(true)}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
 import { formatDateEn, formatVoiceTime, parseDiscordEmoji } from '@/lib/utils';
@@ -103,19 +104,15 @@ export default function SearchPage() {
         {results.map((user) => (
           <div key={user.id} className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 relative">
             {/* Banner */}
-            {user.banner ? (
-              <div className="h-64 w-full relative overflow-hidden">
+            {user.banner && (
+              <div className="aspect-[5/2] w-full relative overflow-hidden">
                 <CachedImage src={user.banner} alt="Banner" fill className="object-cover w-full h-full" referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#111827] to-transparent z-20" />
               </div>
-            ) : (
-              <div className="h-64 w-full relative overflow-hidden" style={{ backgroundColor: user.bannerColor || '#1e1e2e' }}>
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111827] to-transparent" />
-              </div>
             )}
 
-            <div 
-              className="p-6 flex flex-col items-start cursor-pointer hover:bg-white/5 transition-colors relative z-30 -mt-24"
+            <motion.div 
+              className={`p-6 flex flex-col items-start cursor-pointer hover:bg-white/5 transition-colors relative z-30 ${user.banner ? '-mt-24' : ''}`}
               onClick={() => toggleExpand(user.id)}
             >
               <div className="flex items-end gap-4">
@@ -163,7 +160,7 @@ export default function SearchPage() {
                   ))}
                 </div>
               )}
-            </div>
+            </motion.div>
 
             {/* Expanded Details */}
             {expandedId === user.id && (
