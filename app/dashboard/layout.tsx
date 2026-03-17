@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
 
-  if (!session) {
+  if (!session || !session.user) {
     redirect('/');
   }
 
@@ -18,7 +18,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const roleId = process.env.DISCORD_REQUIRED_ROLE_ID;
 
   if (guildId && roleId) {
-    const hasRequiredRole = await hasRole(guildId, session.id, roleId);
+    const hasRequiredRole = await hasRole(guildId, session.user.id, roleId);
     if (!hasRequiredRole) {
       return (
         <div className="min-h-screen flex items-center justify-center text-white">

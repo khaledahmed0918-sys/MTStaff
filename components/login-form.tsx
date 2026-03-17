@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'motion/react';
 import Image from 'next/image';
-import { LogIn, Shield, Users, Zap, Loader2, AlertCircle } from 'lucide-react';
+import { LogIn, Loader2, AlertCircle } from 'lucide-react';
+import { signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 
 export function LoginForm() {
@@ -11,14 +12,9 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
 
-  const getErrorMessage = (err: string) => {
-    switch (err) {
-      case 'missing_config': return 'إعدادات النظام غير مكتملة.';
-      case 'token_failed': return 'فشل في الحصول على رمز الدخول من ديسكورد.';
-      case 'user_failed': return 'يجب أن تكون عضواً في السيرفر لتتمكن من الدخول.';
-      case 'oauth_failed': return 'حدث خطأ أثناء عملية الربط مع ديسكورد.';
-      default: return 'حدث خطأ غير متوقع.';
-    }
+  const handleLogin = async () => {
+    setIsLoading(true);
+    await signIn('discord', { callbackUrl: '/dashboard' });
   };
 
   return (
@@ -105,13 +101,12 @@ export function LoginForm() {
                   className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400 text-sm text-right"
                 >
                   <AlertCircle className="w-5 h-5 shrink-0" />
-                  <p>{getErrorMessage(error)}</p>
+                  <p>حدث خطأ أثناء تسجيل الدخول.</p>
                 </motion.div>
               )}
 
-              <motion.a
-                href="/api/auth/login"
-                onClick={() => setIsLoading(true)}
+              <motion.button
+                onClick={handleLogin}
                 whileHover={{ scale: 1.02, translateY: -2 }}
                 whileTap={{ scale: 0.98 }}
                 className={`relative flex items-center justify-center w-full gap-3 bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold py-4 px-6 rounded-xl transition-colors duration-300 group overflow-hidden ${isLoading ? 'pointer-events-none opacity-80' : ''}`}
@@ -144,7 +139,7 @@ export function LoginForm() {
                     }}
                   />
                 )}
-              </motion.a>
+              </motion.button>
             </motion.div>
           </div>
         </div>

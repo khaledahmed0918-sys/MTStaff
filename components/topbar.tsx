@@ -6,7 +6,8 @@ import { useNav } from './nav-context';
 
 export function Topbar({ user }: { user: any }) {
   const { toggle } = useNav();
-  const [imgSrc, setImgSrc] = useState(user?.avatar || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=');
+  const profile = user?.profile || {};
+  const [imgSrc, setImgSrc] = useState(user?.image || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=');
 
   if (!user) return null;
 
@@ -22,13 +23,13 @@ export function Topbar({ user }: { user: any }) {
       </div>
       <div className="flex items-center gap-4">
         <div className="text-right hidden md:block">
-          <p className="text-sm font-semibold text-white">{user.displayName || user.username}</p>
-          {user.discriminator !== '0' && <p className="text-xs text-blue-400">#{user.discriminator}</p>}
+          <p className="text-sm font-semibold text-white">{profile.global_name || profile.username || user.name}</p>
+          {profile.discriminator && profile.discriminator !== '0' && <p className="text-xs text-blue-400">#{profile.discriminator}</p>}
         </div>
         <div className="w-10 h-10 md:w-12 md:h-12 relative rounded-full overflow-hidden border-2 border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
           <Image
             src={imgSrc}
-            alt={user.username}
+            alt={profile.username || user.name || 'User'}
             fill
             className="object-cover"
             referrerPolicy="no-referrer"

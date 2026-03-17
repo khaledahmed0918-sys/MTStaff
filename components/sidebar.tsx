@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Home, User, Search, LogOut, X, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useNav } from './nav-context';
+import { signOut } from 'next-auth/react';
 
 function SidebarLink({ link, pathname, setIsOpen }: { link: any, pathname: string, setIsOpen: (isOpen: boolean) => void }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -83,13 +84,13 @@ export function Sidebar() {
       </nav>
 
       <div className="p-4 border-t border-white/10">
-        <a
-          href="/api/auth/logout"
-          className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+        <button
+          onClick={() => signOut({ callbackUrl: '/' })}
+          className="flex w-full items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"
         >
           <LogOut className="w-5 h-5" />
           <span className="font-medium">تسجيل الخروج</span>
-        </a>
+        </button>
       </div>
     </aside>
   );
