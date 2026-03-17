@@ -4,6 +4,20 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare } from 'lucide-react';
 
+const formatDate = (dateString: any) => {
+  if (!dateString) return 'غير محدد';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'تاريخ غير صالح';
+  return date.toLocaleDateString('ar-SA');
+};
+
+const formatDateTime = (dateString: any) => {
+  if (!dateString) return 'غير محدد';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'تاريخ غير صالح';
+  return date.toLocaleString('ar-SA');
+};
+
 export default function MyInfoPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -47,7 +61,7 @@ export default function MyInfoPage() {
     );
   }
 
-  const { discord, db } = data;
+  const { discord, db = {} } = data;
   const { warns = [], timeouts = [], bans = [], streaks } = db;
 
   return (
@@ -95,7 +109,7 @@ export default function MyInfoPage() {
                 </div>
                 <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
                   <Calendar className="w-4 h-4 text-gray-500" />
-                  <span>تاريخ الإنشاء: {new Date(discord.createdAt).toLocaleDateString('ar-SA')}</span>
+                  <span>تاريخ الإنشاء: {formatDate(discord.createdAt)}</span>
                 </div>
               </div>
             </div>
@@ -144,7 +158,7 @@ export default function MyInfoPage() {
                 <div key={i} className="bg-[#0a0f1a] border border-white/5 rounded-xl p-4 hover:border-yellow-500/30 transition-all duration-300">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-mono bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-md">#{warn.warn_number}</span>
-                    <span className="text-xs text-gray-400">{new Date(warn.date_warn).toLocaleString('ar-SA')}</span>
+                    <span className="text-xs text-gray-400">{formatDateTime(warn.date_warn)}</span>
                   </div>
                   <p className="text-sm text-gray-200">{warn.reason}</p>
                   {warn.attachments && warn.attachments.length > 0 && (
@@ -174,7 +188,7 @@ export default function MyInfoPage() {
                 <div key={i} className="bg-[#0a0f1a] border border-white/5 rounded-xl p-4 hover:border-orange-500/30 transition-all duration-300">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-mono bg-orange-500/20 text-orange-300 px-2 py-1 rounded-md">#{to.timeout_number}</span>
-                    <span className="text-xs text-gray-400">{new Date(to.date).toLocaleString('ar-SA')}</span>
+                    <span className="text-xs text-gray-400">{formatDateTime(to.date)}</span>
                   </div>
                   <div className="mb-2">
                     <span className="text-xs bg-white/10 px-2 py-1 rounded text-gray-300">المدة: {to.time}</span>
@@ -200,7 +214,7 @@ export default function MyInfoPage() {
                 <div key={i} className="bg-[#0a0f1a] border border-white/5 rounded-xl p-4 hover:border-red-500/30 transition-all duration-300">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-mono bg-red-500/20 text-red-300 px-2 py-1 rounded-md">#{ban.ban_number}</span>
-                    <span className="text-xs text-gray-400">{new Date(ban.date).toLocaleString('ar-SA')}</span>
+                    <span className="text-xs text-gray-400">{formatDateTime(ban.date)}</span>
                   </div>
                   <div className="flex gap-2 mb-2">
                     <span className="text-xs bg-white/10 px-2 py-1 rounded text-gray-300">المدة: {ban.time}</span>

@@ -4,6 +4,13 @@ import { useState } from 'react';
 import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
 
+const formatDate = (dateString: any) => {
+  if (!dateString) return 'غير محدد';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'تاريخ غير صالح';
+  return date.toLocaleDateString('ar-SA');
+};
+
 export default function SearchPage() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
@@ -99,7 +106,7 @@ export default function SearchPage() {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-lg">{user.username} <span className="text-sm text-blue-400 font-normal">#{user.tag.split('#')[1] || user.discriminator}</span></h3>
+                  <h3 className="font-bold text-white text-lg">{user.username} <span className="text-sm text-blue-400 font-normal">#{user.tag?.split('#')[1] || user.discriminator}</span></h3>
                   <p className="text-sm text-gray-400 font-mono">{user.id}</p>
                 </div>
               </div>
@@ -108,19 +115,19 @@ export default function SearchPage() {
                 <div className="hidden md:flex gap-4 text-sm">
                   <div className="flex items-center gap-1.5 text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded">
                     <ShieldAlert className="w-4 h-4" />
-                    <span>{user.stats.warns}</span>
+                    <span>{user.stats?.warns || 0}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-orange-400 bg-orange-400/10 px-2 py-1 rounded">
                     <Clock className="w-4 h-4" />
-                    <span>{user.stats.timeouts}</span>
+                    <span>{user.stats?.timeouts || 0}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-red-400 bg-red-400/10 px-2 py-1 rounded">
                     <Ban className="w-4 h-4" />
-                    <span>{user.stats.bans}</span>
+                    <span>{user.stats?.bans || 0}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-orange-500 bg-orange-500/10 px-2 py-1 rounded">
                     <Flame className="w-4 h-4" />
-                    <span>{user.stats.streaks}</span>
+                    <span>{user.stats?.streaks || 0}</span>
                   </div>
                 </div>
                 {expandedId === user.id ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
@@ -134,7 +141,11 @@ export default function SearchPage() {
                   <div className="flex justify-center py-8">
                     <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
                   </div>
-                ) : expandedData ? (
+                ) : expandedData?.error ? (
+                  <div className="flex justify-center py-8">
+                    <p className="text-red-400 text-sm">حدث خطأ أثناء جلب البيانات: {expandedData.error}</p>
+                  </div>
+                ) : expandedData?.db ? (
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Warns */}
                     <div className="bg-[#111827] border border-yellow-500/20 rounded-xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-yellow-500/40 transition-colors duration-300">
@@ -150,7 +161,7 @@ export default function SearchPage() {
                             <div key={i} className="bg-white/5 border border-white/5 hover:border-yellow-500/30 rounded-lg p-3 text-sm transition-colors">
                               <div className="flex justify-between text-xs text-gray-400 mb-1">
                                 <span className="font-mono text-yellow-300 bg-yellow-500/10 px-1.5 py-0.5 rounded">#{w.warn_number}</span>
-                                <span>{new Date(w.date_warn).toLocaleDateString('ar-SA')}</span>
+                                <span>{formatDate(w.date_warn)}</span>
                               </div>
                               <p className="text-gray-200 mt-2">{w.reason}</p>
                             </div>
@@ -173,7 +184,7 @@ export default function SearchPage() {
                             <div key={i} className="bg-white/5 border border-white/5 hover:border-orange-500/30 rounded-lg p-3 text-sm transition-colors">
                               <div className="flex justify-between text-xs text-gray-400 mb-1">
                                 <span className="font-mono text-orange-300 bg-orange-500/10 px-1.5 py-0.5 rounded">#{t.timeout_number}</span>
-                                <span>{new Date(t.date).toLocaleDateString('ar-SA')}</span>
+                                <span>{formatDate(t.date)}</span>
                               </div>
                               <div className="text-xs text-orange-300 mb-1 bg-orange-500/10 inline-block px-2 py-0.5 rounded">المدة: {t.time}</div>
                               <p className="text-gray-200 mt-1">{t.reason}</p>
@@ -197,7 +208,7 @@ export default function SearchPage() {
                             <div key={i} className="bg-white/5 border border-white/5 hover:border-red-500/30 rounded-lg p-3 text-sm transition-colors">
                               <div className="flex justify-between text-xs text-gray-400 mb-1">
                                 <span className="font-mono text-red-300 bg-red-500/10 px-1.5 py-0.5 rounded">#{b.ban_number}</span>
-                                <span>{new Date(b.date).toLocaleDateString('ar-SA')}</span>
+                                <span>{formatDate(b.date)}</span>
                               </div>
                               <div className="flex gap-2 mb-1">
                                 <span className="text-xs text-red-300 bg-red-500/10 px-2 py-0.5 rounded">المدة: {b.time}</span>

@@ -6,8 +6,9 @@ import { useNav } from './nav-context';
 
 export function Topbar({ user }: { user: any }) {
   const { toggle } = useNav();
+  const [imgSrc, setImgSrc] = useState(user?.avatar || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=');
+
   if (!user) return null;
-  const [imgSrc, setImgSrc] = useState(user.avatar || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=');
 
   return (
     <header className="h-20 bg-[#111827]/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 md:px-8 z-20 shadow-lg">
