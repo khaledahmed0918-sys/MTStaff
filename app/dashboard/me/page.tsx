@@ -74,24 +74,15 @@ export default function MyInfoPage() {
       {/* Profile Card */}
       <div className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative">
         {/* Banner */}
-        <div className="h-48 w-full relative bg-[#0a0f1a] overflow-hidden">
+        <div className="h-64 w-full relative bg-[#0a0f1a] overflow-hidden">
           {discord.banner ? (
-            <>
-              <CachedImage
-                src={discord.banner}
-                alt="Banner Blur"
-                fill
-                className="object-cover opacity-30 blur-2xl scale-110"
-                referrerPolicy="no-referrer"
-              />
-              <CachedImage
-                src={discord.banner}
-                alt="Banner"
-                fill
-                className="object-contain"
-                referrerPolicy="no-referrer"
-              />
-            </>
+            <CachedImage
+              src={discord.banner}
+              alt="Banner"
+              fill
+              className="object-cover w-full h-full"
+              referrerPolicy="no-referrer"
+            />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-indigo-900" />
           )}
@@ -101,8 +92,8 @@ export default function MyInfoPage() {
         {/* Avatar & Info */}
         <div className="px-8 pb-8 relative">
           <div className="flex flex-col md:flex-row gap-6 items-start md:items-end -mt-16 mb-6">
-            <div className="relative w-32 h-32 z-10">
-              <div className="w-full h-full relative rounded-full overflow-hidden border-4 border-[#111827] shadow-[0_0_30px_rgba(59,130,246,0.4)] bg-[#111827]">
+            <div className="relative w-40 h-40 z-10">
+              <div className="w-full h-full relative rounded-lg overflow-hidden border-4 border-[#111827] shadow-[0_0_30px_rgba(59,130,246,0.4)] bg-[#111827]">
                 {discord.avatar ? (
                   <CachedImage
                     src={discord.avatar}
@@ -115,38 +106,34 @@ export default function MyInfoPage() {
                   <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-4xl">{discord.username.charAt(0)}</div>
                 )}
               </div>
-              {discord.avatarDecoration && (
-                <div className="absolute -inset-4 z-20 pointer-events-none">
-                  <CachedImage src={discord.avatarDecoration} alt="Decoration" fill className="object-contain" referrerPolicy="no-referrer" />
-                </div>
-              )}
             </div>
-            <div className="flex-1 mt-16 md:mt-0">
-              <h1 className="text-3xl font-bold flex items-center gap-3" style={{ color: discord.highestRoleColor || '#ffffff' }}>
-                {discord.displayName || discord.username}
+            <div className="flex-1 mt-24 md:mt-20">
+              <div className="flex items-center gap-4">
+                <h1 className="text-3xl font-bold" style={{ color: discord.highestRoleColor || '#ffffff' }}>
+                  {discord.displayName || discord.username}
+                </h1>
                 <span className="text-lg text-gray-400 font-normal">({discord.username})</span>
-              </h1>
-              <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-400">
-                <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
-                  <span className="font-mono text-blue-300">{discord.id}</span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
-                  <Calendar className="w-4 h-4 text-gray-500" />
+              </div>
+              
+              <div className="text-sm text-gray-500 mt-1 flex items-center gap-4">
+                <span>ID: {discord.id}</span>
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4" />
                   <span>تاريخ الإنشاء: {formatDateEn(discord.createdAt)}</span>
                 </div>
                 {discord.joinedAt && (
-                  <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
-                    <Calendar className="w-4 h-4 text-gray-500" />
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4" />
                     <span>تاريخ الانضمام: {formatDateEn(discord.joinedAt)}</span>
                   </div>
                 )}
               </div>
-              
+
               {discord.roles && discord.roles.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
                   {discord.roles.map((role: any) => (
                     <div key={role.id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/10" style={{ backgroundColor: `${role.color}15`, color: role.color !== '#000000' ? role.color : '#ffffff' }}>
-                      {role.icon && <CachedImage src={role.icon} alt={role.name} width={16} height={16} className="rounded-full" />}
+                      {role.icon && <CachedImage src={role.icon} alt={role.name} width={16} height={16} />}
                       {role.name}
                     </div>
                   ))}

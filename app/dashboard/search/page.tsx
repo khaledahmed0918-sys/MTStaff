@@ -104,68 +104,65 @@ export default function SearchPage() {
           <div key={user.id} className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 relative">
             {/* Banner */}
             {user.banner ? (
-              <div className="h-32 w-full relative overflow-hidden">
-                <div 
-                  className="absolute inset-0 bg-cover bg-center blur-md scale-110 opacity-50"
-                  style={{ backgroundImage: `url(${user.banner})` }}
-                />
-                <CachedImage src={user.banner} alt="Banner" fill className="object-cover relative z-10" referrerPolicy="no-referrer" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-[#111827]/50 to-transparent z-20" />
+              <div className="h-64 w-full relative overflow-hidden">
+                <CachedImage src={user.banner} alt="Banner" fill className="object-cover w-full h-full" referrerPolicy="no-referrer" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111827] to-transparent z-20" />
               </div>
             ) : (
-              <div className="h-32 w-full relative overflow-hidden" style={{ backgroundColor: user.bannerColor || '#1e1e2e' }}>
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-[#111827]/50 to-transparent" />
+              <div className="h-64 w-full relative overflow-hidden" style={{ backgroundColor: user.bannerColor || '#1e1e2e' }}>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111827] to-transparent" />
               </div>
             )}
 
             <div 
-              className="p-4 flex flex-col md:flex-row items-start md:items-center justify-between cursor-pointer hover:bg-white/5 transition-colors relative z-30 -mt-16"
+              className="p-6 flex flex-col items-start cursor-pointer hover:bg-white/5 transition-colors relative z-30 -mt-24"
               onClick={() => toggleExpand(user.id)}
             >
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <div className="w-24 h-24 relative rounded-full overflow-hidden border-4 border-[#111827] bg-[#111827] z-10">
-                    {user.avatar ? (
-                      <CachedImage src={user.avatar} alt={user.username} fill className="object-cover" referrerPolicy="no-referrer" />
-                    ) : (
-                      <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-3xl">{user.username.charAt(0)}</div>
-                    )}
-                  </div>
-                  {user.avatarDecoration && (
-                    <div className="absolute -inset-[20%] z-20 pointer-events-none">
-                      <CachedImage src={user.avatarDecoration} alt="Decoration" fill className="object-contain" referrerPolicy="no-referrer" />
-                    </div>
+              <div className="flex items-end gap-4">
+                <div className="w-32 h-32 relative rounded-lg overflow-hidden border-4 border-[#111827] bg-[#111827] z-10">
+                  {user.avatar ? (
+                    <CachedImage src={user.avatar} alt={user.username} fill className="object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-3xl">{user.username.charAt(0)}</div>
                   )}
                 </div>
-                <div className="mt-8 md:mt-0">
+                <div className="mb-2">
                   <h3 className="font-bold text-2xl" style={{ color: user.highestRoleColor || '#ffffff' }}>
-                    {user.displayName} <span className="text-sm text-gray-400 font-normal">({user.username})</span>
+                    {user.displayName}
                   </h3>
-                  <p className="text-sm text-gray-400 font-mono">{user.id}</p>
+                  <p className="text-sm text-gray-400">({user.username})</p>
+                  <p className="text-xs text-gray-500 mt-1">ID: {user.id}</p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-6 mt-4 md:mt-0 self-end md:self-auto">
-                <div className="hidden md:flex gap-4 text-sm">
-                  <div className="flex items-center gap-1.5 text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded">
-                    <ShieldAlert className="w-4 h-4" />
-                    <span>{user.stats?.warns || 0}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-orange-400 bg-orange-400/10 px-2 py-1 rounded">
-                    <Clock className="w-4 h-4" />
-                    <span>{user.stats?.timeouts || 0}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-red-400 bg-red-400/10 px-2 py-1 rounded">
-                    <Ban className="w-4 h-4" />
-                    <span>{user.stats?.bans || 0}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-orange-500 bg-orange-500/10 px-2 py-1 rounded">
-                    <Flame className="w-4 h-4" />
-                    <span>{user.stats?.streaks || 0}</span>
-                  </div>
+              <div className="flex items-center gap-6 mt-4 text-xs text-gray-400">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4" />
+                  <span>تاريخ الإنشاء: {formatDateEn(user.createdAt)}</span>
                 </div>
-                {expandedId === user.id ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4" />
+                  <span>تاريخ الانضمام: {formatDateEn(user.joinedAt)}</span>
+                </div>
               </div>
+              
+              {user.roles && user.roles.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {user.roles.map((role: any) => (
+                    <div 
+                      key={role.id} 
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/10"
+                      style={{ 
+                        backgroundColor: role.color !== '#000000' ? `${role.color}15` : 'rgba(255,255,255,0.05)', 
+                        color: role.color !== '#000000' ? role.color : '#ffffff' 
+                      }}
+                    >
+                      {role.icon && <CachedImage src={role.icon} alt={role.name} width={16} height={16} />}
+                      {role.name}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Expanded Details */}
@@ -235,7 +232,7 @@ export default function SearchPage() {
                       <div className="bg-[#111827] border border-purple-500/20 rounded-xl p-4 shadow-lg">
                         <div className="flex items-center gap-2 mb-3">
                           <Clock className="w-5 h-5 text-purple-400" />
-                          <h4 className="font-bold text-purple-400">الصوت</h4>
+                          <h4 className="font-bold text-purple-400">الفويس</h4>
                         </div>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between"><span className="text-gray-400">الكل:</span> <span className="text-white font-mono">{formatVoiceTime(expandedData.db.voice?.all || 0)}</span></div>

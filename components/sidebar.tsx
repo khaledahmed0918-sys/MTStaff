@@ -35,7 +35,7 @@ export function Sidebar() {
       `}>
         <div className="p-6 flex items-center justify-between border-b border-white/10">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 relative rounded-xl overflow-hidden border border-white/10">
+            <div className="w-10 h-10 relative rounded-full overflow-hidden border border-white/10">
               <Image
                 src="https://i.postimg.cc/jdLhSPtq/HEIF-Image.jpg"
                 alt="Logo"
