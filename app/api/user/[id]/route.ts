@@ -12,9 +12,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   try {
     // Run all queries concurrently to improve speed
-    const [discordRes, warnsRes, timeoutsRes, bansRes, streaksRes, messagesRes, voiceRes, coinsRes, tasksRes] = await Promise.allSettled([
+    const [discordRes, warnsRes, swarnsRes, timeoutsRes, bansRes, streaksRes, messagesRes, voiceRes, coinsRes, tasksRes] = await Promise.allSettled([
       getUserInfo(guildId, id),
       query(`SELECT * FROM "warns_${id}" ORDER BY date_warn DESC`),
+      query(`SELECT * FROM "swarns_${id}" ORDER BY date_warn DESC`),
       query(`SELECT * FROM "timeouts_${id}" ORDER BY date DESC`),
       query(`SELECT * FROM "bans_${id}" ORDER BY date DESC`),
       query(`SELECT * FROM streaks WHERE user_id = $1`, [id]),
@@ -26,6 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const discordInfo = discordRes.status === 'fulfilled' ? discordRes.value : null;
     const warns = warnsRes.status === 'fulfilled' ? warnsRes.value.rows : [];
+    const swarns = swarnsRes.status === 'fulfilled' ? swarnsRes.value.rows : [];
     const timeouts = timeoutsRes.status === 'fulfilled' ? timeoutsRes.value.rows : [];
     const bans = bansRes.status === 'fulfilled' ? bansRes.value.rows : [];
     const streaks = streaksRes.status === 'fulfilled' && streaksRes.value.rows.length > 0 ? streaksRes.value.rows[0] : null;
@@ -45,6 +47,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       discord: discordInfo,
       db: {
         warns,
+        swarns,
         timeouts,
         bans,
         streaks,

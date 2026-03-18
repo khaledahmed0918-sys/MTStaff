@@ -1,13 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
 import { formatDateEn, formatVoiceTime, parseDiscordEmoji } from '@/lib/utils';
+import { useSearchParams } from 'next/navigation';
 
-export default function SearchPage() {
-  const [query, setQuery] = useState('');
+function SearchContent() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get('q') || '';
+  
+  const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -17,9 +21,18 @@ export default function SearchPage() {
   useEffect(() => {
     const fetchDefault = async () => {
       try {
-        const res = await fetch('/api/search');
-        const data = await res.json();
-        setResults(data.results || []);
+        if (initialQuery) {
+          const res = await fetch(`/api/search?q=${encodeURIComponent(initialQuery)}`);
+          const data = await res.json();
+          setResults(data.results || []);
+          if (data.results && data.results.length > 0) {
+            toggleExpand(data.results[0].id);
+          }
+        } else {
+          const res = await fetch('/api/search');
+          const data = await res.json();
+          setResults(data.results || []);
+        }
       } catch (err) {
         // Error handling removed
       } finally {
@@ -27,7 +40,7 @@ export default function SearchPage() {
       }
     };
     fetchDefault();
-  }, []);
+  }, [initialQuery]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +53,9 @@ export default function SearchPage() {
       const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
       setResults(data.results || []);
+      if (data.results && data.results.length > 0) {
+        toggleExpand(data.results[0].id);
+      }
     } catch (err) {
       // Error handling removed
     } finally {
@@ -296,7 +312,30 @@ export default function SearchPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                      {/* Admin Warns (swarns) */}
+                      <div className="bg-[#111827] border border-red-500/20 rounded-xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-red-500/40 transition-colors duration-300">
+                        <div className="bg-red-500/10 p-3 border-b border-red-500/20 flex items-center gap-2">
+                          <ShieldAlert className="w-4 h-4 text-red-500 group-hover:scale-110 transition-transform" />
+                          <h4 className="font-bold text-red-400 text-sm">تحذيرات إدارية ({expandedData.db.swarns?.length || 0})</h4>
+                        </div>
+                        <div className="p-3 flex-1 overflow-y-auto custom-scrollbar space-y-2">
+                          {(!expandedData.db.swarns || expandedData.db.swarns.length === 0) ? (
+                            <p className="text-gray-500 text-center text-sm py-4">لا يوجد</p>
+                          ) : (
+                            expandedData.db.swarns.map((w: any, i: number) => (
+                              <div key={i} className="bg-white/5 border border-white/5 hover:border-red-500/30 rounded-lg p-3 text-sm transition-colors">
+                                <div className="flex justify-between text-xs text-gray-400 mb-1">
+                                  <span className="font-mono text-red-300 bg-red-500/10 px-1.5 py-0.5 rounded">#{w.warn_number}</span>
+                                  <span>{formatDateEn(w.date_warn)}</span>
+                                </div>
+                                <p className="text-gray-200 mt-2">{w.reason}</p>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+
                       {/* Warns */}
                     <div className="bg-[#111827] border border-yellow-500/20 rounded-xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-yellow-500/40 transition-colors duration-300">
                       <div className="bg-yellow-500/10 p-3 border-b border-yellow-500/20 flex items-center gap-2">
@@ -381,5 +420,13 @@ export default function SearchPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" /></div>}>
+      <SearchContent />
+    </Suspense>
   );
 }

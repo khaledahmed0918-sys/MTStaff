@@ -14,8 +14,12 @@ export const authOptions = {
   },
   callbacks: {
     async jwt({ token, user, account, profile }: { token: any; user: any; account: any; profile?: any; }) {
-      if (account) {
+      if (user) {
         token.id = user.id;
+        token.image = user.image;
+        token.name = user.name;
+      }
+      if (account) {
         token.accessToken = account.access_token;
       }
       if (profile) {
@@ -25,8 +29,10 @@ export const authOptions = {
     },
     async session({ session, token }: { session: any; token: any; }) {
       if (session.user) {
-        session.user.id = token.id as string;
+        session.user.id = token.id as string || token.sub as string;
         session.user.profile = token.profile;
+        if (token.image) session.user.image = token.image;
+        if (token.name) session.user.name = token.name;
       }
       return session;
     },

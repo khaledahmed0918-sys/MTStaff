@@ -150,6 +150,80 @@ export async function getUserInfo(guildId: string, userId: string) {
   }
 }
 
+export async function getStaffMembers(guildId: string) {
+  try {
+    if (!client.isReady()) {
+      await new Promise((resolve) => client.once('ready', resolve));
+    }
+
+    const guild = await client.guilds.fetch(guildId);
+    await guild.members.fetch(); // Fetch all members to cache them
+
+    // The order of roles here determines the order of sections
+    const roleIds = [
+      '1465838966904197294', // Managers
+      '1383128056708993219',
+      '1404695448081662014',
+      '1450422143274713191', // Affairs Team
+      '1402719732334985247', // Tickets Helper
+      '1383158445846560870', // Admin Of The Week
+      '1383158823744966736', // Staff Roles...
+      '1383161407742148761',
+      '1384525033111552091',
+      '1383170653636530318',
+      '1383171427066450110',
+      '1383172034892398612',
+      '1383377717432422401',
+      '1383172935753269368'
+    ];
+
+    const result = [];
+    const processedUserIds = new Set();
+
+    for (const roleId of roleIds) {
+      const role = guild.roles.cache.get(roleId);
+      if (!role) continue;
+
+      const categoryMembers = [];
+      const membersWithRole = role.members;
+      
+      for (const [memberId, member] of membersWithRole) {
+        if (!processedUserIds.has(memberId)) {
+          processedUserIds.add(memberId);
+          const user = member.user;
+          categoryMembers.push({
+            id: user.id,
+            username: user.username,
+            displayName: user.globalName || user.displayName || user.username,
+            avatar: user.displayAvatarURL({ forceStatic: false, size: 256 }),
+            avatarDecoration: user.avatarDecorationURL({ size: 256 }),
+            highestRoleColor: member.roles.highest.hexColor !== '#000000' ? member.roles.highest.hexColor : '#ffffff',
+          });
+        }
+      }
+
+      if (categoryMembers.length > 0) {
+        result.push({
+          id: role.id,
+          name: role.name,
+          roleInfo: {
+            id: role.id,
+            name: role.name,
+            color: role.hexColor !== '#000000' ? role.hexColor : '#ffffff',
+            icon: role.iconURL()
+          },
+          members: categoryMembers
+        });
+      }
+    }
+
+    return result;
+  } catch (err) {
+    console.error('Error fetching staff members:', err);
+    return [];
+  }
+}
+
 export async function getRandomMembers(guildId: string, count: number = 10) {
   try {
     if (!client.isReady()) {

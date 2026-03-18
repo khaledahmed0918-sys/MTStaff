@@ -37,6 +37,7 @@ export default function MyInfoPage() {
             },
             db: {
               warns: userData.db?.warns || [],
+              swarns: userData.db?.swarns || [],
               timeouts: userData.db?.timeouts || [],
               bans: userData.db?.bans || [],
               streaks: userData.db?.streaks || null,
@@ -77,7 +78,7 @@ export default function MyInfoPage() {
   }
 
   const { discord, db = {} } = data;
-  const { warns = [], timeouts = [], bans = [], streaks, tasks = [] } = db;
+  const { warns = [], swarns = [], timeouts = [], bans = [], streaks, tasks = [] } = db;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -250,8 +251,31 @@ export default function MyInfoPage() {
       </div>
 
       {/* Logs Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         
+        {/* Admin Warns (swarns) */}
+        <div className="bg-[#111827]/60 backdrop-blur-md border border-red-500/20 rounded-2xl overflow-hidden shadow-lg flex flex-col group hover:border-red-500/40 transition-colors duration-300">
+          <div className="bg-red-500/10 p-4 border-b border-red-500/20 flex items-center gap-3">
+            <ShieldAlert className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform" />
+            <h2 className="font-bold text-red-400 text-lg">تحذيرات إدارية ({swarns.length})</h2>
+          </div>
+          <div className="p-4 flex-1 overflow-y-auto max-h-[400px] custom-scrollbar space-y-3">
+            {swarns.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">لا يوجد تحذيرات إدارية</p>
+            ) : (
+              swarns.map((warn: any, i: number) => (
+                <div key={i} className="bg-[#0a0f1a] border border-white/5 rounded-xl p-4 hover:border-red-500/30 transition-all duration-300">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs font-mono bg-red-500/20 text-red-300 px-2 py-1 rounded-md">#{warn.warn_number}</span>
+                    <span className="text-xs text-gray-400">{formatDateTime(warn.date_warn)}</span>
+                  </div>
+                  <p className="text-sm text-gray-200">{warn.reason}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
         {/* Warns */}
         <div className="bg-[#111827]/60 backdrop-blur-md border border-yellow-500/20 rounded-2xl overflow-hidden shadow-lg flex flex-col group hover:border-yellow-500/40 transition-colors duration-300">
           <div className="bg-yellow-500/10 p-4 border-b border-yellow-500/20 flex items-center gap-3">
