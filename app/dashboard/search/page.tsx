@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo, Camera } from 'lucide-react';
+import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo, Camera, CheckCircle2 } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
 import { formatDateEn, formatVoiceTime, parseDiscordEmoji, generateGradientColors } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
@@ -119,304 +119,316 @@ function SearchContent() {
         )}
 
         {results.map((user) => (
-          <div key={user.id} id={`search-card-${user.id}`} className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 relative group">
-            <div className="absolute top-4 left-4 z-50">
-              <ScreenshotButton elementId={`search-card-${user.id}`} fileName={`${user.username}-profile.png`} />
-            </div>
-            {/* Banner */}
-            {user.banner && (
-              <div className="aspect-[5/2] w-full relative overflow-hidden">
-                <CachedImage src={user.banner} alt="Banner" fill className="object-cover w-full h-full" referrerPolicy="no-referrer" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111827] to-transparent z-20" />
-              </div>
-            )}
-
-            <motion.div 
-              className={`p-6 flex flex-col items-start cursor-pointer hover:bg-white/5 transition-colors relative z-30 ${user.banner ? '-mt-24' : ''}`}
-              onClick={() => toggleExpand(user.id)}
-            >
-              <div className="flex items-end gap-4">
-                <div className="w-32 h-32 relative rounded-full overflow-hidden border-4 border-[#111827] bg-[#111827] z-10">
-                  {user.avatar ? (
-                    <CachedImage src={user.avatar} alt={user.username} fill className="object-cover" referrerPolicy="no-referrer" />
-                  ) : (
-                    <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-3xl">{user.username.charAt(0)}</div>
-                  )}
-                </div>
-                <div className="mb-2">
-                  <h3 className="font-bold text-2xl" style={{ color: user.highestRoleColor || '#ffffff' }}>
-                    {user.displayName}
-                  </h3>
-                  <p className="text-sm text-gray-400">({user.username})</p>
-                  <p className="text-xs text-gray-500 mt-1">ID: {user.id}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-6 mt-4 text-xs text-gray-400">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4" />
-                  <span>تاريخ الإنشاء: {formatDateEn(user.createdAt)}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4" />
-                  <span>تاريخ الانضمام: {formatDateEn(user.joinedAt)}</span>
-                </div>
-              </div>
-              
-              {user.roles && user.roles.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {user.roles.map((role: any) => {
-                    const roleColor = role.color !== '#000000' ? role.color : '#ffffff';
-                    const { primaryColor, secondaryColor, tertiaryColor } = generateGradientColors(roleColor);
-                    return (
-                      <div 
-                        key={role.id} 
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/10"
-                        style={{ 
-                          backgroundImage: `linear-gradient(to right, ${primaryColor}20, ${secondaryColor}20, ${tertiaryColor}20)`, 
-                          color: primaryColor 
-                        }}
-                      >
-                        {role.icon && <CachedImage src={role.icon} alt={role.name} width={16} height={16} />}
-                        {role.name}
-                      </div>
-                    );
-                  })}
+          <ScreenshotButton 
+            key={user.id} 
+            elementId={`search-card-${user.id}`} 
+            fileName={`${user.username}-profile.png`}
+            memberData={user}
+          >
+            <div id={`search-card-${user.id}`} className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 relative group">
+              {/* Banner */}
+              {user.banner && (
+                <div className="aspect-[5/2] w-full relative overflow-hidden">
+                  <CachedImage src={user.banner} alt="Banner" fill className="object-cover w-full h-full" referrerPolicy="no-referrer" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#111827] to-transparent z-20" />
                 </div>
               )}
-            </motion.div>
 
-            {/* Expanded Details */}
-            {expandedId === user.id && (
-              <div className="border-t border-white/10 bg-[#0a0f1a]/80 p-6">
-                {/* Roles and Dates */}
-                <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                    <h4 className="text-gray-400 text-sm mb-2">تاريخ إنشاء الحساب</h4>
-                    <p className="text-white font-mono">{formatDateEn(user.createdAt)}</p>
+              <motion.div 
+                className={`p-6 flex flex-col items-center md:items-start cursor-pointer hover:bg-white/5 transition-colors relative z-30 ${user.banner ? '-mt-16 md:-mt-24' : ''}`}
+                onClick={() => toggleExpand(user.id)}
+              >
+                <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6">
+                  <div className="w-32 h-32 md:w-40 md:h-40 relative rounded-full overflow-hidden border-4 border-[#111827] bg-[#111827] z-10 shadow-2xl">
+                    {user.avatar ? (
+                      <CachedImage src={user.avatar} alt={user.username} fill className="object-cover" referrerPolicy="no-referrer" />
+                    ) : (
+                      <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-4xl">{user.username.charAt(0)}</div>
+                    )}
                   </div>
-                  <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                    <h4 className="text-gray-400 text-sm mb-2">تاريخ الانضمام للسيرفر</h4>
-                    <p className="text-white font-mono">{formatDateEn(user.joinedAt)}</p>
+                  <div className="mb-2 text-center md:text-right">
+                    <h3 className="font-black text-3xl md:text-4xl mb-1" style={{ color: user.highestRoleColor || '#ffffff' }}>
+                      {user.displayName}
+                    </h3>
+                    <p className="text-lg text-gray-400">({user.username})</p>
+                    <p className="text-sm text-gray-500 mt-2 font-mono bg-white/5 px-3 py-1 rounded-full inline-block">ID: {user.id}</p>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col md:flex-row items-center gap-3 md:gap-8 mt-6 text-sm text-gray-400 w-full md:w-auto">
+                  <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5 w-full md:w-auto justify-center">
+                    <Calendar className="w-4 h-4 text-blue-400" />
+                    <span>تاريخ الإنشاء: {formatDateEn(user.createdAt)}</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5 w-full md:w-auto justify-center">
+                    <Calendar className="w-4 h-4 text-purple-400" />
+                    <span>تاريخ الانضمام: {formatDateEn(user.joinedAt)}</span>
                   </div>
                 </div>
                 
                 {user.roles && user.roles.length > 0 && (
-                  <div className="mb-6">
-                    <h4 className="text-gray-400 text-sm mb-2">الرتب</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {user.roles.map((role: any) => {
-                        const roleColor = role.color !== '#000000' ? role.color : '#ffffff';
-                        const { primaryColor, secondaryColor, tertiaryColor } = generateGradientColors(roleColor);
-                        return (
-                          <div 
-                            key={role.id} 
-                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/10"
-                            style={{ 
-                              backgroundImage: `linear-gradient(to right, ${primaryColor}20, ${secondaryColor}20, ${tertiaryColor}20)`, 
-                              color: primaryColor 
-                            }}
-                          >
-                            {role.icon && (
-                              <CachedImage src={role.icon} alt={role.name} width={16} height={16} className="rounded-sm" />
-                            )}
-                            <span>{role.name}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
+                  <div className="mt-6 flex flex-wrap justify-center md:justify-start gap-2">
+                    {user.roles.map((role: any) => {
+                      const roleColor = role.color !== '#000000' ? role.color : '#ffffff';
+                      const { primaryColor, secondaryColor, tertiaryColor } = generateGradientColors(roleColor);
+                      return (
+                        <div 
+                          key={role.id} 
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold border border-white/10 backdrop-blur-md"
+                          style={{ 
+                            backgroundImage: `linear-gradient(to right, ${primaryColor}20, ${secondaryColor}20, ${tertiaryColor}20)`, 
+                            color: primaryColor 
+                          }}
+                        >
+                          {role.icon && <CachedImage src={role.icon} alt={role.name} width={18} height={18} />}
+                          {role.name}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
-                {loadingDetails ? (
-                  <div className="flex justify-center py-8">
-                    <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
-                  </div>
-                ) : expandedData?.error ? (
-                  <div className="flex justify-center py-8">
-                    <p className="text-red-400 text-sm">حدث خطأ أثناء جلب البيانات: {expandedData.error}</p>
-                  </div>
-                ) : expandedData?.db ? (
-                  <div className="space-y-6">
-                    {/* New Stats Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                      {/* Messages */}
-                      <div className="bg-[#111827] border border-blue-500/20 rounded-xl p-4 shadow-lg">
-                        <div className="flex items-center gap-2 mb-3">
-                          <MessageSquare className="w-5 h-5 text-blue-400" />
-                          <h4 className="font-bold text-blue-400">الرسائل</h4>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between"><span className="text-gray-400">الكل:</span> <span className="text-white font-mono">{expandedData.db.messages?.all || 0}</span></div>
-                          <div className="flex justify-between"><span className="text-gray-400">اليوم:</span> <span className="text-white font-mono">{expandedData.db.messages?.top_day || 0}</span></div>
-                          <div className="flex justify-between"><span className="text-gray-400">الأسبوع:</span> <span className="text-white font-mono">{expandedData.db.messages?.top_week || 0}</span></div>
-                          <div className="flex justify-between"><span className="text-gray-400">الشهر:</span> <span className="text-white font-mono">{expandedData.db.messages?.top_month || 0}</span></div>
-                        </div>
-                      </div>
+              </motion.div>
 
-                      {/* Voice */}
-                      <div className="bg-[#111827] border border-purple-500/20 rounded-xl p-4 shadow-lg">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Clock className="w-5 h-5 text-purple-400" />
-                          <h4 className="font-bold text-purple-400">الفويس</h4>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between"><span className="text-gray-400">الكل:</span> <span className="text-white font-mono">{formatVoiceTime(expandedData.db.voice?.all || 0)}</span></div>
-                          <div className="flex justify-between"><span className="text-gray-400">اليوم:</span> <span className="text-white font-mono">{formatVoiceTime(expandedData.db.voice?.top_day || 0)}</span></div>
-                          <div className="flex justify-between"><span className="text-gray-400">الأسبوع:</span> <span className="text-white font-mono">{formatVoiceTime(expandedData.db.voice?.top_week || 0)}</span></div>
-                          <div className="flex justify-between"><span className="text-gray-400">الشهر:</span> <span className="text-white font-mono">{formatVoiceTime(expandedData.db.voice?.top_month || 0)}</span></div>
-                        </div>
-                      </div>
-
-                      {/* Streaks */}
-                      <div className="bg-[#111827] border border-orange-500/20 rounded-xl p-4 shadow-lg">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Flame className="w-5 h-5 text-orange-400" />
-                          <h4 className="font-bold text-orange-400">الستريك</h4>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-400">الحالي:</span> 
-                            <div className="flex items-center gap-1">
-                              <span className="text-white font-mono">{expandedData.db.streaks?.streak || 0}</span>
-                              {expandedData.db.streaks?.streak_emoji_url ? (
-                                <CachedImage src={expandedData.db.streaks.streak_emoji_url} alt="streak" width={16} height={16} />
-                              ) : expandedData.db.streaks?.streak_emoji ? (
-                                (() => {
-                                  const parsed = parseDiscordEmoji(expandedData.db.streaks.streak_emoji);
-                                  return parsed ? (
-                                    <CachedImage src={parsed} alt="streak" width={16} height={16} />
-                                  ) : (
-                                    <span>{expandedData.db.streaks.streak_emoji}</span>
-                                  );
-                                })()
-                              ) : (
-                                <Flame className="w-4 h-4 text-orange-500" />
-                              )}
+              {/* Expanded Details */}
+              {expandedId === user.id && (
+                <div className="border-t border-white/10 bg-[#0a0f1a]/90 p-6 md:p-8">
+                  {loadingDetails ? (
+                    <div className="flex justify-center py-12">
+                      <div className="w-10 h-10 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+                    </div>
+                  ) : expandedData?.error ? (
+                    <div className="flex justify-center py-8">
+                      <p className="text-red-400 text-sm">حدث خطأ أثناء جلب البيانات: {expandedData.error}</p>
+                    </div>
+                  ) : expandedData?.db ? (
+                    <div className="space-y-8">
+                      {/* New Stats Grid - Larger and more prominent */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* Messages */}
+                        <div className="bg-[#111827] border-2 border-blue-500/30 rounded-3xl p-8 shadow-2xl hover:border-blue-500/60 transition-all group flex flex-col justify-between">
+                          <div className="flex items-center gap-4 mb-6">
+                            <div className="p-3 bg-blue-500/20 rounded-2xl group-hover:bg-blue-500/30 transition-colors">
+                              <MessageSquare className="w-8 h-8 text-blue-400" />
+                            </div>
+                            <h4 className="font-black text-2xl text-blue-400 tracking-tight">الرسائل</h4>
+                          </div>
+                          <div className="space-y-6">
+                            <div className="flex justify-between items-end border-b border-white/10 pb-4">
+                              <span className="text-gray-400 font-bold">المجموع:</span> 
+                              <span className="text-4xl sm:text-5xl font-black text-white font-mono tracking-tighter leading-none">{expandedData.db.messages?.all?.toLocaleString() || 0}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-3 pt-2">
+                              <div className="text-center bg-white/5 p-2 rounded-xl">
+                                <div className="text-[10px] text-gray-500 uppercase font-black">يوم</div>
+                                <div className="text-lg font-black text-white">{expandedData.db.messages?.top_day || 0}</div>
+                              </div>
+                              <div className="text-center bg-white/5 p-2 rounded-xl">
+                                <div className="text-[10px] text-gray-500 uppercase font-black">أسبوع</div>
+                                <div className="text-lg font-black text-white">{expandedData.db.messages?.top_week || 0}</div>
+                              </div>
+                              <div className="text-center bg-white/5 p-2 rounded-xl">
+                                <div className="text-[10px] text-gray-500 uppercase font-black">شهر</div>
+                                <div className="text-lg font-black text-white">{expandedData.db.messages?.top_month || 0}</div>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex justify-between"><span className="text-gray-400">السابق:</span> <span className="text-white font-mono">{expandedData.db.streaks?.old_streak || 0}</span></div>
-                          <div className="flex justify-between"><span className="text-gray-400">الحمايات:</span> <span className="text-white font-mono">{expandedData.db.streaks?.shields || 0}</span></div>
-                          <div className="flex justify-between"><span className="text-gray-400">رسائل اليوم:</span> <span className="text-white font-mono">{expandedData.db.streaks?.daily_messages || 0}/100</span></div>
                         </div>
-                      </div>
 
-                      {/* Coins */}
-                      <div className="bg-[#111827] border border-yellow-500/20 rounded-xl p-4 shadow-lg">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center text-xs font-bold text-black">$</div>
-                          <h4 className="font-bold text-yellow-400">العملات</h4>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between"><span className="text-gray-400">الرصيد:</span> <span className="text-white font-mono">{expandedData.db.coins?.coins || 0}</span></div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                      {/* Admin Warns (swarns) */}
-                      <div className="bg-[#111827] border border-red-500/20 rounded-xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-red-500/40 transition-colors duration-300">
-                        <div className="bg-red-500/10 p-3 border-b border-red-500/20 flex items-center gap-2">
-                          <ShieldAlert className="w-4 h-4 text-red-500 group-hover:scale-110 transition-transform" />
-                          <h4 className="font-bold text-red-400 text-sm">تحذيرات إدارية ({expandedData.db.swarns?.length || 0})</h4>
-                        </div>
-                        <div className="p-3 flex-1 overflow-y-auto custom-scrollbar space-y-2">
-                          {(!expandedData.db.swarns || expandedData.db.swarns.length === 0) ? (
-                            <p className="text-gray-500 text-center text-sm py-4">لا يوجد</p>
-                          ) : (
-                            expandedData.db.swarns.map((w: any, i: number) => (
-                              <div key={i} className="bg-white/5 border border-white/5 hover:border-red-500/30 rounded-lg p-3 text-sm transition-colors">
-                                <div className="flex justify-between text-xs text-gray-400 mb-1">
-                                  <span className="font-mono text-red-300 bg-red-500/10 px-1.5 py-0.5 rounded">#{w.warn_number}</span>
-                                  <span>{formatDateEn(w.date_warn)}</span>
-                                </div>
-                                <p className="text-gray-200 mt-2">{w.reason}</p>
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Warns */}
-                    <div className="bg-[#111827] border border-yellow-500/20 rounded-xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-yellow-500/40 transition-colors duration-300">
-                      <div className="bg-yellow-500/10 p-3 border-b border-yellow-500/20 flex items-center gap-2">
-                        <ShieldAlert className="w-4 h-4 text-yellow-500 group-hover:scale-110 transition-transform" />
-                        <h4 className="font-bold text-yellow-400 text-sm">التحذيرات ({expandedData.db.warns?.length || 0})</h4>
-                      </div>
-                      <div className="p-3 flex-1 overflow-y-auto custom-scrollbar space-y-2">
-                        {(!expandedData.db.warns || expandedData.db.warns.length === 0) ? (
-                          <p className="text-gray-500 text-center text-sm py-4">لا يوجد</p>
-                        ) : (
-                          expandedData.db.warns.map((w: any, i: number) => (
-                            <div key={i} className="bg-white/5 border border-white/5 hover:border-yellow-500/30 rounded-lg p-3 text-sm transition-colors">
-                              <div className="flex justify-between text-xs text-gray-400 mb-1">
-                                <span className="font-mono text-yellow-300 bg-yellow-500/10 px-1.5 py-0.5 rounded">#{w.warn_number}</span>
-                                <span>{formatDateEn(w.date_warn)}</span>
-                              </div>
-                              <p className="text-gray-200 mt-2">{w.reason}</p>
+                        {/* Voice */}
+                        <div className="bg-[#111827] border-2 border-purple-500/30 rounded-3xl p-8 shadow-2xl hover:border-purple-500/60 transition-all group flex flex-col justify-between">
+                          <div className="flex items-center gap-4 mb-6">
+                            <div className="p-3 bg-purple-500/20 rounded-2xl group-hover:bg-purple-500/30 transition-colors">
+                              <Clock className="w-8 h-8 text-purple-400" />
                             </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Timeouts */}
-                    <div className="bg-[#111827] border border-orange-500/20 rounded-xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-orange-500/40 transition-colors duration-300">
-                      <div className="bg-orange-500/10 p-3 border-b border-orange-500/20 flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-orange-500 group-hover:scale-110 transition-transform" />
-                        <h4 className="font-bold text-orange-400 text-sm">التايم أوت ({expandedData.db.timeouts?.length || 0})</h4>
-                      </div>
-                      <div className="p-3 flex-1 overflow-y-auto custom-scrollbar space-y-2">
-                        {(!expandedData.db.timeouts || expandedData.db.timeouts.length === 0) ? (
-                          <p className="text-gray-500 text-center text-sm py-4">لا يوجد</p>
-                        ) : (
-                          expandedData.db.timeouts.map((t: any, i: number) => (
-                            <div key={i} className="bg-white/5 border border-white/5 hover:border-orange-500/30 rounded-lg p-3 text-sm transition-colors">
-                              <div className="flex justify-between text-xs text-gray-400 mb-1">
-                                <span className="font-mono text-orange-300 bg-orange-500/10 px-1.5 py-0.5 rounded">#{t.timeout_number}</span>
-                                <span>{formatDateEn(t.date)}</span>
-                              </div>
-                              <div className="text-xs text-orange-300 mb-1 bg-orange-500/10 inline-block px-2 py-0.5 rounded">المدة: {t.time}</div>
-                              <p className="text-gray-200 mt-1">{t.reason}</p>
+                            <h4 className="font-black text-2xl text-purple-400 tracking-tight">الفويس</h4>
+                          </div>
+                          <div className="space-y-6">
+                            <div className="flex justify-between items-end border-b border-white/10 pb-4">
+                              <span className="text-gray-400 font-bold">المجموع:</span> 
+                              <span className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tighter leading-none">{formatVoiceTime(expandedData.db.voice?.all || 0)}</span>
                             </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Bans */}
-                    <div className="bg-[#111827] border border-red-500/20 rounded-xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-red-500/40 transition-colors duration-300">
-                      <div className="bg-red-500/10 p-3 border-b border-red-500/20 flex items-center gap-2">
-                        <Ban className="w-4 h-4 text-red-500 group-hover:scale-110 transition-transform" />
-                        <h4 className="font-bold text-red-400 text-sm">الباند ({expandedData.db.bans?.length || 0})</h4>
-                      </div>
-                      <div className="p-3 flex-1 overflow-y-auto custom-scrollbar space-y-2">
-                        {(!expandedData.db.bans || expandedData.db.bans.length === 0) ? (
-                          <p className="text-gray-500 text-center text-sm py-4">لا يوجد</p>
-                        ) : (
-                          expandedData.db.bans.map((b: any, i: number) => (
-                            <div key={i} className="bg-white/5 border border-white/5 hover:border-red-500/30 rounded-lg p-3 text-sm transition-colors">
-                              <div className="flex justify-between text-xs text-gray-400 mb-1">
-                                <span className="font-mono text-red-300 bg-red-500/10 px-1.5 py-0.5 rounded">#{b.ban_number}</span>
-                                <span>{formatDateEn(b.date)}</span>
+                            <div className="grid grid-cols-3 gap-3 pt-2">
+                              <div className="text-center bg-white/5 p-2 rounded-xl">
+                                <div className="text-[10px] text-gray-500 uppercase font-black">يوم</div>
+                                <div className="text-xs font-black text-white">{formatVoiceTime(expandedData.db.voice?.top_day || 0)}</div>
                               </div>
-                              <div className="flex gap-2 mb-1">
-                                <span className="text-xs text-red-300 bg-red-500/10 px-2 py-0.5 rounded">المدة: {b.time}</span>
-                                {b.unbanned && (
-                                  <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">مفكوك</span>
+                              <div className="text-center bg-white/5 p-2 rounded-xl">
+                                <div className="text-[10px] text-gray-500 uppercase font-black">أسبوع</div>
+                                <div className="text-xs font-black text-white">{formatVoiceTime(expandedData.db.voice?.top_week || 0)}</div>
+                              </div>
+                              <div className="text-center bg-white/5 p-2 rounded-xl">
+                                <div className="text-[10px] text-gray-500 uppercase font-black">شهر</div>
+                                <div className="text-xs font-black text-white">{formatVoiceTime(expandedData.db.voice?.top_month || 0)}</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Streaks */}
+                        <div className="bg-[#111827] border-2 border-orange-500/30 rounded-3xl p-8 shadow-2xl hover:border-orange-500/60 transition-all group flex flex-col justify-between">
+                          <div className="flex items-center gap-4 mb-6">
+                            <div className="p-3 bg-orange-500/20 rounded-2xl group-hover:bg-orange-500/30 transition-colors">
+                              <Flame className="w-8 h-8 text-orange-400" />
+                            </div>
+                            <h4 className="font-black text-2xl text-orange-400 tracking-tight">الستريك</h4>
+                          </div>
+                          <div className="space-y-6">
+                            <div className="flex justify-between items-end border-b border-white/10 pb-4">
+                              <span className="text-gray-400 font-bold">الحالي:</span> 
+                              <div className="flex items-center gap-3">
+                                <span className="text-4xl sm:text-5xl font-black text-white font-mono tracking-tighter leading-none">{expandedData.db.streaks?.streak || 0}</span>
+                                {expandedData.db.streaks?.streak_emoji_url ? (
+                                  <CachedImage src={expandedData.db.streaks.streak_emoji_url} alt="streak" width={32} height={32} />
+                                ) : (
+                                  <Flame className="w-8 h-8 text-orange-500" />
                                 )}
                               </div>
-                              <p className="text-gray-200 mt-1">{b.reason}</p>
                             </div>
-                          ))
-                        )}
+                            <div className="flex justify-between text-base"><span className="text-gray-400 font-bold">الحمايات:</span> <span className="text-white font-black">{expandedData.db.streaks?.shields || 0}</span></div>
+                            <div className="space-y-2">
+                              <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden border border-white/5">
+                                <div 
+                                  className="bg-gradient-to-r from-orange-600 to-orange-400 h-full rounded-full transition-all duration-1000 ease-out" 
+                                  style={{ width: `${Math.min(100, ((expandedData.db.streaks?.daily_messages || 0) / 100) * 100)}%` }}
+                                />
+                              </div>
+                              <div className="text-xs text-center text-gray-500 font-bold">{expandedData.db.streaks?.daily_messages || 0} / 100 رسالة اليوم</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Coins */}
+                        <div className="bg-gradient-to-br from-[#111827] to-[#0a0f1a] border-2 border-yellow-500/40 rounded-3xl p-8 shadow-2xl hover:border-yellow-500/70 transition-all group flex flex-col items-center justify-center text-center relative overflow-hidden">
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-500/10 rounded-bl-full blur-2xl" />
+                          <div className="p-4 bg-yellow-500/20 rounded-full mb-6 group-hover:scale-110 transition-transform">
+                            <div className="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center text-2xl font-black text-black shadow-[0_0_20px_rgba(250,204,21,0.4)]">$</div>
+                          </div>
+                          <h4 className="font-black text-2xl text-yellow-400 mb-2 tracking-tight">الرصيد الحالي</h4>
+                          <div className="flex flex-col items-center">
+                            <span className="text-5xl sm:text-6xl font-black text-white font-mono tracking-tighter leading-none drop-shadow-lg">{expandedData.db.coins?.coins?.toLocaleString() || 0}</span>
+                            <span className="text-sm text-gray-500 mt-4 font-bold uppercase tracking-[0.2em] opacity-60">عملة رقمية</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* Admin Warns (swarns) */}
+                        <div className="bg-[#111827] border border-red-500/20 rounded-2xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-red-500/40 transition-all">
+                          <div className="bg-red-500/10 p-4 border-b border-red-500/20 flex items-center gap-2">
+                            <ShieldAlert className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform" />
+                            <h4 className="font-bold text-red-400">تحذيرات إدارية ({expandedData.db.swarns?.length || 0})</h4>
+                          </div>
+                          <div className="p-4 flex-1 overflow-y-auto custom-scrollbar space-y-3">
+                            {(!expandedData.db.swarns || expandedData.db.swarns.length === 0) ? (
+                              <div className="h-full flex flex-col items-center justify-center text-gray-600">
+                                <CheckCircle2 className="w-12 h-12 mb-2 opacity-20" />
+                                <p className="text-sm">سجل نظيف</p>
+                              </div>
+                            ) : (
+                              expandedData.db.swarns.map((w: any, i: number) => (
+                                <div key={i} className="bg-white/5 border border-white/5 hover:border-red-500/30 rounded-xl p-4 text-sm transition-all">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <span className="font-mono text-red-300 bg-red-500/20 px-2 py-0.5 rounded-md text-xs">#{w.warn_number}</span>
+                                    <span className="text-[10px] text-gray-500">{formatDateEn(w.date_warn)}</span>
+                                  </div>
+                                  <p className="text-gray-200 leading-relaxed">{w.reason}</p>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Warns */}
+                        <div className="bg-[#111827] border border-yellow-500/20 rounded-2xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-yellow-500/40 transition-all">
+                          <div className="bg-yellow-500/10 p-4 border-b border-yellow-500/20 flex items-center gap-2">
+                            <ShieldAlert className="w-5 h-5 text-yellow-500 group-hover:scale-110 transition-transform" />
+                            <h4 className="font-bold text-yellow-400">التحذيرات ({expandedData.db.warns?.length || 0})</h4>
+                          </div>
+                          <div className="p-4 flex-1 overflow-y-auto custom-scrollbar space-y-3">
+                            {(!expandedData.db.warns || expandedData.db.warns.length === 0) ? (
+                              <div className="h-full flex flex-col items-center justify-center text-gray-600">
+                                <CheckCircle2 className="w-12 h-12 mb-2 opacity-20" />
+                                <p className="text-sm">سجل نظيف</p>
+                              </div>
+                            ) : (
+                              expandedData.db.warns.map((w: any, i: number) => (
+                                <div key={i} className="bg-white/5 border border-white/5 hover:border-yellow-500/30 rounded-xl p-4 text-sm transition-all">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <span className="font-mono text-yellow-300 bg-yellow-500/20 px-2 py-0.5 rounded-md text-xs">#{w.warn_number}</span>
+                                    <span className="text-[10px] text-gray-500">{formatDateEn(w.date_warn)}</span>
+                                  </div>
+                                  <p className="text-gray-200 leading-relaxed">{w.reason}</p>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Timeouts */}
+                        <div className="bg-[#111827] border border-orange-500/20 rounded-2xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-orange-500/40 transition-all">
+                          <div className="bg-orange-500/10 p-4 border-b border-orange-500/20 flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-orange-500 group-hover:scale-110 transition-transform" />
+                            <h4 className="font-bold text-orange-400">التايم أوت ({expandedData.db.timeouts?.length || 0})</h4>
+                          </div>
+                          <div className="p-4 flex-1 overflow-y-auto custom-scrollbar space-y-3">
+                            {(!expandedData.db.timeouts || expandedData.db.timeouts.length === 0) ? (
+                              <div className="h-full flex flex-col items-center justify-center text-gray-600">
+                                <CheckCircle2 className="w-12 h-12 mb-2 opacity-20" />
+                                <p className="text-sm">سجل نظيف</p>
+                              </div>
+                            ) : (
+                              expandedData.db.timeouts.map((t: any, i: number) => (
+                                <div key={i} className="bg-white/5 border border-white/5 hover:border-orange-500/30 rounded-xl p-4 text-sm transition-all">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <span className="font-mono text-orange-300 bg-orange-500/20 px-2 py-0.5 rounded-md text-xs">#{t.timeout_number}</span>
+                                    <span className="text-[10px] text-gray-500">{formatDateEn(t.date)}</span>
+                                  </div>
+                                  <div className="text-xs text-orange-300 mb-2 bg-orange-500/10 inline-block px-2 py-0.5 rounded font-bold">المدة: {t.time}</div>
+                                  <p className="text-gray-200 leading-relaxed">{t.reason}</p>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Bans */}
+                        <div className="bg-[#111827] border border-red-500/20 rounded-2xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-red-500/40 transition-all">
+                          <div className="bg-red-500/10 p-4 border-b border-red-500/20 flex items-center gap-2">
+                            <Ban className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform" />
+                            <h4 className="font-bold text-red-400">الباند ({expandedData.db.bans?.length || 0})</h4>
+                          </div>
+                          <div className="p-4 flex-1 overflow-y-auto custom-scrollbar space-y-3">
+                            {(!expandedData.db.bans || expandedData.db.bans.length === 0) ? (
+                              <div className="h-full flex flex-col items-center justify-center text-gray-600">
+                                <CheckCircle2 className="w-12 h-12 mb-2 opacity-20" />
+                                <p className="text-sm">سجل نظيف</p>
+                              </div>
+                            ) : (
+                              expandedData.db.bans.map((b: any, i: number) => (
+                                <div key={i} className="bg-white/5 border border-white/5 hover:border-red-500/30 rounded-xl p-4 text-sm transition-all">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <span className="font-mono text-red-300 bg-red-500/20 px-2 py-0.5 rounded-md text-xs">#{b.ban_number}</span>
+                                    <span className="text-[10px] text-gray-500">{formatDateEn(b.date)}</span>
+                                  </div>
+                                  <div className="flex gap-2 mb-2">
+                                    <span className="text-xs text-red-300 bg-red-500/10 px-2 py-0.5 rounded font-bold">المدة: {b.time}</span>
+                                    {b.unbanned && (
+                                      <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-bold">مفكوك</span>
+                                    )}
+                                  </div>
+                                  <p className="text-gray-200 leading-relaxed">{b.reason}</p>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  </div>
-                ) : null}
-              </div>
-            )}
-          </div>
+                  ) : null}
+                </div>
+              )}
+            </div>
+          </ScreenshotButton>
         ))}
       </div>
     </div>

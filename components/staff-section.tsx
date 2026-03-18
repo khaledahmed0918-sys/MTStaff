@@ -99,107 +99,110 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {role.members.map((member: any, memIdx: number) => (
-                      <motion.div
-                        key={member.id}
-                        id={`staff-card-${member.id}`}
-                        whileHover={{ y: -4, scale: 1.01 }}
-                        onClick={() => router.push(`/dashboard/search?q=${member.id}`)}
-                        className="bg-[#111827]/60 backdrop-blur-xl border border-white/5 rounded-2xl p-5 shadow-lg hover:shadow-[0_0_25px_rgba(59,130,246,0.15)] transition-all duration-300 cursor-pointer group relative overflow-hidden"
-                        style={{ borderTopColor: `${member.highestRoleColor}80`, borderTopWidth: '2px' }}
+                      <ScreenshotButton 
+                        elementId={`staff-card-${member.id}`} 
+                        fileName={`${member.username}-staff-card.png`} 
+                        memberData={member}
+                        className="h-full"
                       >
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full opacity-50 pointer-events-none" style={{ backgroundImage: `linear-gradient(to bottom right, ${member.highestRoleColor}20, transparent)` }} />
-                        
-                        <div className="absolute top-4 left-4 z-20">
-                          <ScreenshotButton 
-                            elementId={`staff-card-${member.id}`} 
-                            fileName={`${member.username}-staff-card.png`} 
-                            memberData={member}
-                          />
-                        </div>
-
-                        <div className="flex items-start gap-4 relative z-10">
-                          <div className="relative w-16 h-16 shrink-0 group/avatar">
-                            <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#111827] shadow-md relative z-10 bg-[#0a0f1a]" style={{ borderColor: member.highestRoleColor }}>
-                              <CachedImage 
-                                src={member.avatar} 
-                                alt={member.displayName} 
-                                fill 
-                                className="object-cover rounded-full transition-transform duration-500 group-hover/avatar:scale-110" 
-                              />
-                            </div>
-                            {member.avatarDecoration && (
-                              <div className="absolute -inset-3 z-20 pointer-events-none">
-                                <CachedImage src={member.avatarDecoration} alt="Decoration" fill className="object-cover" />
-                              </div>
-                            )}
-                            <div className="absolute inset-0 rounded-full shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] z-15 pointer-events-none" />
-                          </div>
+                        <motion.div
+                          key={member.id}
+                          id={`staff-card-${member.id}`}
+                          whileHover={{ y: -4, scale: 1.01 }}
+                          onClick={() => router.push(`/dashboard/search?q=${member.id}`)}
+                          className="bg-[#111827]/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-lg hover:shadow-[0_0_25px_rgba(59,130,246,0.15)] transition-all duration-300 cursor-pointer group relative overflow-hidden h-full"
+                          style={{ borderTopColor: `${member.highestRoleColor}80`, borderTopWidth: '2px' }}
+                        >
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full opacity-50 pointer-events-none" style={{ backgroundImage: `linear-gradient(to bottom right, ${member.highestRoleColor}20, transparent)` }} />
                           
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-lg font-bold text-white truncate group-hover:text-blue-400 transition-colors" style={{ color: member.highestRoleColor }}>
-                              {member.displayName}
-                            </h4>
-                            <p className="text-sm text-gray-400 truncate">@{member.username}</p>
-                          </div>
-                        </div>
-
-                        {member.stats && (
-                          <div className="mt-5 space-y-3">
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="bg-[#0a0f1a] rounded-xl p-3 border border-white/5 flex flex-col gap-1">
-                                <div className="flex items-center gap-2 text-gray-400 text-xs font-medium">
-                                  <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
-                                  <span>الرسائل</span>
+                          <div className="flex items-start gap-4 relative z-10">
+                            <div className="relative w-20 h-20 shrink-0 group/avatar">
+                              <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#111827] shadow-md relative z-10 bg-[#0a0f1a]" style={{ borderColor: member.highestRoleColor }}>
+                                <CachedImage 
+                                  src={member.avatar} 
+                                  alt={member.displayName} 
+                                  fill 
+                                  className="object-cover rounded-full transition-transform duration-500 group-hover/avatar:scale-110" 
+                                />
+                              </div>
+                              {member.avatarDecoration && (
+                                <div className="absolute -inset-3 z-20 pointer-events-none">
+                                  <CachedImage src={member.avatarDecoration} alt="Decoration" fill className="object-cover" />
                                 </div>
-                                <div className="text-lg font-bold text-white">{member.stats.messages.total.toLocaleString()}</div>
-                                <div className="flex justify-between text-[10px] text-gray-500 mt-1">
-                                  <span>ي: {member.stats.messages.daily}</span>
-                                  <span>أ: {member.stats.messages.weekly}</span>
-                                  <span>ش: {member.stats.messages.monthly}</span>
+                              )}
+                              <div className="absolute inset-0 rounded-full shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] z-15 pointer-events-none" />
+                            </div>
+                            
+                            <div className="flex-1 min-w-0 pt-2">
+                              <h4 className="text-xl font-bold text-white truncate group-hover:text-blue-400 transition-colors" style={{ color: member.highestRoleColor }}>
+                                {member.displayName}
+                              </h4>
+                              <p className="text-base text-gray-400 truncate">@{member.username}</p>
+                            </div>
+                          </div>
+
+                          {member.stats && (
+                            <div className="mt-6 space-y-4">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-[#0a0f1a] rounded-2xl p-6 border border-white/10 flex flex-col gap-2 hover:bg-white/5 transition-all hover:scale-[1.02] shadow-inner">
+                                  <div className="flex items-center gap-3 text-gray-400 text-sm font-bold">
+                                    <MessageSquare className="w-5 h-5 text-blue-400" />
+                                    <span className="tracking-wider">الرسائل</span>
+                                  </div>
+                                  <div className="text-4xl font-black text-white tracking-tighter">{member.stats.messages.total.toLocaleString()}</div>
+                                  <div className="flex justify-between text-[11px] text-gray-500 mt-2 border-t border-white/5 pt-2 font-mono">
+                                    <span className="bg-white/5 px-2 py-0.5 rounded">ي: {member.stats.messages.daily}</span>
+                                    <span className="bg-white/5 px-2 py-0.5 rounded">أ: {member.stats.messages.weekly}</span>
+                                    <span className="bg-white/5 px-2 py-0.5 rounded">ش: {member.stats.messages.monthly}</span>
+                                  </div>
+                                </div>
+
+                                <div className="bg-[#0a0f1a] rounded-2xl p-6 border border-white/10 flex flex-col gap-2 hover:bg-white/5 transition-all hover:scale-[1.02] shadow-inner">
+                                  <div className="flex items-center gap-3 text-gray-400 text-sm font-bold">
+                                    <Flame className="w-5 h-5 text-orange-400" />
+                                    <span className="tracking-wider">الستريك</span>
+                                  </div>
+                                  <div className="text-4xl font-black text-white tracking-tighter">{member.stats.streak}</div>
+                                  <div className="flex items-center gap-2 text-red-400 text-[11px] font-bold mt-2 border-t border-white/5 pt-2">
+                                    <AlertTriangle className="w-4 h-4" />
+                                    <span>تحذيرات: {member.stats.warns.length}</span>
+                                  </div>
                                 </div>
                               </div>
 
-                              <div className="bg-[#0a0f1a] rounded-xl p-3 border border-white/5 flex flex-col gap-1">
-                                <div className="flex items-center gap-2 text-gray-400 text-xs font-medium">
-                                  <Flame className="w-3.5 h-3.5 text-orange-400" />
-                                  <span>الستريك</span>
-                                </div>
-                                <div className="text-lg font-bold text-white">{member.stats.streak}</div>
-                                <div className="flex items-center gap-2 text-gray-400 text-xs font-medium mt-1">
-                                  <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-                                  <span>تحذيرات: {member.stats.swarns.length}</span>
-                                </div>
+                              {/* Detailed Logs */}
+                              <div className="space-y-3">
+                                {member.stats.warns.length > 0 && (
+                                  <div className="bg-[#0a0f1a] rounded-xl p-4 border border-white/5">
+                                    <h5 className="text-sm font-bold text-yellow-400 mb-2 flex items-center gap-2">
+                                      <Shield className="w-3.5 h-3.5" />
+                                      التحذيرات ({member.stats.warns.length})
+                                    </h5>
+                                    <div className="space-y-1.5">
+                                      {member.stats.warns.slice(0, 2).map((w: any, i: number) => (
+                                        <div key={i} className="text-sm text-gray-300 truncate cursor-pointer hover:text-white bg-white/5 px-2 py-1 rounded" onClick={(e) => { e.stopPropagation(); w.attachments && setPopupImage(w.attachments[0]); }}>#{w.warn_number}: {w.reason}</div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {member.stats.timeouts.length > 0 && (
+                                  <div className="bg-[#0a0f1a] rounded-xl p-4 border border-white/5">
+                                    <h5 className="text-sm font-bold text-orange-400 mb-2 flex items-center gap-2">
+                                      <Clock className="w-3.5 h-3.5" />
+                                      التايم أوت ({member.stats.timeouts.length})
+                                    </h5>
+                                    <div className="space-y-1.5">
+                                      {member.stats.timeouts.slice(0, 2).map((t: any, i: number) => (
+                                        <div key={i} className="text-sm text-gray-300 truncate cursor-pointer hover:text-white bg-white/5 px-2 py-1 rounded" onClick={(e) => { e.stopPropagation(); t.attachments && setPopupImage(t.attachments[0]); }}>#{t.timeout_number}: {t.reason}</div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
-
-                            {/* Detailed Logs */}
-                            <div className="space-y-2">
-                              {member.stats.warns.length > 0 && (
-                                <div className="bg-[#0a0f1a] rounded-xl p-3 border border-white/5">
-                                  <h5 className="text-xs font-bold text-yellow-400 mb-2">التحذيرات ({member.stats.warns.length})</h5>
-                                  <div className="space-y-1">
-                                    {member.stats.warns.slice(0, 2).map((w: any, i: number) => (
-                                      <div key={i} className="text-xs text-gray-300 truncate cursor-pointer hover:text-white" onClick={(e) => { e.stopPropagation(); w.attachments && setPopupImage(w.attachments[0]); }}>#{w.warn_number}: {w.reason}</div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              {member.stats.timeouts.length > 0 && (
-                                <div className="bg-[#0a0f1a] rounded-xl p-3 border border-white/5">
-                                  <h5 className="text-xs font-bold text-orange-400 mb-2">التايم أوت ({member.stats.timeouts.length})</h5>
-                                  <div className="space-y-1">
-                                    {member.stats.timeouts.slice(0, 2).map((t: any, i: number) => (
-                                      <div key={i} className="text-xs text-gray-300 truncate cursor-pointer hover:text-white" onClick={(e) => { e.stopPropagation(); t.attachments && setPopupImage(t.attachments[0]); }}>#{t.timeout_number}: {t.reason}</div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </motion.div>
-                    ))}
+                          )}
+                        </motion.div>
+                      </ScreenshotButton>
                   </div>
                 </div>
               ))}

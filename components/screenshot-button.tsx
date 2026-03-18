@@ -12,10 +12,70 @@ interface ScreenshotModalProps {
   memberData?: any;
 }
 
-export function ScreenshotButton({ elementId, fileName = 'screenshot.png', className = '', memberData }: ScreenshotModalProps) {
+export function ScreenshotButton({ elementId, fileName = 'screenshot.png', className = '', memberData, children }: ScreenshotModalProps & { children?: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const addStampToCanvas = (canvas: HTMLCanvasElement) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const stampRadius = Math.min(canvas.width, canvas.height) * 0.18; // Even larger stamp
+    const stampX = canvas.width - stampRadius - 60;
+    const stampY = canvas.height - stampRadius - 60;
+    
+    ctx.save();
+    ctx.translate(stampX, stampY);
+    ctx.rotate(-0.2); // Slightly more tilt for "stamped" look
+    
+    // Outer thick circle
+    ctx.beginPath();
+    ctx.arc(0, 0, stampRadius, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(59, 130, 246, 0.8)'; // Blue with some transparency
+    ctx.lineWidth = stampRadius * 0.1;
+    ctx.stroke();
+
+    // Inner thin circle
+    ctx.beginPath();
+    ctx.arc(0, 0, stampRadius * 0.82, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)';
+    ctx.lineWidth = stampRadius * 0.03;
+    ctx.stroke();
+    
+    ctx.fillStyle = 'rgba(59, 130, 246, 0.9)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Server Name - Curved text would be better but let's stick to centered for now
+    ctx.font = `black ${stampRadius * 0.25}px Arial`;
+    ctx.fillText('MT Community', 0, -stampRadius * 0.2);
+    
+    // Staff Team
+    ctx.font = `bold ${stampRadius * 0.2}px Arial`;
+    ctx.fillText('Staff Team', 0, stampRadius * 0.2);
+    
+    // Decorative lines
+    ctx.beginPath();
+    ctx.moveTo(-stampRadius * 0.7, 0);
+    ctx.lineTo(stampRadius * 0.7, 0);
+    ctx.strokeStyle = 'rgba(59, 130, 246, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Add some "distress" effect (optional but looks more like a stamp)
+    ctx.globalCompositeOperation = 'destination-out';
+    for (let i = 0; i < 50; i++) {
+      const x = (Math.random() - 0.5) * stampRadius * 2;
+      const y = (Math.random() - 0.5) * stampRadius * 2;
+      const r = Math.random() * 2;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore();
+  };
 
   const drawFallbackCanvas = async (member: any): Promise<string> => {
     const canvas = document.createElement('canvas');
@@ -23,24 +83,24 @@ export function ScreenshotButton({ elementId, fileName = 'screenshot.png', class
     if (!ctx) return '';
 
     // Set canvas size (standard card size)
-    canvas.width = 800;
-    canvas.height = 1000;
+    canvas.width = 1000;
+    canvas.height = 1200;
 
     // Background
-    ctx.fillStyle = '#111827';
+    ctx.fillStyle = '#0a0f1a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Border
     ctx.strokeStyle = member.highestRoleColor || '#3b82f6';
-    ctx.lineWidth = 10;
-    ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
+    ctx.lineWidth = 15;
+    ctx.strokeRect(7.5, 7.5, canvas.width - 15, canvas.height - 15);
 
     // Header Gradient
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 200);
-    gradient.addColorStop(0, `${member.highestRoleColor || '#3b82f6'}33`);
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 400);
+    gradient.addColorStop(0, `${member.highestRoleColor || '#3b82f6'}44`);
     gradient.addColorStop(1, 'transparent');
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, 300);
+    ctx.fillRect(0, 0, canvas.width, 400);
 
     // Helper to load image
     const loadImage = (url: string): Promise<HTMLImageElement> => {
@@ -64,116 +124,95 @@ export function ScreenshotButton({ elementId, fileName = 'screenshot.png', class
           const avatarImg = await loadImage(member.avatar);
           ctx.save();
           ctx.beginPath();
-          ctx.arc(canvas.width - 120, 150, 70, 0, Math.PI * 2);
+          ctx.arc(canvas.width - 150, 180, 100, 0, Math.PI * 2);
           ctx.clip();
-          ctx.drawImage(avatarImg, canvas.width - 190, 80, 140, 140);
+          ctx.drawImage(avatarImg, canvas.width - 250, 80, 200, 200);
           ctx.restore();
           
           // Avatar Border
           ctx.strokeStyle = member.highestRoleColor || '#3b82f6';
-          ctx.lineWidth = 4;
+          ctx.lineWidth = 6;
           ctx.beginPath();
-          ctx.arc(canvas.width - 120, 150, 70, 0, Math.PI * 2);
+          ctx.arc(canvas.width - 150, 180, 100, 0, Math.PI * 2);
           ctx.stroke();
         } catch (e) {
-          // Fallback circle if avatar fails
           ctx.fillStyle = '#1f2937';
           ctx.beginPath();
-          ctx.arc(canvas.width - 120, 150, 70, 0, Math.PI * 2);
+          ctx.arc(canvas.width - 150, 180, 100, 0, Math.PI * 2);
           ctx.fill();
         }
       }
 
       // User Info
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 40px Arial';
-      ctx.fillText(member.displayName || member.username, canvas.width - 220, 140);
+      ctx.font = 'black 60px Arial';
+      ctx.fillText(member.displayName || member.username, canvas.width - 280, 160);
       
       ctx.fillStyle = '#9ca3af';
-      ctx.font = '24px Arial';
-      ctx.fillText(`@${member.username}`, canvas.width - 220, 180);
+      ctx.font = '32px Arial';
+      ctx.fillText(`@${member.username}`, canvas.width - 280, 210);
 
       // Stats Section
       if (member.stats) {
         // Messages Box
-        ctx.fillStyle = '#0a0f1a';
-        ctx.roundRect?.(canvas.width - 380, 300, 330, 150, 20);
+        ctx.fillStyle = '#111827';
+        ctx.roundRect?.(canvas.width - 450, 350, 400, 200, 30);
         ctx.fill();
-        ctx.strokeStyle = '#ffffff1a';
+        ctx.strokeStyle = '#ffffff22';
         ctx.stroke();
 
         ctx.fillStyle = '#3b82f6';
-        ctx.font = 'bold 24px Arial';
-        ctx.fillText('الرسائل', canvas.width - 80, 340);
+        ctx.font = 'bold 36px Arial';
+        ctx.fillText('الرسائل', canvas.width - 100, 410);
         
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 36px Arial';
-        ctx.fillText(member.stats.messages.total.toLocaleString(), canvas.width - 80, 390);
+        ctx.font = 'black 64px Arial';
+        ctx.fillText(member.stats.messages.total.toLocaleString(), canvas.width - 100, 490);
 
         // Streak Box
-        ctx.fillStyle = '#0a0f1a';
-        ctx.roundRect?.(50, 300, 330, 150, 20);
+        ctx.fillStyle = '#111827';
+        ctx.roundRect?.(50, 350, 400, 200, 30);
         ctx.fill();
-        ctx.strokeStyle = '#ffffff1a';
+        ctx.strokeStyle = '#ffffff22';
         ctx.stroke();
 
         ctx.textAlign = 'left';
         ctx.fillStyle = '#f97316';
-        ctx.font = 'bold 24px Arial';
-        ctx.fillText('الستريك', 80, 340);
+        ctx.font = 'bold 36px Arial';
+        ctx.fillText('الستريك', 100, 410);
         
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 36px Arial';
-        ctx.fillText(member.stats.streak.toString(), 80, 390);
+        ctx.font = 'black 64px Arial';
+        ctx.fillText(member.stats.streak.toString(), 100, 490);
 
         // Detailed Stats
         ctx.textAlign = 'right';
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 30px Arial';
-        ctx.fillText('إحصائيات إضافية', canvas.width - 50, 520);
+        ctx.font = 'black 40px Arial';
+        ctx.fillText('إحصائيات إضافية', canvas.width - 50, 650);
 
-        const statsY = 580;
+        const statsY = 730;
         ctx.fillStyle = '#9ca3af';
-        ctx.font = '24px Arial';
+        ctx.font = '30px Arial';
         ctx.fillText(`يومي: ${member.stats.messages.daily}`, canvas.width - 50, statsY);
-        ctx.fillText(`أسبوعي: ${member.stats.messages.weekly}`, canvas.width - 50, statsY + 40);
-        ctx.fillText(`شهري: ${member.stats.messages.monthly}`, canvas.width - 50, statsY + 80);
+        ctx.fillText(`أسبوعي: ${member.stats.messages.weekly}`, canvas.width - 50, statsY + 50);
+        ctx.fillText(`شهري: ${member.stats.messages.monthly}`, canvas.width - 50, statsY + 100);
         
         ctx.textAlign = 'left';
         ctx.fillStyle = '#ef4444';
         ctx.fillText(`التحذيرات: ${member.stats.warns.length}`, 50, statsY);
         ctx.fillStyle = '#f97316';
-        ctx.fillText(`التايم أوت: ${member.stats.timeouts.length}`, 50, statsY + 40);
+        ctx.fillText(`التايم أوت: ${member.stats.timeouts.length}`, 50, statsY + 50);
       }
 
       // Watermark Stamp
-      ctx.textAlign = 'center';
-      const stampRadius = 80;
-      const stampX = canvas.width - stampRadius - 50;
-      const stampY = canvas.height - stampRadius - 50;
-      
-      ctx.save();
-      ctx.translate(stampX, stampY);
-      ctx.rotate(-0.2);
-      
-      ctx.beginPath();
-      ctx.arc(0, 0, stampRadius, 0, 2 * Math.PI);
-      ctx.strokeStyle = '#3b82f6';
-      ctx.lineWidth = 6;
-      ctx.stroke();
-      
-      ctx.fillStyle = '#3b82f6';
-      ctx.font = 'bold 20px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('MT Community', 0, -15);
-      ctx.fillText('Staff Team', 0, 20);
-      ctx.restore();
+      addStampToCanvas(canvas);
 
       // Footer
-      ctx.fillStyle = '#ffffff33';
-      ctx.font = '16px Arial';
+      ctx.fillStyle = '#ffffff44';
+      ctx.font = '20px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(`Generated on ${new Date().toLocaleString()}`, canvas.width / 2, canvas.height - 30);
+      ctx.fillText(`Generated on ${new Date().toLocaleString()}`, canvas.width / 2, canvas.height - 40);
 
       return canvas.toDataURL('image/png');
     } catch (err) {
@@ -182,8 +221,12 @@ export function ScreenshotButton({ elementId, fileName = 'screenshot.png', class
     }
   };
 
-  const handleCapture = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleCapture = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    
     const element = document.getElementById(elementId);
     if (!element) return;
 
@@ -210,6 +253,9 @@ export function ScreenshotButton({ elementId, fileName = 'screenshot.png', class
           }
         }
       });
+
+      // Add stamp to the generated canvas
+      addStampToCanvas(canvas);
 
       const dataUrl = canvas.toDataURL('image/png', 0.8); // Slightly lower quality for faster generation
       setImage(dataUrl);
@@ -244,14 +290,18 @@ export function ScreenshotButton({ elementId, fileName = 'screenshot.png', class
 
   return (
     <>
-      <button
-        onClick={handleCapture}
-        disabled={loading}
-        className={`p-2 bg-white/5 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors ${className}`}
-        title="التقاط صورة"
+      <div 
+        onDoubleClick={handleCapture} 
+        className={`cursor-pointer ${className} relative group/screenshot`}
+        title="انقر مرتين لالتقاط صورة للبطاقة"
       >
-        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
-      </button>
+        {children}
+        {loading && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] rounded-inherit">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          </div>
+        )}
+      </div>
 
       <AnimatePresence>
         {isOpen && image && (
