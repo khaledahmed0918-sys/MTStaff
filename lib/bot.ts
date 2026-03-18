@@ -183,46 +183,49 @@ async function fetchStaffMembersBackground(guildId: string) {
     }
 
     // The order of roles here determines the order of sections
-    const roleIds = [
-      '1465838966904197294', // Managers
-      '1383128056708993219',
-      '1404695448081662014',
-      '1450422143274713191', // Affairs Team
-      '1402719732334985247', // Tickets Helper
-      '1383158445846560870', // Admin Of The Week
-      '1383158823744966736', // Staff Roles...
-      '1383161407742148761',
-      '1384525033111552091',
-      '1383170653636530318',
-      '1383171427066450110',
-      '1383172034892398612',
-      '1383377717432422401',
-      '1383172935753269368'
+    const staffGroups = [
+      { name: 'Staff Managers', roleIds: ['1465838966904197294', '1383128056708993219', '1404695448081662014'] },
+      { name: 'Affairs Team', roleIds: ['1450422143274713191'] },
+      { name: 'Tickets Helper', roleIds: ['1402719732334985247'] },
+      { name: 'Admin Of The Week', roleIds: ['1383158445846560870'] },
+      { 
+        name: 'Staff Team', 
+        roleIds: [
+          '1383158823744966736', '1383161407742148761', '1384525033111552091',
+          '1383170653636530318', '1383171427066450110', '1383172034892398612',
+          '1383377717432422401', '1383172935753269368'
+        ] 
+      }
     ];
 
     const result = [];
     const processedUserIds = new Set();
 
-    for (const roleId of roleIds) {
-      const role = guild.roles.cache.get(roleId);
-      if (!role) continue;
-
+    for (const group of staffGroups) {
       const categoryMembers = [];
-      const membersWithRole = allMembers.filter(m => m.roles.includes(roleId));
       
-      for (const member of membersWithRole) {
+      // Find all members that have at least one role from this group
+      const membersInGroup = allMembers.filter(m => m.roles.some((rId: string) => group.roleIds.includes(rId)));
+      
+      for (const member of membersInGroup) {
         if (!processedUserIds.has(member.user.id)) {
           processedUserIds.add(member.user.id);
           const user = member.user;
           
-          // Find highest role color
+          // Find highest role from the group for this member
           let highestPosition = -1;
-          let highestColor = '#ffffff';
+          let highestRoleInfo = { color: '#ffffff', icon: null };
+          
           for (const rId of member.roles) {
-            const r = guild.roles.cache.get(rId);
-            if (r && r.position > highestPosition) {
-              highestPosition = r.position;
-              highestColor = r.hexColor !== '#000000' ? r.hexColor : '#ffffff';
+            if (group.roleIds.includes(rId)) {
+                const r = guild.roles.cache.get(rId);
+                if (r && r.position > highestPosition) {
+                    highestPosition = r.position;
+                    highestRoleInfo = {
+                        color: r.hexColor !== '#000000' ? r.hexColor : '#ffffff',
+                        icon: r.iconURL()
+                    };
+                }
             }
           }
 
@@ -232,21 +235,30 @@ async function fetchStaffMembersBackground(guildId: string) {
             displayName: user.global_name || user.username,
             avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256` : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator || '0') % 5}.png`,
             avatarDecoration: user.avatar_decoration_data ? `https://cdn.discordapp.com/avatar-decoration-presets/${user.avatar_decoration_data.asset}.png?size=256` : null,
-            highestRoleColor: highestColor,
+            highestRoleColor: highestRoleInfo.color,
           });
         }
       }
 
       if (categoryMembers.length > 0) {
+        // Find highest role for the group header
+        let highestGroupPosition = -1;
+        let highestGroupRoleInfo = { color: '#ffffff', icon: null };
+        
+        for (const rId of group.roleIds) {
+            const r = guild.roles.cache.get(rId);
+            if (r && r.position > highestGroupPosition) {
+                highestGroupPosition = r.position;
+                highestGroupRoleInfo = {
+                    color: r.hexColor !== '#000000' ? r.hexColor : '#ffffff',
+                    icon: r.iconURL()
+                };
+            }
+        }
+
         result.push({
-          id: role.id,
-          name: role.name,
-          roleInfo: {
-            id: role.id,
-            name: role.name,
-            color: role.hexColor !== '#000000' ? role.hexColor : '#ffffff',
-            icon: role.iconURL()
-          },
+          name: group.name,
+          roleInfo: highestGroupRoleInfo,
           members: categoryMembers
         });
       }
@@ -317,12 +329,27 @@ export async function getStaffWithStats(guildId: string) {
   }
 
   const swarnsMap = new Map();
+  const warnsMap = new Map();
+  const timeoutsMap = new Map();
+  const bansMap = new Map();
+
   await Promise.allSettled(userIds.map(async (id) => {
     try {
-      const res = await query(`SELECT COUNT(*) FROM "swarns_${id}"`);
-      swarnsMap.set(id, parseInt(res.rows[0].count, 10));
+      const [swarnsRes, warnsRes, timeoutsRes] = await Promise.all([
+        query(`SELECT * FROM "swarns_${id}" ORDER BY date DESC`),
+        query(`SELECT * FROM "warns_${id}" ORDER BY date_warn DESC`),
+        query(`SELECT * FROM "timeouts_${id}" ORDER BY date DESC`)
+      ]);
+      
+      swarnsMap.set(id, swarnsRes.rows);
+      warnsMap.set(id, warnsRes.rows);
+      timeoutsMap.set(id, timeoutsRes.rows);
+      bansMap.set(id, []); // Bans table not found
     } catch (e) {
-      swarnsMap.set(id, 0);
+      swarnsMap.set(id, []);
+      warnsMap.set(id, []);
+      timeoutsMap.set(id, []);
+      bansMap.set(id, []);
     }
   }));
 
@@ -331,7 +358,10 @@ export async function getStaffWithStats(guildId: string) {
       (member as any).stats = {
         streak: streaksMap.get(member.id) || 0,
         messages: messagesMap.get(member.id) || { total: 0, daily: 0, weekly: 0, monthly: 0 },
-        swarns: swarnsMap.get(member.id) || 0
+        swarns: swarnsMap.get(member.id) || [],
+        warns: warnsMap.get(member.id) || [],
+        timeouts: timeoutsMap.get(member.id) || [],
+        bans: bansMap.get(member.id) || []
       };
     }
   }

@@ -2,34 +2,29 @@
 
 import { useState, useEffect } from 'react';
 import CachedImage from '@/components/cached-image';
-import { Shield, MessageSquare, Flame, AlertTriangle, Loader2, ChevronDown, ChevronUp, Camera } from 'lucide-react';
+import { Shield, MessageSquare, Flame, AlertTriangle, Loader2, ChevronDown, ChevronUp, Camera, Ban, Clock, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ScreenshotButton } from '@/components/screenshot-button';
+import { ImagePopup } from '@/components/image-popup';
 
 export function StaffSection({ initialCategories }: { initialCategories: any[] }) {
   const [categories, setCategories] = useState(initialCategories);
   const [loading, setLoading] = useState(initialCategories.length === 0);
+  const [popupImage, setPopupImage] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    if (initialCategories.length === 0) {
-      async function fetchStaff() {
-        try {
-          const res = await fetch('/api/staff');
-          if (res.ok) {
-            const json = await res.json();
-            setCategories(json.staff || []);
-          }
-        } catch (err) {
-          // Silent error
-        } finally {
-          setLoading(false);
-        }
-      }
-      fetchStaff();
+    if (document.body.style.overflow === 'hidden') {
+        document.body.style.overflow = 'unset';
     }
-  }, [initialCategories]);
+    if (popupImage) {
+        document.body.style.overflow = 'hidden';
+    }
+    return () => {
+        document.body.style.overflow = 'unset';
+    };
+  }, [popupImage]);
 
   if (loading) {
     return (
@@ -128,40 +123,56 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                   </div>
 
                   {member.stats && (
-                    <div className="mt-5 grid grid-cols-2 gap-3">
-                      <div className="bg-[#0a0f1a] rounded-xl p-3 border border-white/5 flex flex-col gap-1">
-                        <div className="flex items-center gap-2 text-gray-400 text-xs font-medium">
-                          <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
-                          <span>الرسائل</span>
+                    <div className="mt-5 space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-[#0a0f1a] rounded-xl p-3 border border-white/5 flex flex-col gap-1">
+                          <div className="flex items-center gap-2 text-gray-400 text-xs font-medium">
+                            <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
+                            <span>الرسائل</span>
+                          </div>
+                          <div className="text-lg font-bold text-white">{member.stats.messages.total.toLocaleString()}</div>
+                          <div className="flex justify-between text-[10px] text-gray-500 mt-1">
+                            <span>ي: {member.stats.messages.daily}</span>
+                            <span>أ: {member.stats.messages.weekly}</span>
+                            <span>ش: {member.stats.messages.monthly}</span>
+                          </div>
                         </div>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-lg font-bold text-white">{member.stats.messages.total.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between text-[10px] text-gray-500 mt-1">
-                          <span>ي: {member.stats.messages.daily}</span>
-                          <span>أ: {member.stats.messages.weekly}</span>
-                          <span>ش: {member.stats.messages.monthly}</span>
-                        </div>
-                      </div>
 
-                      <div className="flex flex-col gap-3">
-                        <div className="bg-[#0a0f1a] rounded-xl p-2.5 border border-white/5 flex items-center justify-between">
+                        <div className="bg-[#0a0f1a] rounded-xl p-3 border border-white/5 flex flex-col gap-1">
                           <div className="flex items-center gap-2 text-gray-400 text-xs font-medium">
                             <Flame className="w-3.5 h-3.5 text-orange-400" />
                             <span>الستريك</span>
                           </div>
-                          <span className="text-sm font-bold text-white">{member.stats.streak}</span>
-                        </div>
-                        
-                        <div className="bg-[#0a0f1a] rounded-xl p-2.5 border border-white/5 flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-gray-400 text-xs font-medium">
+                          <div className="text-lg font-bold text-white">{member.stats.streak}</div>
+                          <div className="flex items-center gap-2 text-gray-400 text-xs font-medium mt-1">
                             <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-                            <span>تحذيرات إدارية</span>
+                            <span>تحذيرات: {member.stats.swarns.length}</span>
                           </div>
-                          <span className={`text-sm font-bold ${member.stats.swarns > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                            {member.stats.swarns}
-                          </span>
                         </div>
+                      </div>
+
+                      {/* Detailed Logs */}
+                      <div className="space-y-2">
+                        {member.stats.warns.length > 0 && (
+                          <div className="bg-[#0a0f1a] rounded-xl p-3 border border-white/5">
+                            <h5 className="text-xs font-bold text-yellow-400 mb-2">التحذيرات ({member.stats.warns.length})</h5>
+                            <div className="space-y-1">
+                              {member.stats.warns.slice(0, 2).map((w: any, i: number) => (
+                                <div key={i} className="text-xs text-gray-300 truncate cursor-pointer hover:text-white" onClick={() => w.attachments && setPopupImage(w.attachments[0])}>#{w.warn_number}: {w.reason}</div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {member.stats.timeouts.length > 0 && (
+                          <div className="bg-[#0a0f1a] rounded-xl p-3 border border-white/5">
+                            <h5 className="text-xs font-bold text-orange-400 mb-2">التايم أوت ({member.stats.timeouts.length})</h5>
+                            <div className="space-y-1">
+                              {member.stats.timeouts.slice(0, 2).map((t: any, i: number) => (
+                                <div key={i} className="text-xs text-gray-300 truncate cursor-pointer hover:text-white" onClick={() => t.attachments && setPopupImage(t.attachments[0])}>#{t.timeout_number}: {t.reason}</div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -171,6 +182,7 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
           </div>
         ))}
       </div>
+      {popupImage && <ImagePopup src={popupImage} onClose={() => setPopupImage(null)} />}
     </section>
   );
 }
