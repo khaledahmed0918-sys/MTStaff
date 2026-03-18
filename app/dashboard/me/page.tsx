@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import CachedImage from '@/components/cached-image';
-import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare, CheckCircle2, Camera } from 'lucide-react';
 import { formatVoiceTime, formatDateEn, parseDiscordEmoji } from '@/lib/utils';
+import { ScreenshotButton } from '@/components/screenshot-button';
 
 const formatDateTime = (dateString: any) => {
   if (!dateString) return 'غير محدد';
@@ -83,7 +84,10 @@ export default function MyInfoPage() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Profile Card */}
-      <div className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative">
+      <div id="my-profile-card" className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative group">
+        <div className="absolute top-4 left-4 z-50 opacity-0 group-hover:opacity-100 transition-opacity">
+          <ScreenshotButton elementId="my-profile-card" fileName={`${discord.username}-profile.png`} />
+        </div>
         {/* Banner */}
         <div className="aspect-[5/2] w-full relative bg-[#0a0f1a] overflow-hidden">
           {discord.banner ? (

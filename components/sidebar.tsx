@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, User, Search, LogOut, X, Loader2 } from 'lucide-react';
+import { Home, User, Search, LogOut, X, Loader2, Users } from 'lucide-react';
 import Image from 'next/image';
 import { useNav } from './nav-context';
 import { signOut } from 'next-auth/react';
@@ -44,6 +44,7 @@ export function Sidebar() {
   const { isOpen, setIsOpen } = useNav();
   const links = [
     { href: '/dashboard', label: 'الرئيسية', icon: Home },
+    { href: '/dashboard/staff', label: 'الرتب الإدارية', icon: Users },
     { href: '/dashboard/search', label: 'البحث', icon: Search },
     { href: '/dashboard/me', label: 'الملف الشخصي', icon: User },
   ];

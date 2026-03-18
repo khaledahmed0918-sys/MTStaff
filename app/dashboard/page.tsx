@@ -1,7 +1,7 @@
-import { getServerInfo, getStaffMembers } from '@/lib/bot';
+import { getServerInfo } from '@/lib/bot';
+import { query } from '@/lib/db';
 import CachedImage from '@/components/cached-image';
 import { Users, UserCheck, Shield, MessageSquare, Clock, Flame, Trophy, Crown, Medal, Star } from 'lucide-react';
-import { StaffSection } from '@/components/staff-section';
 import { TopUsersSection } from '@/components/top-users-section';
 
 export const dynamic = 'force-dynamic';
@@ -9,11 +9,18 @@ export const dynamic = 'force-dynamic';
 export default async function DashboardHome() {
   const guildId = process.env.DISCORD_GUILD_ID;
   let serverInfo = null;
-  let staffCategories: any[] = [];
+  let totalMessages = 0;
 
   if (guildId) {
     serverInfo = await getServerInfo(guildId);
-    staffCategories = await getStaffMembers(guildId);
+    try {
+      const res = await query(`SELECT SUM(all) as total FROM messages`);
+      if (res.rows[0] && res.rows[0].total) {
+        totalMessages = parseInt(res.rows[0].total, 10);
+      }
+    } catch (e) {
+      console.error('Error fetching total messages:', e);
+    }
   }
 
   const displayInfo = serverInfo || {
@@ -101,22 +108,18 @@ export default async function DashboardHome() {
 
           <div className="bg-[#111827]/60 backdrop-blur-md border border-white/5 p-6 rounded-2xl shadow-lg hover:shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:border-yellow-500/30 transition-all duration-300 group sm:col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-gray-400 font-medium text-lg">أكثر شات تفاعلاً</h3>
+              <h3 className="text-gray-400 font-medium text-lg">إجمالي الرسائل</h3>
               <div className="p-3 bg-yellow-500/10 rounded-xl group-hover:bg-yellow-500/20 transition-colors">
                 <MessageSquare className="w-6 h-6 text-yellow-400" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-white truncate">💬 الشات العام</p>
-            <p className="text-sm text-gray-400 mt-2">أكثر من 10,000 رسالة اليوم</p>
+            <p className="text-4xl font-bold text-white truncate">{totalMessages.toLocaleString()}</p>
           </div>
         </div>
       </section>
 
       {/* Top Users Section */}
       <TopUsersSection guildId={guildId || ''} />
-
-      {/* Staff Team Section */}
-      <StaffSection initialCategories={staffCategories} />
     </div>
   );
 }

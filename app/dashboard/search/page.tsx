@@ -2,10 +2,11 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo } from 'lucide-react';
+import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo, Camera } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
 import { formatDateEn, formatVoiceTime, parseDiscordEmoji } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
+import { ScreenshotButton } from '@/components/screenshot-button';
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -118,7 +119,10 @@ function SearchContent() {
         )}
 
         {results.map((user) => (
-          <div key={user.id} className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 relative">
+          <div key={user.id} id={`search-card-${user.id}`} className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 relative group">
+            <div className="absolute top-4 left-4 z-50 opacity-0 group-hover:opacity-100 transition-opacity">
+              <ScreenshotButton elementId={`search-card-${user.id}`} fileName={`${user.username}-profile.png`} />
+            </div>
             {/* Banner */}
             {user.banner && (
               <div className="aspect-[5/2] w-full relative overflow-hidden">

@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import CachedImage from '@/components/cached-image';
-import { Trophy, Flame, Star, Crown, Loader2 } from 'lucide-react';
+import { Trophy, Flame, Star, Crown, Loader2, Camera } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
+import { ScreenshotButton } from '@/components/screenshot-button';
 
 export function TopUsersSection({ guildId }: { guildId: string }) {
   const [data, setData] = useState<any>(null);
@@ -74,6 +75,7 @@ export function TopUsersSection({ guildId }: { guildId: string }) {
           return (
             <motion.div 
               key={sec.key}
+              id={`top-user-card-${member.id}`}
               whileHover={{ y: -5 }}
               onClick={() => router.push(`/dashboard/search?q=${member.id}`)}
               className={`relative overflow-hidden rounded-3xl border ${sec.border} bg-[#111827]/80 backdrop-blur-xl p-6 shadow-xl cursor-pointer group`}
@@ -81,6 +83,10 @@ export function TopUsersSection({ guildId }: { guildId: string }) {
               <div className={`absolute top-0 left-0 w-full h-1 ${sec.bg.replace('/10', '')}`} />
               <div className="absolute -right-10 -top-10 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Icon className="w-40 h-40" />
+              </div>
+
+              <div className="absolute top-4 left-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                <ScreenshotButton elementId={`top-user-card-${member.id}`} fileName={`${member.username}-top-user.png`} />
               </div>
 
               <div className="relative z-10 flex flex-col items-center text-center">

@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import CachedImage from '@/components/cached-image';
-import { Shield, MessageSquare, Flame, AlertTriangle, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Shield, MessageSquare, Flame, AlertTriangle, Loader2, ChevronDown, ChevronUp, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
+import { ScreenshotButton } from '@/components/screenshot-button';
 
 export function StaffSection({ initialCategories }: { initialCategories: any[] }) {
   const [categories, setCategories] = useState(initialCategories);
@@ -64,7 +65,7 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
               <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-white/10" />
               <div className="flex items-center gap-3 px-4 py-2 rounded-full border border-white/10 bg-[#111827]/80 backdrop-blur-md shadow-lg" style={{ borderColor: `${category.roleInfo?.color}40` }}>
                 {category.roleInfo?.icon && (
-                  <CachedImage src={category.roleInfo.icon} alt={category.name} width={24} height={24} className="rounded-full" />
+                  <CachedImage src={category.roleInfo.icon} alt={category.name} width={24} height={24} />
                 )}
                 <h3 className="text-lg font-bold" style={{ color: category.roleInfo?.color || '#fff' }}>
                   {category.name}
@@ -80,6 +81,7 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
               {category.members.map((member: any) => (
                 <motion.div
                   key={member.id}
+                  id={`staff-card-${member.id}`}
                   whileHover={{ y: -4, scale: 1.01 }}
                   onClick={() => router.push(`/dashboard/search?q=${member.id}`)}
                   className="bg-[#111827]/60 backdrop-blur-xl border border-white/5 rounded-2xl p-5 shadow-lg hover:shadow-[0_0_25px_rgba(59,130,246,0.15)] transition-all duration-300 cursor-pointer group relative overflow-hidden"
@@ -87,6 +89,10 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                 >
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full opacity-50 pointer-events-none" style={{ backgroundImage: `linear-gradient(to bottom right, ${member.highestRoleColor}20, transparent)` }} />
                   
+                  <div className="absolute top-4 left-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ScreenshotButton elementId={`staff-card-${member.id}`} fileName={`${member.username}-staff-card.png`} />
+                  </div>
+
                   <div className="flex items-start gap-4 relative z-10">
                     <div className="relative w-16 h-16 shrink-0">
                       <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#111827] shadow-md" style={{ borderColor: member.highestRoleColor }}>
