@@ -46,3 +46,31 @@ export const formatDateEn = (dateString: any) => {
   if (isNaN(date.getTime())) return 'Invalid Date';
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 };
+
+export function generateGradientColors(hex: string) {
+  if (!/^#[0-9A-F]{6}$/i.test(hex)) {
+    return { primaryColor: hex, secondaryColor: hex, tertiaryColor: hex };
+  }
+  
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+
+  const toHex = (c: number) => c.toString(16).padStart(2, '0');
+  
+  // Create a slightly lighter color for secondary
+  const r2 = Math.min(255, r + 40);
+  const g2 = Math.min(255, g + 40);
+  const b2 = Math.min(255, b + 40);
+  
+  // Create a slightly darker color for tertiary
+  const r3 = Math.max(0, r - 20);
+  const g3 = Math.max(0, g - 20);
+  const b3 = Math.max(0, b - 20);
+
+  return {
+    primaryColor: hex,
+    secondaryColor: `#${toHex(r2)}${toHex(g2)}${toHex(b2)}`,
+    tertiaryColor: `#${toHex(r3)}${toHex(g3)}${toHex(b3)}`
+  };
+}

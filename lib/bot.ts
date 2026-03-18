@@ -151,14 +151,36 @@ export async function getUserInfo(guildId: string, userId: string) {
   }
 }
 
-export async function getStaffMembers(guildId: string) {
+let cachedStaffMembers: any = null;
+let lastStaffFetch = 0;
+let isFetchingStaff = false;
+
+async function fetchStaffMembersBackground(guildId: string) {
+  if (isFetchingStaff) return;
+  isFetchingStaff = true;
   try {
     if (!client.isReady()) {
       await new Promise((resolve) => client.once('ready', resolve));
     }
 
     const guild = await client.guilds.fetch(guildId);
-    await guild.members.fetch(); // Fetch all members to cache them
+    
+    // Fetch all members using REST to avoid gateway rate limits
+    let allMembers: any[] = [];
+    let lastId = '0';
+    while (true) {
+      const res = await fetch(`https://discord.com/api/v10/guilds/${guildId}/members?limit=1000&after=${lastId}`, {
+        headers: {
+          Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+        },
+      });
+      if (!res.ok) break;
+      const members = await res.json();
+      if (members.length === 0) break;
+      allMembers = allMembers.concat(members);
+      lastId = members[members.length - 1].user.id;
+      if (members.length < 1000) break;
+    }
 
     // The order of roles here determines the order of sections
     const roleIds = [
@@ -186,19 +208,31 @@ export async function getStaffMembers(guildId: string) {
       if (!role) continue;
 
       const categoryMembers = [];
-      const membersWithRole = role.members;
+      const membersWithRole = allMembers.filter(m => m.roles.includes(roleId));
       
-      for (const [memberId, member] of membersWithRole) {
-        if (!processedUserIds.has(memberId)) {
-          processedUserIds.add(memberId);
+      for (const member of membersWithRole) {
+        if (!processedUserIds.has(member.user.id)) {
+          processedUserIds.add(member.user.id);
           const user = member.user;
+          
+          // Find highest role color
+          let highestPosition = -1;
+          let highestColor = '#ffffff';
+          for (const rId of member.roles) {
+            const r = guild.roles.cache.get(rId);
+            if (r && r.position > highestPosition) {
+              highestPosition = r.position;
+              highestColor = r.hexColor !== '#000000' ? r.hexColor : '#ffffff';
+            }
+          }
+
           categoryMembers.push({
             id: user.id,
             username: user.username,
-            displayName: user.globalName || user.displayName || user.username,
-            avatar: user.displayAvatarURL({ forceStatic: false, size: 256 }),
-            avatarDecoration: user.avatarDecorationURL({ size: 256 }),
-            highestRoleColor: member.roles.highest.hexColor !== '#000000' ? member.roles.highest.hexColor : '#ffffff',
+            displayName: user.global_name || user.username,
+            avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256` : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator || '0') % 5}.png`,
+            avatarDecoration: user.avatar_decoration_data ? `https://cdn.discordapp.com/avatar-decoration-presets/${user.avatar_decoration_data.asset}.png?size=256` : null,
+            highestRoleColor: highestColor,
           });
         }
       }
@@ -218,11 +252,37 @@ export async function getStaffMembers(guildId: string) {
       }
     }
 
-    return result;
+    cachedStaffMembers = result;
+    lastStaffFetch = Date.now();
   } catch (err) {
-    console.error('Error fetching staff members:', err);
-    return [];
+    console.error('Error fetching staff members in background:', err);
+  } finally {
+    isFetchingStaff = false;
   }
+}
+
+export async function getStaffMembers(guildId: string) {
+  if (cachedStaffMembers && Date.now() - lastStaffFetch < 5 * 60 * 1000) {
+    return cachedStaffMembers;
+  }
+
+  // If cache is empty or stale, trigger background fetch
+  fetchStaffMembersBackground(guildId);
+
+  // If we have stale cache, return it while fetching
+  if (cachedStaffMembers) {
+    return cachedStaffMembers;
+  }
+
+  // If no cache at all, wait a bit to see if it finishes quickly (e.g. first 1000 members)
+  // But we don't want to block for 19 seconds. We'll wait up to 5 seconds.
+  let retries = 0;
+  while (!cachedStaffMembers && retries < 10) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    retries++;
+  }
+
+  return cachedStaffMembers || [];
 }
 
 export async function getStaffWithStats(guildId: string) {

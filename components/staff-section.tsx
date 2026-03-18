@@ -89,7 +89,7 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                 >
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full opacity-50 pointer-events-none" style={{ backgroundImage: `linear-gradient(to bottom right, ${member.highestRoleColor}20, transparent)` }} />
                   
-                  <div className="absolute top-4 left-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-4 left-4 z-20">
                     <ScreenshotButton elementId={`staff-card-${member.id}`} fileName={`${member.username}-staff-card.png`} />
                   </div>
 

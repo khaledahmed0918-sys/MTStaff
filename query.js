@@ -5,8 +5,8 @@ const dbUrl = env.split('\n').find(line => line.startsWith('DATABASE_URL=')).spl
 async function run() {
   const client = new Client({ connectionString: dbUrl });
   await client.connect();
-  const res = await client.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
-  console.log('Tables:', res.rows.map(r => r.table_name));
+  const res = await client.query("SELECT COUNT(DISTINCT user_id) FROM messages");
+  console.log('Users:', res.rows[0].count);
   await client.end();
 }
 run();

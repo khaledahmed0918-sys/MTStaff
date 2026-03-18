@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import CachedImage from '@/components/cached-image';
 import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare, CheckCircle2, Camera } from 'lucide-react';
-import { formatVoiceTime, formatDateEn, parseDiscordEmoji } from '@/lib/utils';
+import { formatVoiceTime, formatDateEn, parseDiscordEmoji, generateGradientColors } from '@/lib/utils';
 import { ScreenshotButton } from '@/components/screenshot-button';
 
 const formatDateTime = (dateString: any) => {
@@ -82,12 +82,13 @@ export default function MyInfoPage() {
   const { warns = [], swarns = [], timeouts = [], bans = [], streaks, tasks = [] } = db;
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div id="my-profile-card" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#0a0f1a] p-4 sm:p-8 rounded-3xl relative">
+      <div className="absolute top-6 left-6 z-50">
+        <ScreenshotButton elementId="my-profile-card" fileName={`${discord.username}-profile.png`} />
+      </div>
+
       {/* Profile Card */}
-      <div id="my-profile-card" className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative group">
-        <div className="absolute top-4 left-4 z-50 opacity-0 group-hover:opacity-100 transition-opacity">
-          <ScreenshotButton elementId="my-profile-card" fileName={`${discord.username}-profile.png`} />
-        </div>
+      <div className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative group">
         {/* Banner */}
         <div className="aspect-[5/2] w-full relative bg-[#0a0f1a] overflow-hidden">
           {discord.banner ? (
@@ -146,12 +147,23 @@ export default function MyInfoPage() {
 
               {discord.roles && discord.roles.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {discord.roles.map((role: any) => (
-                    <div key={role.id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/10" style={{ backgroundColor: `${role.color}15`, color: role.color !== '#000000' ? role.color : '#ffffff' }}>
-                      {role.icon && <CachedImage src={role.icon} alt={role.name} width={16} height={16} />}
-                      {role.name}
-                    </div>
-                  ))}
+                  {discord.roles.map((role: any) => {
+                    const roleColor = role.color !== '#000000' ? role.color : '#ffffff';
+                    const { primaryColor, secondaryColor, tertiaryColor } = generateGradientColors(roleColor);
+                    return (
+                      <div 
+                        key={role.id} 
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/10" 
+                        style={{ 
+                          backgroundImage: `linear-gradient(to right, ${primaryColor}20, ${secondaryColor}20, ${tertiaryColor}20)`, 
+                          color: primaryColor 
+                        }}
+                      >
+                        {role.icon && <CachedImage src={role.icon} alt={role.name} width={16} height={16} />}
+                        {role.name}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>

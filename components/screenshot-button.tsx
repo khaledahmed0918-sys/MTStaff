@@ -35,6 +35,23 @@ export function ScreenshotButton({ elementId, fileName = 'screenshot.png', class
         useCORS: true,
         allowTaint: true,
         logging: false,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.getElementById(elementId);
+          if (clonedElement) {
+            // Remove height restrictions and overflow for full capture
+            const scrollableElements = clonedElement.querySelectorAll('.overflow-y-auto, .overflow-auto, .h-80, .max-h-\\[400px\\]');
+            scrollableElements.forEach((el) => {
+              (el as HTMLElement).style.overflow = 'visible';
+              (el as HTMLElement).style.maxHeight = 'none';
+              (el as HTMLElement).style.height = 'auto';
+            });
+            // Also fix any flex-1 that might restrict height
+            const flexElements = clonedElement.querySelectorAll('.flex-1');
+            flexElements.forEach((el) => {
+              (el as HTMLElement).style.flex = 'none';
+            });
+          }
+        }
       });
 
       element.removeChild(watermark);

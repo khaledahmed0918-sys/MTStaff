@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo, Camera } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
-import { formatDateEn, formatVoiceTime, parseDiscordEmoji } from '@/lib/utils';
+import { formatDateEn, formatVoiceTime, parseDiscordEmoji, generateGradientColors } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
 import { ScreenshotButton } from '@/components/screenshot-button';
 
@@ -120,7 +120,7 @@ function SearchContent() {
 
         {results.map((user) => (
           <div key={user.id} id={`search-card-${user.id}`} className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 relative group">
-            <div className="absolute top-4 left-4 z-50 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute top-4 left-4 z-50">
               <ScreenshotButton elementId={`search-card-${user.id}`} fileName={`${user.username}-profile.png`} />
             </div>
             {/* Banner */}
@@ -165,19 +165,23 @@ function SearchContent() {
               
               {user.roles && user.roles.length > 0 && (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {user.roles.map((role: any) => (
-                    <div 
-                      key={role.id} 
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/10"
-                      style={{ 
-                        backgroundColor: role.color !== '#000000' ? `${role.color}15` : 'rgba(255,255,255,0.05)', 
-                        color: role.color !== '#000000' ? role.color : '#ffffff' 
-                      }}
-                    >
-                      {role.icon && <CachedImage src={role.icon} alt={role.name} width={16} height={16} />}
-                      {role.name}
-                    </div>
-                  ))}
+                  {user.roles.map((role: any) => {
+                    const roleColor = role.color !== '#000000' ? role.color : '#ffffff';
+                    const { primaryColor, secondaryColor, tertiaryColor } = generateGradientColors(roleColor);
+                    return (
+                      <div 
+                        key={role.id} 
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/10"
+                        style={{ 
+                          backgroundImage: `linear-gradient(to right, ${primaryColor}20, ${secondaryColor}20, ${tertiaryColor}20)`, 
+                          color: primaryColor 
+                        }}
+                      >
+                        {role.icon && <CachedImage src={role.icon} alt={role.name} width={16} height={16} />}
+                        {role.name}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </motion.div>
@@ -201,21 +205,25 @@ function SearchContent() {
                   <div className="mb-6">
                     <h4 className="text-gray-400 text-sm mb-2">الرتب</h4>
                     <div className="flex flex-wrap gap-2">
-                      {user.roles.map((role: any) => (
-                        <div 
-                          key={role.id} 
-                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/10"
-                          style={{ 
-                            backgroundColor: role.color !== '#000000' ? `${role.color}20` : 'rgba(255,255,255,0.05)', 
-                            color: role.color !== '#000000' ? role.color : '#ffffff' 
-                          }}
-                        >
-                          {role.icon && (
-                            <CachedImage src={role.icon} alt={role.name} width={16} height={16} className="rounded-sm" />
-                          )}
-                          <span>{role.name}</span>
-                        </div>
-                      ))}
+                      {user.roles.map((role: any) => {
+                        const roleColor = role.color !== '#000000' ? role.color : '#ffffff';
+                        const { primaryColor, secondaryColor, tertiaryColor } = generateGradientColors(roleColor);
+                        return (
+                          <div 
+                            key={role.id} 
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/10"
+                            style={{ 
+                              backgroundImage: `linear-gradient(to right, ${primaryColor}20, ${secondaryColor}20, ${tertiaryColor}20)`, 
+                              color: primaryColor 
+                            }}
+                          >
+                            {role.icon && (
+                              <CachedImage src={role.icon} alt={role.name} width={16} height={16} className="rounded-sm" />
+                            )}
+                            <span>{role.name}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
