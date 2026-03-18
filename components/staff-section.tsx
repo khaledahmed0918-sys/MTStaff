@@ -99,14 +99,15 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {role.members.map((member: any) => (
                       <ScreenshotButton 
+                        key={member.id}
                         elementId={`staff-card-${member.id}`} 
                         fileName={`${member.username}-staff-card.png`} 
                         memberData={member}
                         className="h-full"
                       >
                         <motion.div
-                          key={member.id}
                           id={`staff-card-${member.id}`}
                           whileHover={{ y: -4, scale: 1.01 }}
                           onClick={() => router.push(`/dashboard/search?q=${member.id}`)}
@@ -203,6 +204,7 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                           )}
                         </motion.div>
                       </ScreenshotButton>
+                    ))}
                   </div>
                 </div>
               ))}
