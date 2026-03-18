@@ -189,32 +189,29 @@ export function ScreenshotButton({ elementId, fileName = 'screenshot.png', class
 
     setLoading(true);
     try {
-      // Try html2canvas first
+      // Try html2canvas first with optimized settings
       const canvas = await html2canvas(element, {
         backgroundColor: '#111827',
-        scale: 2,
+        scale: 1.5, // Reduced from 2 for speed
         useCORS: true,
         allowTaint: false,
         logging: false,
-        imageTimeout: 15000,
+        imageTimeout: 5000, // Reduced from 15000 for faster failure/fallback
         onclone: (clonedDoc) => {
           const clonedElement = clonedDoc.getElementById(elementId);
           if (clonedElement) {
-            const scrollableElements = clonedElement.querySelectorAll('.overflow-y-auto, .overflow-auto, .h-80, .max-h-\\[400px\\]');
+            // Only fix essential styles
+            const scrollableElements = clonedElement.querySelectorAll('.overflow-y-auto, .overflow-auto');
             scrollableElements.forEach((el) => {
               (el as HTMLElement).style.overflow = 'visible';
               (el as HTMLElement).style.maxHeight = 'none';
               (el as HTMLElement).style.height = 'auto';
             });
-            const flexElements = clonedElement.querySelectorAll('.flex-1');
-            flexElements.forEach((el) => {
-              (el as HTMLElement).style.flex = 'none';
-            });
           }
         }
       });
 
-      const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = canvas.toDataURL('image/png', 0.8); // Slightly lower quality for faster generation
       setImage(dataUrl);
       setIsOpen(true);
     } catch (err) {

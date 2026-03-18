@@ -310,18 +310,6 @@ function SearchContent() {
                           <div className="flex justify-between"><span className="text-gray-400">الرصيد:</span> <span className="text-white font-mono">{expandedData.db.coins?.coins || 0}</span></div>
                         </div>
                       </div>
-
-                      {/* Tasks */}
-                      <div className="bg-[#111827] border border-emerald-500/20 rounded-xl p-4 shadow-lg">
-                        <div className="flex items-center gap-2 mb-3">
-                          <ListTodo className="w-5 h-5 text-emerald-400" />
-                          <h4 className="font-bold text-emerald-400">المهام</h4>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between"><span className="text-gray-400">المكتملة:</span> <span className="text-white font-mono">{expandedData.db.tasks?.completed || 0}</span></div>
-                          <div className="flex justify-between"><span className="text-gray-400">قيد التنفيذ:</span> <span className="text-white font-mono">{expandedData.db.tasks?.pending || 0}</span></div>
-                        </div>
-                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

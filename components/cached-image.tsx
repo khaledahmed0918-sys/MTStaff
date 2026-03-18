@@ -79,16 +79,26 @@ export default function CachedImage({ src, alt, ...props }: CachedImageProps) {
     const loadImage = async () => {
       if (!src) return;
       
-      // Try to get from cache first
-      const cachedUrl = await getCachedImage(src);
-      if (cachedUrl) {
-        if (isMounted) setImgSrc(cachedUrl);
+      // Skip caching for Discord banners/gifs as they often fail CORS
+      if (src.includes('discordapp.com/banners/') || src.includes('.gif')) {
+        if (isMounted) setImgSrc(src);
         return;
+      }
+
+      // Try to get from cache first
+      try {
+        const cachedUrl = await getCachedImage(src);
+        if (cachedUrl) {
+          if (isMounted) setImgSrc(cachedUrl);
+          return;
+        }
+      } catch (e) {
+        // Ignore cache read errors
       }
 
       // If not in cache, fetch it
       try {
-        const response = await fetch(src, { mode: 'cors' });
+        const response = await fetch(src, { mode: 'cors', credentials: 'omit' });
         if (!response.ok) throw new Error('Network response was not ok');
         const blob = await response.blob();
         
@@ -102,7 +112,6 @@ export default function CachedImage({ src, alt, ...props }: CachedImageProps) {
       } catch (error) {
         // Fallback to original src if fetch fails
         if (isMounted) setImgSrc(src);
-        console.warn('Failed to cache image, falling back to direct URL:', src);
       }
     };
 
