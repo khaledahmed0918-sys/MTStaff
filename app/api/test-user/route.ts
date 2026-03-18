@@ -9,7 +9,7 @@ export async function GET() {
     }
     const guild = await client.guilds.fetch(guildId!);
     const member = await guild.members.fetch('1459876549384736874'); // Just a random member
-    const user = await member.user.fetch();
+    const user = (await member.user.fetch()) as any;
     return NextResponse.json({ 
       theme_colors: user.themeColors, 
       accentColor: user.hexAccentColor,
