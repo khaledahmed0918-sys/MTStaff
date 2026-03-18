@@ -9,12 +9,178 @@ interface ScreenshotModalProps {
   elementId: string;
   fileName?: string;
   className?: string;
+  memberData?: any;
 }
 
-export function ScreenshotButton({ elementId, fileName = 'screenshot.png', className = '' }: ScreenshotModalProps) {
+export function ScreenshotButton({ elementId, fileName = 'screenshot.png', className = '', memberData }: ScreenshotModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const drawFallbackCanvas = async (member: any): Promise<string> => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return '';
+
+    // Set canvas size (standard card size)
+    canvas.width = 800;
+    canvas.height = 1000;
+
+    // Background
+    ctx.fillStyle = '#111827';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Border
+    ctx.strokeStyle = member.highestRoleColor || '#3b82f6';
+    ctx.lineWidth = 10;
+    ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
+
+    // Header Gradient
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 200);
+    gradient.addColorStop(0, `${member.highestRoleColor || '#3b82f6'}33`);
+    gradient.addColorStop(1, 'transparent');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, 300);
+
+    // Helper to load image
+    const loadImage = (url: string): Promise<HTMLImageElement> => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
+        img.src = url;
+      });
+    };
+
+    try {
+      // Set RTL for Arabic text
+      ctx.direction = 'rtl';
+      ctx.textAlign = 'right';
+
+      // Draw Avatar
+      if (member.avatar) {
+        try {
+          const avatarImg = await loadImage(member.avatar);
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(canvas.width - 120, 150, 70, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.drawImage(avatarImg, canvas.width - 190, 80, 140, 140);
+          ctx.restore();
+          
+          // Avatar Border
+          ctx.strokeStyle = member.highestRoleColor || '#3b82f6';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(canvas.width - 120, 150, 70, 0, Math.PI * 2);
+          ctx.stroke();
+        } catch (e) {
+          // Fallback circle if avatar fails
+          ctx.fillStyle = '#1f2937';
+          ctx.beginPath();
+          ctx.arc(canvas.width - 120, 150, 70, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // User Info
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 40px Arial';
+      ctx.fillText(member.displayName || member.username, canvas.width - 220, 140);
+      
+      ctx.fillStyle = '#9ca3af';
+      ctx.font = '24px Arial';
+      ctx.fillText(`@${member.username}`, canvas.width - 220, 180);
+
+      // Stats Section
+      if (member.stats) {
+        // Messages Box
+        ctx.fillStyle = '#0a0f1a';
+        ctx.roundRect?.(canvas.width - 380, 300, 330, 150, 20);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff1a';
+        ctx.stroke();
+
+        ctx.fillStyle = '#3b82f6';
+        ctx.font = 'bold 24px Arial';
+        ctx.fillText('الرسائل', canvas.width - 80, 340);
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 36px Arial';
+        ctx.fillText(member.stats.messages.total.toLocaleString(), canvas.width - 80, 390);
+
+        // Streak Box
+        ctx.fillStyle = '#0a0f1a';
+        ctx.roundRect?.(50, 300, 330, 150, 20);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff1a';
+        ctx.stroke();
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#f97316';
+        ctx.font = 'bold 24px Arial';
+        ctx.fillText('الستريك', 80, 340);
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 36px Arial';
+        ctx.fillText(member.stats.streak.toString(), 80, 390);
+
+        // Detailed Stats
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 30px Arial';
+        ctx.fillText('إحصائيات إضافية', canvas.width - 50, 520);
+
+        const statsY = 580;
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '24px Arial';
+        ctx.fillText(`يومي: ${member.stats.messages.daily}`, canvas.width - 50, statsY);
+        ctx.fillText(`أسبوعي: ${member.stats.messages.weekly}`, canvas.width - 50, statsY + 40);
+        ctx.fillText(`شهري: ${member.stats.messages.monthly}`, canvas.width - 50, statsY + 80);
+        
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#ef4444';
+        ctx.fillText(`التحذيرات: ${member.stats.warns.length}`, 50, statsY);
+        ctx.fillStyle = '#f97316';
+        ctx.fillText(`التايم أوت: ${member.stats.timeouts.length}`, 50, statsY + 40);
+      }
+
+      // Watermark Stamp
+      ctx.textAlign = 'center';
+      const stampRadius = 80;
+      const stampX = canvas.width - stampRadius - 50;
+      const stampY = canvas.height - stampRadius - 50;
+      
+      ctx.save();
+      ctx.translate(stampX, stampY);
+      ctx.rotate(-0.2);
+      
+      ctx.beginPath();
+      ctx.arc(0, 0, stampRadius, 0, 2 * Math.PI);
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 6;
+      ctx.stroke();
+      
+      ctx.fillStyle = '#3b82f6';
+      ctx.font = 'bold 20px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('MT Community', 0, -15);
+      ctx.fillText('Staff Team', 0, 20);
+      ctx.restore();
+
+      // Footer
+      ctx.fillStyle = '#ffffff33';
+      ctx.font = '16px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Generated on ${new Date().toLocaleString()}`, canvas.width / 2, canvas.height - 30);
+
+      return canvas.toDataURL('image/png');
+    } catch (err) {
+      console.error('Canvas fallback failed:', err);
+      return '';
+    }
+  };
 
   const handleCapture = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -23,29 +189,23 @@ export function ScreenshotButton({ elementId, fileName = 'screenshot.png', class
 
     setLoading(true);
     try {
-      // Temporarily add watermark elements
-      const watermark = document.createElement('div');
-      watermark.className = 'absolute bottom-2 right-4 text-white/30 font-bold text-sm z-50 pointer-events-none flex flex-col items-end';
-      watermark.innerHTML = '<span>MT Community</span><span class="text-xs">Staff Team</span>';
-      element.appendChild(watermark);
-
+      // Try html2canvas first
       const canvas = await html2canvas(element, {
         backgroundColor: '#111827',
         scale: 2,
         useCORS: true,
-        allowTaint: true,
+        allowTaint: false,
         logging: false,
+        imageTimeout: 15000,
         onclone: (clonedDoc) => {
           const clonedElement = clonedDoc.getElementById(elementId);
           if (clonedElement) {
-            // Remove height restrictions and overflow for full capture
             const scrollableElements = clonedElement.querySelectorAll('.overflow-y-auto, .overflow-auto, .h-80, .max-h-\\[400px\\]');
             scrollableElements.forEach((el) => {
               (el as HTMLElement).style.overflow = 'visible';
               (el as HTMLElement).style.maxHeight = 'none';
               (el as HTMLElement).style.height = 'auto';
             });
-            // Also fix any flex-1 that might restrict height
             const flexElements = clonedElement.querySelectorAll('.flex-1');
             flexElements.forEach((el) => {
               (el as HTMLElement).style.flex = 'none';
@@ -54,38 +214,22 @@ export function ScreenshotButton({ elementId, fileName = 'screenshot.png', class
         }
       });
 
-      // Add stamp to the canvas
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        const stampRadius = 50;
-        const stampX = canvas.width - stampRadius - 20;
-        const stampY = canvas.height - stampRadius - 20;
-        
-        ctx.save();
-        ctx.translate(stampX, stampY);
-        ctx.rotate(-0.2); // Rotate slightly
-        
-        ctx.beginPath();
-        ctx.arc(0, 0, stampRadius, 0, 2 * Math.PI);
-        ctx.strokeStyle = '#3b82f6';
-        ctx.lineWidth = 5;
-        ctx.stroke();
-        
-        ctx.fillStyle = '#3b82f6';
-        ctx.font = 'bold 16px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('MT Community', 0, -10);
-        ctx.fillText('Staff Team', 0, 15);
-        ctx.restore();
-      }
-
-      element.removeChild(watermark);
-
       const dataUrl = canvas.toDataURL('image/png');
       setImage(dataUrl);
       setIsOpen(true);
     } catch (err) {
-      console.error('Failed to capture screenshot:', err);
+      console.error('html2canvas failed, trying canvas fallback:', err);
+      if (memberData) {
+        const fallbackUrl = await drawFallbackCanvas(memberData);
+        if (fallbackUrl) {
+          setImage(fallbackUrl);
+          setIsOpen(true);
+        } else {
+          alert('عذراً، فشل التقاط الصورة. يرجى المحاولة مرة أخرى.');
+        }
+      } else {
+        alert('عذراً، فشل التقاط الصورة.');
+      }
     } finally {
       setLoading(false);
     }

@@ -84,7 +84,7 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                   <div className="flex items-center gap-4 px-4">
                     <div className="flex items-center gap-3 px-5 py-2 rounded-xl border border-white/5 bg-[#111827]/40 backdrop-blur-sm shadow-inner" style={{ borderColor: `${role.color}30` }}>
                       {role.icon ? (
-                        <CachedImage src={role.icon} alt={role.name} width={24} height={24} className="rounded-full" />
+                        <CachedImage src={role.icon} alt={role.name} width={24} height={24} className="object-contain" />
                       ) : (
                         <Shield className="w-5 h-5" style={{ color: role.color }} />
                       )}
@@ -111,19 +111,29 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full opacity-50 pointer-events-none" style={{ backgroundImage: `linear-gradient(to bottom right, ${member.highestRoleColor}20, transparent)` }} />
                         
                         <div className="absolute top-4 left-4 z-20">
-                          <ScreenshotButton elementId={`staff-card-${member.id}`} fileName={`${member.username}-staff-card.png`} />
+                          <ScreenshotButton 
+                            elementId={`staff-card-${member.id}`} 
+                            fileName={`${member.username}-staff-card.png`} 
+                            memberData={member}
+                          />
                         </div>
 
                         <div className="flex items-start gap-4 relative z-10">
-                          <div className="relative w-16 h-16 shrink-0">
-                            <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#111827] shadow-md" style={{ borderColor: member.highestRoleColor }}>
-                              <CachedImage src={member.avatar} alt={member.displayName} fill className="object-cover" />
+                          <div className="relative w-16 h-16 shrink-0 group/avatar">
+                            <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#111827] shadow-md relative z-10 bg-[#0a0f1a]" style={{ borderColor: member.highestRoleColor }}>
+                              <CachedImage 
+                                src={member.avatar} 
+                                alt={member.displayName} 
+                                fill 
+                                className="object-cover rounded-full transition-transform duration-500 group-hover/avatar:scale-110" 
+                              />
                             </div>
                             {member.avatarDecoration && (
                               <div className="absolute -inset-3 z-20 pointer-events-none">
                                 <CachedImage src={member.avatarDecoration} alt="Decoration" fill className="object-cover" />
                               </div>
                             )}
+                            <div className="absolute inset-0 rounded-full shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] z-15 pointer-events-none" />
                           </div>
                           
                           <div className="flex-1 min-w-0">

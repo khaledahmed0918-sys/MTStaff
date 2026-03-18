@@ -88,7 +88,7 @@ export default function CachedImage({ src, alt, ...props }: CachedImageProps) {
 
       // If not in cache, fetch it
       try {
-        const response = await fetch(src);
+        const response = await fetch(src, { mode: 'cors' });
         if (!response.ok) throw new Error('Network response was not ok');
         const blob = await response.blob();
         
@@ -102,6 +102,7 @@ export default function CachedImage({ src, alt, ...props }: CachedImageProps) {
       } catch (error) {
         // Fallback to original src if fetch fails
         if (isMounted) setImgSrc(src);
+        console.warn('Failed to cache image, falling back to direct URL:', src);
       }
     };
 
