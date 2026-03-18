@@ -214,7 +214,7 @@ async function fetchStaffMembersBackground(guildId: string) {
           
           // Find highest role from the group for this member
           let highestPosition = -1;
-          let highestRoleInfo = { color: '#ffffff', icon: null };
+          let highestRoleInfo: { color: string; icon: string | null } = { color: '#ffffff', icon: null };
           
           for (const rId of member.roles) {
             if (group.roleIds.includes(rId)) {
@@ -243,7 +243,7 @@ async function fetchStaffMembersBackground(guildId: string) {
       if (categoryMembers.length > 0) {
         // Find highest role for the group header
         let highestGroupPosition = -1;
-        let highestGroupRoleInfo = { color: '#ffffff', icon: null };
+        let highestGroupRoleInfo: { color: string; icon: string | null } = { color: '#ffffff', icon: null };
         
         for (const rId of group.roleIds) {
             const r = guild.roles.cache.get(rId);
