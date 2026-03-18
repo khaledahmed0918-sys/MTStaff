@@ -379,44 +379,6 @@ export default function MyInfoPage() {
 
       </div>
 
-      {/* Tasks Section */}
-      <div className="bg-[#111827]/60 backdrop-blur-md border border-blue-500/20 rounded-2xl overflow-hidden shadow-lg flex flex-col group hover:border-blue-500/40 transition-colors duration-300">
-        <div className="bg-blue-500/10 p-4 border-b border-blue-500/20 flex items-center gap-3">
-          <CheckCircle2 className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
-          <h2 className="font-bold text-blue-400 text-lg">المهام ({tasks.length})</h2>
-        </div>
-        <div className="p-4 flex-1 overflow-y-auto max-h-[400px] custom-scrollbar space-y-3">
-          {tasks.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">لا يوجد مهام</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {tasks.map((task: any, i: number) => (
-                <div key={i} className={`bg-[#0a0f1a] border rounded-xl p-4 transition-all duration-300 ${task.completed ? 'border-emerald-500/30 hover:border-emerald-500/50' : 'border-blue-500/30 hover:border-blue-500/50'}`}>
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className={`font-bold ${task.completed ? 'text-emerald-400 line-through opacity-70' : 'text-blue-400'}`}>{task.title || 'مهمة بدون عنوان'}</h3>
-                    {task.completed ? (
-                      <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-md flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" />
-                        مكتملة
-                      </span>
-                    ) : (
-                      <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded-md">
-                        حالية
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-300 mb-3">{task.description || 'لا يوجد وصف'}</p>
-                  <div className="flex justify-between items-center text-xs text-gray-500">
-                    {task.dueDate && <span>تاريخ الانتهاء: {formatDateEn(task.dueDate)}</span>}
-                    {task.createdAt && <span>تاريخ الإنشاء: {formatDateEn(task.createdAt)}</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
     </div>
   );
 }

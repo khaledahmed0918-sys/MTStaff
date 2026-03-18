@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     
     const [streaksRes, messagesRes] = await Promise.allSettled([
       query(`SELECT user_id, streak FROM streaks WHERE user_id IN (${placeholders})`, userIds),
-      query(`SELECT user_id, all as total, top_day as daily, top_week as weekly, top_month as monthly FROM messages WHERE user_id IN (${placeholders})`, userIds)
+      query(`SELECT user_id, "all" as total, top_day as daily, top_week as weekly, top_month as monthly FROM messages WHERE user_id IN (${placeholders})`, userIds)
     ]);
 
     const streaksMap = new Map();

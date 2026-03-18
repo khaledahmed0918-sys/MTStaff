@@ -14,12 +14,12 @@ export default async function DashboardHome() {
   if (guildId) {
     serverInfo = await getServerInfo(guildId);
     try {
-      const res = await query(`SELECT SUM(all) as total FROM messages`);
+      const res = await query(`SELECT SUM("all") as total FROM messages`);
       if (res.rows[0] && res.rows[0].total) {
         totalMessages = parseInt(res.rows[0].total, 10);
       }
     } catch (e) {
-      console.error('Error fetching total messages:', e);
+      // Silent error
     }
   }
 

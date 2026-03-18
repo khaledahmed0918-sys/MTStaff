@@ -54,6 +54,31 @@ export function ScreenshotButton({ elementId, fileName = 'screenshot.png', class
         }
       });
 
+      // Add stamp to the canvas
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const stampRadius = 50;
+        const stampX = canvas.width - stampRadius - 20;
+        const stampY = canvas.height - stampRadius - 20;
+        
+        ctx.save();
+        ctx.translate(stampX, stampY);
+        ctx.rotate(-0.2); // Rotate slightly
+        
+        ctx.beginPath();
+        ctx.arc(0, 0, stampRadius, 0, 2 * Math.PI);
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 5;
+        ctx.stroke();
+        
+        ctx.fillStyle = '#3b82f6';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('MT Community', 0, -10);
+        ctx.fillText('Staff Team', 0, 15);
+        ctx.restore();
+      }
+
       element.removeChild(watermark);
 
       const dataUrl = canvas.toDataURL('image/png');

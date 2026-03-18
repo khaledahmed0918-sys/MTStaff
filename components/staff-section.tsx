@@ -22,7 +22,7 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
             setCategories(json.staff || []);
           }
         } catch (err) {
-          console.error('Failed to fetch staff:', err);
+          // Silent error
         } finally {
           setLoading(false);
         }
@@ -47,7 +47,21 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
     );
   }
 
-  if (!categories || categories.length === 0) return null;
+  if (!categories || categories.length === 0) {
+    return (
+      <section className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both">
+        <div className="flex items-center gap-3 px-2">
+          <div className="p-2 bg-blue-500/20 rounded-lg">
+            <Shield className="w-6 h-6 text-blue-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-white">فريق الإدارة</h2>
+        </div>
+        <div className="flex justify-center py-12 text-gray-500">
+          لا يوجد أعضاء في فريق الإدارة حالياً
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both">
