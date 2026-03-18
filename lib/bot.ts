@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import { query } from '@/lib/db';
+import { STAFF_GROUPS } from '@/lib/constants';
 
 // Use a singleton pattern to prevent multiple clients in dev
 const globalForDiscord = global as unknown as { discordClient: Client };
@@ -182,84 +183,77 @@ async function fetchStaffMembersBackground(guildId: string) {
       if (members.length < 1000) break;
     }
 
-    // The order of roles here determines the order of sections
-    const staffGroups = [
-      { name: 'Staff Managers', roleIds: ['1465838966904197294', '1383128056708993219', '1404695448081662014'] },
-      { name: 'Affairs Team', roleIds: ['1450422143274713191'] },
-      { name: 'Tickets Helper', roleIds: ['1402719732334985247'] },
-      { name: 'Admin Of The Week', roleIds: ['1383158445846560870'] },
-      { 
-        name: 'Staff Team', 
-        roleIds: [
-          '1383158823744966736', '1383161407742148761', '1384525033111552091',
-          '1383170653636530318', '1383171427066450110', '1383172034892398612',
-          '1383377717432422401', '1383172935753269368'
-        ] 
-      }
-    ];
-
     const result = [];
     const processedUserIds = new Set();
 
-    for (const group of staffGroups) {
-      const categoryMembers = [];
+    // Flatten all role IDs to determine global priority
+    const allRoleIds = STAFF_GROUPS.flatMap(g => g.roles.map(r => r.id));
+
+    for (const group of STAFF_GROUPS) {
+      const groupRoles = [];
       
-      // Find all members that have at least one role from this group
-      const membersInGroup = allMembers.filter(m => m.roles.some((rId: string) => group.roleIds.includes(rId)));
-      
-      for (const member of membersInGroup) {
-        if (!processedUserIds.has(member.user.id)) {
-          processedUserIds.add(member.user.id);
+      for (const roleConfig of group.roles) {
+        const role = guild.roles.cache.get(roleConfig.id);
+        if (!role) continue;
+
+        const roleMembers = [];
+        // Find members whose HIGHEST staff role is this one
+        const membersWithRole = allMembers.filter(m => {
+          if (processedUserIds.has(m.user.id)) return false;
+          
+          // Check if this is their highest role among all staff roles
+          const memberStaffRoles = m.roles.filter((rId: string) => allRoleIds.includes(rId));
+          if (memberStaffRoles.length === 0) return false;
+          
+          // Find the index of each role in allRoleIds (lower index = higher priority)
+          const highestRoleIndex = Math.min(...memberStaffRoles.map((rId: string) => allRoleIds.indexOf(rId)));
+          
+          if (allRoleIds[highestRoleIndex] === roleConfig.id) {
+            processedUserIds.add(m.user.id);
+            return true;
+          }
+          return false;
+        });
+
+        for (const member of membersWithRole) {
           const user = member.user;
           
-          // Find highest role from the group for this member
+          // Find highest role color for the member
           let highestPosition = -1;
-          let highestRoleInfo: { color: string; icon: string | null } = { color: '#ffffff', icon: null };
-          
+          let highestColor = '#ffffff';
           for (const rId of member.roles) {
-            if (group.roleIds.includes(rId)) {
-                const r = guild.roles.cache.get(rId);
-                if (r && r.position > highestPosition) {
-                    highestPosition = r.position;
-                    highestRoleInfo = {
-                        color: r.hexColor !== '#000000' ? r.hexColor : '#ffffff',
-                        icon: r.iconURL()
-                    };
-                }
+            const r = guild.roles.cache.get(rId);
+            if (r && r.position > highestPosition) {
+              highestPosition = r.position;
+              highestColor = r.hexColor !== '#000000' ? r.hexColor : '#ffffff';
             }
           }
 
-          categoryMembers.push({
+          roleMembers.push({
             id: user.id,
             username: user.username,
             displayName: user.global_name || user.username,
             avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256` : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator || '0') % 5}.png`,
             avatarDecoration: user.avatar_decoration_data ? `https://cdn.discordapp.com/avatar-decoration-presets/${user.avatar_decoration_data.asset}.png?size=256` : null,
-            highestRoleColor: highestRoleInfo.color,
+            highestRoleColor: highestColor,
+          });
+        }
+
+        if (roleMembers.length > 0) {
+          groupRoles.push({
+            id: role.id,
+            name: role.name,
+            color: role.hexColor !== '#000000' ? role.hexColor : '#ffffff',
+            icon: role.iconURL(),
+            members: roleMembers
           });
         }
       }
 
-      if (categoryMembers.length > 0) {
-        // Find highest role for the group header
-        let highestGroupPosition = -1;
-        let highestGroupRoleInfo: { color: string; icon: string | null } = { color: '#ffffff', icon: null };
-        
-        for (const rId of group.roleIds) {
-            const r = guild.roles.cache.get(rId);
-            if (r && r.position > highestGroupPosition) {
-                highestGroupPosition = r.position;
-                highestGroupRoleInfo = {
-                    color: r.hexColor !== '#000000' ? r.hexColor : '#ffffff',
-                    icon: r.iconURL()
-                };
-            }
-        }
-
+      if (groupRoles.length > 0) {
         result.push({
           name: group.name,
-          roleInfo: highestGroupRoleInfo,
-          members: categoryMembers
+          roles: groupRoles
         });
       }
     }
@@ -302,8 +296,10 @@ export async function getStaffWithStats(guildId: string) {
   
   const userIds: string[] = [];
   for (const category of staffCategories) {
-    for (const member of category.members) {
-      userIds.push(member.id);
+    for (const role of category.roles) {
+      for (const member of role.members) {
+        userIds.push(member.id);
+      }
     }
   }
 
@@ -354,15 +350,17 @@ export async function getStaffWithStats(guildId: string) {
   }));
 
   for (const category of staffCategories) {
-    for (const member of category.members) {
-      (member as any).stats = {
-        streak: streaksMap.get(member.id) || 0,
-        messages: messagesMap.get(member.id) || { total: 0, daily: 0, weekly: 0, monthly: 0 },
-        swarns: swarnsMap.get(member.id) || [],
-        warns: warnsMap.get(member.id) || [],
-        timeouts: timeoutsMap.get(member.id) || [],
-        bans: bansMap.get(member.id) || []
-      };
+    for (const role of category.roles) {
+      for (const member of role.members) {
+        (member as any).stats = {
+          streak: streaksMap.get(member.id) || 0,
+          messages: messagesMap.get(member.id) || { total: 0, daily: 0, weekly: 0, monthly: 0 },
+          swarns: swarnsMap.get(member.id) || [],
+          warns: warnsMap.get(member.id) || [],
+          timeouts: timeoutsMap.get(member.id) || [],
+          bans: bansMap.get(member.id) || []
+        };
+      }
     }
   }
 
