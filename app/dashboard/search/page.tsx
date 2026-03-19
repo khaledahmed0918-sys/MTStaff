@@ -310,8 +310,10 @@ function SearchContent() {
                               </div>
                               <div className="flex flex-wrap gap-3">
                                 {(() => {
-                                  const remaining = expandedData.db.stats?.tasks_remaining ? expandedData.db.stats.tasks_remaining.split(',').filter(Boolean) : [];
-                                  if (!expandedData.db.stats?.completed_today) {
+                                  const remaining = typeof expandedData.db.coins?.tasks_remaining === 'string' 
+                                    ? expandedData.db.coins.tasks_remaining.split(',').filter(Boolean) 
+                                    : [];
+                                  if (!expandedData.db.streaks?.completed_today) {
                                     remaining.push("إكمال مهمة الستريك");
                                   }
                                   return remaining.length > 0 ? remaining.map((task: string, i: number) => (
@@ -337,7 +339,9 @@ function SearchContent() {
                               </div>
                               <div className="flex flex-wrap gap-3">
                                 {(() => {
-                                  const completed = expandedData.db.stats?.tasks_completed ? expandedData.db.stats.tasks_completed.split(',').filter(Boolean) : [];
+                                  const completed = typeof expandedData.db.coins?.tasks_completed === 'string'
+                                    ? expandedData.db.coins.tasks_completed.split(',').filter(Boolean)
+                                    : [];
                                   return completed.length > 0 ? completed.map((task: string, i: number) => (
                                     <div key={i} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 animate-in fade-in zoom-in duration-300" style={{ animationDelay: `${i * 100}ms` }}>
                                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />

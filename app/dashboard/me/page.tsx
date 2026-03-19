@@ -275,7 +275,9 @@ export default function MyInfoPage() {
               </div>
               <div className="flex flex-wrap gap-2">
                 {(() => {
-                  const remaining = db.coins?.tasks_remaining ? db.coins.tasks_remaining.split(',').filter(Boolean) : [];
+                  const remaining = typeof db.coins?.tasks_remaining === 'string' 
+                    ? db.coins.tasks_remaining.split(',').filter(Boolean) 
+                    : [];
                   if (!db.streaks?.completed_today) {
                     remaining.push("إكمال مهمة الستريك");
                   }
@@ -302,7 +304,9 @@ export default function MyInfoPage() {
               </div>
               <div className="flex flex-wrap gap-2">
                 {(() => {
-                  const completed = db.coins?.tasks_completed ? db.coins.tasks_completed.split(',').filter(Boolean) : [];
+                  const completed = typeof db.coins?.tasks_completed === 'string' 
+                    ? db.coins.tasks_completed.split(',').filter(Boolean) 
+                    : [];
                   return completed.length > 0 ? completed.map((task: string, i: number) => (
                     <div key={i} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
