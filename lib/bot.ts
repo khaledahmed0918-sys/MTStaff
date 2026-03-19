@@ -309,19 +309,25 @@ export async function getStaffWithStats(guildId: string) {
 
   const placeholders = userIds.map((_, i) => `$${i + 1}`).join(',');
   
-  const [streaksRes, messagesRes] = await Promise.allSettled([
-    query(`SELECT user_id, streak FROM streaks WHERE user_id IN (${placeholders})`, userIds),
-    query(`SELECT user_id, "all" as total, top_day as daily, top_week as weekly, top_month as monthly FROM messages WHERE user_id IN (${placeholders})`, userIds)
+  const [streaksRes, messagesRes, coinsRes] = await Promise.allSettled([
+    query(`SELECT user_id, streak, completed_today FROM streaks WHERE user_id IN (${placeholders})`, userIds),
+    query(`SELECT user_id, "all" as total, top_day as daily, top_week as weekly, top_month as monthly FROM messages WHERE user_id IN (${placeholders})`, userIds),
+    query(`SELECT user_id, tasks_remaining, tasks_completed FROM coins WHERE user_id IN (${placeholders})`, userIds)
   ]);
 
   const streaksMap = new Map();
   if (streaksRes.status === 'fulfilled') {
-    streaksRes.value.rows.forEach(row => streaksMap.set(row.user_id, row.streak));
+    streaksRes.value.rows.forEach(row => streaksMap.set(row.user_id, { streak: row.streak, completed_today: row.completed_today }));
   }
 
   const messagesMap = new Map();
   if (messagesRes.status === 'fulfilled') {
     messagesRes.value.rows.forEach(row => messagesMap.set(row.user_id, row));
+  }
+
+  const coinsMap = new Map();
+  if (coinsRes.status === 'fulfilled') {
+    coinsRes.value.rows.forEach(row => coinsMap.set(row.user_id, row));
   }
 
   const swarnsMap = new Map();
@@ -352,8 +358,13 @@ export async function getStaffWithStats(guildId: string) {
   for (const category of staffCategories) {
     for (const role of category.roles) {
       for (const member of role.members) {
+        const streakData = streaksMap.get(member.id) || { streak: 0, completed_today: false };
+        const coinData = coinsMap.get(member.id) || { tasks_remaining: '', tasks_completed: '' };
         (member as any).stats = {
-          streak: streaksMap.get(member.id) || 0,
+          streak: streakData.streak,
+          completed_today: streakData.completed_today,
+          tasks_remaining: coinData.tasks_remaining,
+          tasks_completed: coinData.tasks_completed,
           messages: messagesMap.get(member.id) || { total: 0, daily: 0, weekly: 0, monthly: 0 },
           swarns: swarnsMap.get(member.id) || [],
           warns: warnsMap.get(member.id) || [],

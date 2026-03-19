@@ -73,45 +73,47 @@ export function TopUsersSection({ guildId }: { guildId: string }) {
           const Icon = sec.icon;
 
           return (
-            <motion.div 
+            <ScreenshotButton 
               key={sec.key}
-              id={`top-user-card-${member.id}`}
-              whileHover={{ y: -5 }}
-              onClick={() => router.push(`/dashboard/search?q=${member.id}`)}
-              className={`relative overflow-hidden rounded-3xl border ${sec.border} bg-[#111827]/80 backdrop-blur-xl p-6 shadow-xl cursor-pointer group`}
+              elementId={`top-user-card-${member.id}`} 
+              fileName={`${member.username}-top-user.png`}
+              className="block"
             >
-              <div className={`absolute top-0 left-0 w-full h-1 ${sec.bg.replace('/10', '')}`} />
-              <div className="absolute -right-10 -top-10 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Icon className="w-40 h-40" />
-              </div>
-
-              <div className="absolute top-4 left-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                <ScreenshotButton elementId={`top-user-card-${member.id}`} fileName={`${member.username}-top-user.png`} />
-              </div>
-
-              <div className="relative z-10 flex flex-col items-center text-center">
-                <div className={`p-3 rounded-2xl ${sec.bg} mb-4`}>
-                  <Icon className={`w-8 h-8 ${sec.color}`} />
+              <motion.div 
+                id={`top-user-card-${member.id}`}
+                whileHover={{ y: -5 }}
+                onClick={() => router.push(`/dashboard/search?q=${member.id}`)}
+                className={`relative overflow-hidden rounded-3xl border ${sec.border} bg-[#111827]/80 backdrop-blur-xl p-6 shadow-xl cursor-pointer group h-full`}
+              >
+                <div className={`absolute top-0 left-0 w-full h-1 ${sec.bg.replace('/10', '')}`} />
+                <div className="absolute -right-10 -top-10 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Icon className="w-40 h-40" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-4">{sec.title}</h3>
-                
-                <div className="relative w-24 h-24 mb-4">
-                  <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#111827] shadow-lg relative z-10" style={{ borderColor: member.roleColor }}>
-                    <CachedImage src={member.avatar} alt={member.displayName} fill className="object-cover" />
+
+                <div className="relative z-10 flex flex-col items-center text-center">
+                  <div className={`p-3 rounded-2xl ${sec.bg} mb-4`}>
+                    <Icon className={`w-8 h-8 ${sec.color}`} />
                   </div>
-                  {member.avatarDecoration && (
-                    <div className="absolute -inset-4 z-20 pointer-events-none">
-                      <CachedImage src={member.avatarDecoration} alt="Decoration" fill className="object-cover" />
+                  <h3 className="text-lg font-bold text-white mb-4">{sec.title}</h3>
+                  
+                  <div className="relative w-24 h-24 mb-4">
+                    <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#111827] shadow-lg relative z-10" style={{ borderColor: member.roleColor }}>
+                      <CachedImage src={member.avatar} alt={member.displayName} fill className="object-cover" />
                     </div>
-                  )}
-                </div>
+                    {member.avatarDecoration && (
+                      <div className="absolute -inset-4 z-20 pointer-events-none">
+                        <CachedImage src={member.avatarDecoration} alt="Decoration" fill className="object-cover" />
+                      </div>
+                    )}
+                  </div>
 
-                <h4 className="text-xl font-bold text-white truncate w-full" style={{ color: member.roleColor }}>
-                  {member.displayName}
-                </h4>
-                <p className="text-sm text-gray-400 mt-1">{member.roleName}</p>
-              </div>
-            </motion.div>
+                  <h4 className="text-xl font-bold text-white truncate w-full" style={{ color: member.roleColor }}>
+                    {member.displayName}
+                  </h4>
+                  <p className="text-sm text-gray-400 mt-1">{member.roleName}</p>
+                </div>
+              </motion.div>
+            </ScreenshotButton>
           );
         })}
       </div>

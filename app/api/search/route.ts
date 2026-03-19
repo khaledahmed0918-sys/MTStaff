@@ -16,17 +16,19 @@ export async function GET(req: NextRequest) {
       
       // Fetch stats for these random members
       const results = await Promise.all(randomMembers.map(async (member) => {
-        const [warnsRes, timeoutsRes, bansRes, streaksRes] = await Promise.allSettled([
+        const [warnsRes, timeoutsRes, bansRes, streaksRes, coinsRes] = await Promise.allSettled([
           query(`SELECT COUNT(*) as count FROM "warns_${member.id}"`),
           query(`SELECT COUNT(*) as count FROM "timeouts_${member.id}"`),
           query(`SELECT COUNT(*) as count FROM "bans_${member.id}"`),
-          query(`SELECT * FROM streaks WHERE user_id = $1`, [member.id])
+          query(`SELECT * FROM streaks WHERE user_id = $1`, [member.id]),
+          query(`SELECT tasks_remaining, tasks_completed FROM coins WHERE user_id = $1`, [member.id])
         ]);
 
         const warnsCount = warnsRes.status === 'fulfilled' ? parseInt(warnsRes.value.rows[0]?.count || '0', 10) : 0;
         const timeoutsCount = timeoutsRes.status === 'fulfilled' ? parseInt(timeoutsRes.value.rows[0]?.count || '0', 10) : 0;
         const bansCount = bansRes.status === 'fulfilled' ? parseInt(bansRes.value.rows[0]?.count || '0', 10) : 0;
         const streaks = streaksRes.status === 'fulfilled' && streaksRes.value.rows.length > 0 ? streaksRes.value.rows[0] : null;
+        const coins = coinsRes.status === 'fulfilled' && coinsRes.value.rows.length > 0 ? coinsRes.value.rows[0] : null;
 
         return {
           ...member,
@@ -35,6 +37,9 @@ export async function GET(req: NextRequest) {
             timeouts: timeoutsCount,
             bans: bansCount,
             streaks: streaks?.streak || 0,
+            completed_today: streaks?.completed_today || false,
+            tasks_remaining: coins?.tasks_remaining || '',
+            tasks_completed: coins?.tasks_completed || '',
           }
         };
       }));
@@ -46,17 +51,19 @@ export async function GET(req: NextRequest) {
     const discordInfo = await getUserInfo(guildId, q);
 
     if (discordInfo) {
-      const [warnsRes, timeoutsRes, bansRes, streaksRes] = await Promise.allSettled([
+      const [warnsRes, timeoutsRes, bansRes, streaksRes, coinsRes] = await Promise.allSettled([
         query(`SELECT COUNT(*) as count FROM "warns_${q}"`),
         query(`SELECT COUNT(*) as count FROM "timeouts_${q}"`),
         query(`SELECT COUNT(*) as count FROM "bans_${q}"`),
-        query(`SELECT * FROM streaks WHERE user_id = $1`, [q])
+        query(`SELECT * FROM streaks WHERE user_id = $1`, [q]),
+        query(`SELECT tasks_remaining, tasks_completed FROM coins WHERE user_id = $1`, [q])
       ]);
 
       const warnsCount = warnsRes.status === 'fulfilled' ? parseInt(warnsRes.value.rows[0]?.count || '0', 10) : 0;
       const timeoutsCount = timeoutsRes.status === 'fulfilled' ? parseInt(timeoutsRes.value.rows[0]?.count || '0', 10) : 0;
       const bansCount = bansRes.status === 'fulfilled' ? parseInt(bansRes.value.rows[0]?.count || '0', 10) : 0;
       const streaks = streaksRes.status === 'fulfilled' && streaksRes.value.rows.length > 0 ? streaksRes.value.rows[0] : null;
+      const coins = coinsRes.status === 'fulfilled' && coinsRes.value.rows.length > 0 ? coinsRes.value.rows[0] : null;
 
       return NextResponse.json({
         results: [
@@ -67,6 +74,9 @@ export async function GET(req: NextRequest) {
               timeouts: timeoutsCount,
               bans: bansCount,
               streaks: streaks?.streak || 0,
+              completed_today: streaks?.completed_today || false,
+              tasks_remaining: coins?.tasks_remaining || '',
+              tasks_completed: coins?.tasks_completed || '',
             },
           },
         ],

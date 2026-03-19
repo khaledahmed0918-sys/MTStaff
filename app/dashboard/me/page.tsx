@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import CachedImage from '@/components/cached-image';
-import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare, CheckCircle2, Camera } from 'lucide-react';
+import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare, CheckCircle2, Camera, ListTodo } from 'lucide-react';
 import { formatVoiceTime, formatDateEn, parseDiscordEmoji, generateGradientColors } from '@/lib/utils';
 import { ScreenshotButton } from '@/components/screenshot-button';
 
@@ -82,13 +82,10 @@ export default function MyInfoPage() {
   const { warns = [], swarns = [], timeouts = [], bans = [], streaks, tasks = [] } = db;
 
   return (
-    <div id="my-profile-card" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#0a0f1a] p-4 sm:p-8 rounded-3xl relative">
-      <div className="absolute top-6 left-6 z-50">
-        <ScreenshotButton elementId="my-profile-card" fileName={`${discord.username}-profile.png`} />
-      </div>
-
-      {/* Profile Card */}
-      <div className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative group">
+    <ScreenshotButton elementId="my-profile-card" fileName={`${discord.username}-profile.png`} className="block">
+      <div id="my-profile-card" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#0a0f1a] p-4 sm:p-8 rounded-3xl relative">
+        {/* Profile Card */}
+        <div className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative group">
         {/* Banner */}
         <div className="aspect-[5/2] w-full relative bg-[#0a0f1a] overflow-hidden">
           {discord.banner ? (
@@ -264,6 +261,61 @@ export default function MyInfoPage() {
             <div className="flex justify-between items-center"><span className="text-gray-400">الرصيد:</span> <span className="text-white font-mono bg-white/5 px-2 py-1 rounded">{db.coins?.coins || 0}</span></div>
           </div>
         </div>
+
+        {/* Tasks */}
+        <div className="md:col-span-2 lg:col-span-4 bg-[#111827]/80 backdrop-blur-xl border border-blue-500/20 rounded-2xl p-6 shadow-lg relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-full blur-3xl" />
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="flex-1 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-500/10 rounded-lg">
+                  <ListTodo className="w-6 h-6 text-blue-400" />
+                </div>
+                <h4 className="text-xl font-black text-white tracking-tight">المهام المتبقية</h4>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(() => {
+                  const remaining = db.coins?.tasks_remaining ? db.coins.tasks_remaining.split(',').filter(Boolean) : [];
+                  if (!db.streaks?.completed_today) {
+                    remaining.push("إكمال مهمة الستريك");
+                  }
+                  return remaining.length > 0 ? remaining.map((task: string, i: number) => (
+                    <div key={i} className="bg-red-500/10 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                      {task}
+                    </div>
+                  )) : (
+                    <div className="text-gray-500 font-bold italic py-1">لا توجد مهام متبقية 🎉</div>
+                  );
+                })()}
+              </div>
+            </div>
+            
+            <div className="w-px bg-white/5 hidden md:block" />
+            
+            <div className="flex-1 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-emerald-500/10 rounded-lg">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                </div>
+                <h4 className="text-xl font-black text-white tracking-tight">المهام المكتملة</h4>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(() => {
+                  const completed = db.coins?.tasks_completed ? db.coins.tasks_completed.split(',').filter(Boolean) : [];
+                  return completed.length > 0 ? completed.map((task: string, i: number) => (
+                    <div key={i} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      {task}
+                    </div>
+                  )) : (
+                    <div className="text-gray-500 font-bold italic py-1">لم يتم إكمال أي مهام بعد</div>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Logs Grid */}
@@ -378,7 +430,7 @@ export default function MyInfoPage() {
         </div>
 
       </div>
-
     </div>
-  );
+  </ScreenshotButton>
+);
 }

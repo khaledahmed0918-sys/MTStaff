@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import CachedImage from '@/components/cached-image';
-import { Shield, MessageSquare, Flame, AlertTriangle, Loader2, ChevronDown, ChevronUp, Camera, Ban, Clock, CheckCircle2 } from 'lucide-react';
+import { Shield, MessageSquare, Flame, AlertTriangle, Loader2, ChevronDown, ChevronUp, Camera, Ban, Clock, CheckCircle2, ListTodo } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ScreenshotButton } from '@/components/screenshot-button';
@@ -167,6 +167,59 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                                   <div className="flex items-center gap-2 text-red-400 text-[11px] font-bold mt-2 border-t border-white/5 pt-2">
                                     <AlertTriangle className="w-4 h-4" />
                                     <span>تحذيرات: {member.stats.warns.length}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Tasks Section */}
+                              <div className="bg-[#0a0f1a] rounded-2xl p-6 border border-white/10 space-y-4 shadow-inner">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-blue-500/20 rounded-lg">
+                                    <ListTodo className="w-5 h-5 text-blue-400" />
+                                  </div>
+                                  <h4 className="text-lg font-black text-white tracking-tight">المهام</h4>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                  <div className="space-y-2">
+                                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider flex items-center gap-2">
+                                      <div className="w-1 h-1 rounded-full bg-red-500" />
+                                      متبقية
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {(() => {
+                                        const remaining = member.stats.tasks_remaining ? member.stats.tasks_remaining.split(',').filter(Boolean) : [];
+                                        if (!member.stats.completed_today) {
+                                          remaining.push("إكمال مهمة الستريك");
+                                        }
+                                        return remaining.length > 0 ? remaining.map((task: string, i: number) => (
+                                          <span key={i} className="bg-red-500/10 text-red-400 px-2 py-1 rounded-lg text-[11px] font-bold border border-red-500/10">
+                                            {task}
+                                          </span>
+                                        )) : (
+                                          <span className="text-gray-600 text-[11px] italic">لا توجد مهام 🎉</span>
+                                        );
+                                      })()}
+                                    </div>
+                                  </div>
+
+                                  <div className="space-y-2">
+                                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider flex items-center gap-2">
+                                      <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                                      مكتملة
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {(() => {
+                                        const completed = member.stats.tasks_completed ? member.stats.tasks_completed.split(',').filter(Boolean) : [];
+                                        return completed.length > 0 ? completed.map((task: string, i: number) => (
+                                          <span key={i} className="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-lg text-[11px] font-bold border border-emerald-500/10">
+                                            {task}
+                                          </span>
+                                        )) : (
+                                          <span className="text-gray-600 text-[11px] italic">لا توجد مهام مكتملة</span>
+                                        );
+                                      })()}
+                                    </div>
                                   </div>
                                 </div>
                               </div>

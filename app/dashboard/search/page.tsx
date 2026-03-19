@@ -297,6 +297,61 @@ function SearchContent() {
                           </div>
                         </div>
 
+                        {/* Tasks */}
+                        <div className="lg:col-span-3 bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden group">
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-full blur-3xl" />
+                          <div className="flex flex-col md:flex-row gap-8">
+                            <div className="flex-1 space-y-6">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-500/20 rounded-lg">
+                                  <ListTodo className="w-6 h-6 text-blue-400" />
+                                </div>
+                                <h4 className="text-2xl font-black text-white tracking-tight">المهام المتبقية</h4>
+                              </div>
+                              <div className="flex flex-wrap gap-3">
+                                {(() => {
+                                  const remaining = expandedData.db.stats?.tasks_remaining ? expandedData.db.stats.tasks_remaining.split(',').filter(Boolean) : [];
+                                  if (!expandedData.db.stats?.completed_today) {
+                                    remaining.push("إكمال مهمة الستريك");
+                                  }
+                                  return remaining.length > 0 ? remaining.map((task: string, i: number) => (
+                                    <div key={i} className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 animate-in fade-in zoom-in duration-300" style={{ animationDelay: `${i * 100}ms` }}>
+                                      <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                                      {task}
+                                    </div>
+                                  )) : (
+                                    <div className="text-gray-500 font-bold italic py-2">لا توجد مهام متبقية 🎉</div>
+                                  );
+                                })()}
+                              </div>
+                            </div>
+                            
+                            <div className="w-px bg-white/5 hidden md:block" />
+                            
+                            <div className="flex-1 space-y-6">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-emerald-500/20 rounded-lg">
+                                  <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                                </div>
+                                <h4 className="text-2xl font-black text-white tracking-tight">المهام المكتملة</h4>
+                              </div>
+                              <div className="flex flex-wrap gap-3">
+                                {(() => {
+                                  const completed = expandedData.db.stats?.tasks_completed ? expandedData.db.stats.tasks_completed.split(',').filter(Boolean) : [];
+                                  return completed.length > 0 ? completed.map((task: string, i: number) => (
+                                    <div key={i} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 animate-in fade-in zoom-in duration-300" style={{ animationDelay: `${i * 100}ms` }}>
+                                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                      {task}
+                                    </div>
+                                  )) : (
+                                    <div className="text-gray-500 font-bold italic py-2">لم يتم إكمال أي مهام بعد</div>
+                                  );
+                                })()}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
                         {/* Coins */}
                         <div className="bg-gradient-to-br from-[#111827] to-[#0a0f1a] border-2 border-yellow-500/40 rounded-3xl p-8 shadow-2xl hover:border-yellow-500/70 transition-all group flex flex-col items-center justify-center text-center relative overflow-hidden">
                           <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-500/10 rounded-bl-full blur-2xl" />
