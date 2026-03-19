@@ -41,6 +41,7 @@ function SearchContent() {
       }
     };
     fetchDefault();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuery]);
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -337,6 +338,9 @@ function SearchContent() {
                                 {(() => {
                                   const tasks = expandedData.db.tasks || [];
                                   const completed = tasks.filter((t: any) => t.completed);
+                                  if (expandedData.db.streaks?.daily_messages >= 100) {
+                                    completed.push({ task_name: 'إنجاز مهمة الستريك بنجاح', completed: true });
+                                  }
                                   return completed.length > 0 ? completed.map((task: any, i: number) => (
                                     <div key={i} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 animate-in fade-in zoom-in duration-300" style={{ animationDelay: `${i * 100}ms` }}>
                                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />

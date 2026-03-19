@@ -84,6 +84,10 @@ export default function MyInfoPage() {
   const remainingTasks = tasks.filter((t: any) => !t.completed);
   const completedTasks = tasks.filter((t: any) => t.completed);
 
+  if (streaks && streaks.daily_messages >= 100) {
+    completedTasks.push({ task_name: 'إنجاز مهمة الستريك بنجاح', completed: true });
+  }
+
   return (
     <ScreenshotButton elementId="my-profile-card" fileName={`${discord.username}-profile.png`} className="block">
       <div id="my-profile-card" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#0a0f1a] p-4 sm:p-8 rounded-3xl relative">
@@ -107,7 +111,7 @@ export default function MyInfoPage() {
 
         {/* Avatar & Info */}
         <div className="px-4 md:px-8 pb-8 relative">
-          <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center md:items-end -mt-20 md:-mt-16 mb-6">
+          <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center md:items-end -mt-16 md:-mt-20 mb-6">
             <div className="relative w-32 h-32 md:w-40 md:h-40 z-10 shrink-0">
               <div className="w-full h-full relative rounded-full overflow-hidden border-4 border-[#111827] shadow-[0_0_30px_rgba(59,130,246,0.4)] bg-[#111827]">
                 {discord.avatar ? (
@@ -123,7 +127,7 @@ export default function MyInfoPage() {
                 )}
               </div>
             </div>
-            <div className="flex-1 text-center md:text-right mt-2 md:mt-0">
+            <div className="flex-1 text-center md:text-right mt-2 md:mt-0 pt-2 md:pt-0">
               <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 justify-center md:justify-start">
                 <h1 className="text-2xl md:text-3xl font-bold" style={{ color: discord.highestRoleColor || '#ffffff' }}>
                   {discord.displayName || discord.username}
@@ -146,7 +150,7 @@ export default function MyInfoPage() {
               </div>
 
               {discord.roles && discord.roles.length > 0 && (
-                <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-2">
+                <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-2 max-h-[120px] md:max-h-none overflow-y-auto custom-scrollbar pr-1">
                   {discord.roles.map((role: any) => {
                     const roleColor = role.color !== '#000000' ? role.color : '#ffffff';
                     const { primaryColor, secondaryColor, tertiaryColor } = generateGradientColors(roleColor);

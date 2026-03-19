@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
 import Image from 'next/image';
-import { Menu } from 'lucide-react';
+import { Menu, LogOut } from 'lucide-react';
 import { useNav } from './nav-context';
+import { signOut } from 'next-auth/react';
 
 export function Topbar({ user }: { user: any }) {
   const { toggle } = useNav();
@@ -12,20 +13,39 @@ export function Topbar({ user }: { user: any }) {
   if (!user) return null;
 
   return (
-    <header className="h-16 bg-[#050505]/95 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 md:px-6 z-20 shadow-sm">
+    <header className="h-16 bg-gradient-to-r from-[#050505] to-[#0a0f1a] backdrop-blur-2xl border-b border-white/5 flex items-center justify-between px-4 md:px-6 z-20 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
       <div className="flex items-center gap-4">
         <button 
           onClick={toggle}
-          className="md:hidden p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+          className="md:hidden p-2.5 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 bg-[#111827]/50 border border-white/5"
         >
           <Menu className="w-5 h-5" />
         </button>
+        <div className="md:hidden flex items-center gap-2">
+          <div className="w-8 h-8 relative rounded-full overflow-hidden border border-white/10 shadow-[0_0_10px_rgba(59,130,246,0.3)]">
+            <Image
+              src="https://i.postimg.cc/jdLhSPtq/HEIF-Image.jpg"
+              alt="Logo"
+              fill
+              className="object-cover"
+              referrerPolicy="no-referrer"
+              unoptimized
+            />
+          </div>
+          <h2 className="font-bold text-sm text-white tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">MT</h2>
+        </div>
       </div>
       <div className="flex items-center gap-3">
+        <button
+          onClick={() => signOut({ callbackUrl: '/' })}
+          className="md:hidden p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/20"
+        >
+          <LogOut className="w-5 h-5" />
+        </button>
         <div className="text-right hidden md:block">
-          <p className="text-sm font-medium text-white">{profile.global_name || profile.username || user.name}</p>
+          <p className="text-sm font-bold text-white tracking-wide">{profile.global_name || profile.username || user.name}</p>
         </div>
-        <div className="w-9 h-9 relative rounded-full overflow-hidden border border-white/10">
+        <div className="w-10 h-10 relative rounded-full overflow-hidden border-2 border-[#111827] shadow-[0_0_15px_rgba(255,255,255,0.1)]">
           <Image
             src={imgSrc}
             alt={profile.username || user.name || 'User'}
