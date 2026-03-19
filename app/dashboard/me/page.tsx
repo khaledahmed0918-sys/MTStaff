@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import CachedImage from '@/components/cached-image';
-import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare, CheckCircle2, Camera, ListTodo } from 'lucide-react';
+import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare, CheckCircle2, Camera, ListTodo, History } from 'lucide-react';
 import { formatVoiceTime, formatDateEn, parseDiscordEmoji, generateGradientColors } from '@/lib/utils';
 import { ScreenshotButton } from '@/components/screenshot-button';
 
@@ -81,6 +81,9 @@ export default function MyInfoPage() {
   const { discord, db = {} } = data;
   const { warns = [], swarns = [], timeouts = [], bans = [], streaks, tasks = [] } = db;
 
+  const remainingTasks = tasks.filter((t: any) => !t.completed);
+  const completedTasks = tasks.filter((t: any) => t.completed);
+
   return (
     <ScreenshotButton elementId="my-profile-card" fileName={`${discord.username}-profile.png`} className="block">
       <div id="my-profile-card" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#0a0f1a] p-4 sm:p-8 rounded-3xl relative">
@@ -103,9 +106,9 @@ export default function MyInfoPage() {
         </div>
 
         {/* Avatar & Info */}
-        <div className="px-8 pb-8 relative">
-          <div className="flex flex-col md:flex-row gap-6 items-start md:items-end -mt-16 mb-6">
-            <div className="relative w-40 h-40 z-10">
+        <div className="px-4 md:px-8 pb-8 relative">
+          <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center md:items-end -mt-20 md:-mt-16 mb-6">
+            <div className="relative w-32 h-32 md:w-40 md:h-40 z-10 shrink-0">
               <div className="w-full h-full relative rounded-full overflow-hidden border-4 border-[#111827] shadow-[0_0_30px_rgba(59,130,246,0.4)] bg-[#111827]">
                 {discord.avatar ? (
                   <CachedImage
@@ -120,15 +123,15 @@ export default function MyInfoPage() {
                 )}
               </div>
             </div>
-            <div className="flex-1 mt-24 md:mt-20">
-              <div className="flex items-center gap-4">
-                <h1 className="text-3xl font-bold" style={{ color: discord.highestRoleColor || '#ffffff' }}>
+            <div className="flex-1 text-center md:text-right mt-2 md:mt-0">
+              <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 justify-center md:justify-start">
+                <h1 className="text-2xl md:text-3xl font-bold" style={{ color: discord.highestRoleColor || '#ffffff' }}>
                   {discord.displayName || discord.username}
                 </h1>
-                <span className="text-lg text-gray-400 font-normal">({discord.username})</span>
+                <span className="text-base md:text-lg text-gray-400 font-normal">({discord.username})</span>
               </div>
               
-              <div className="text-sm text-gray-500 mt-1 flex items-center gap-4">
+              <div className="text-xs md:text-sm text-gray-500 mt-2 flex flex-col md:flex-row items-center gap-2 md:gap-4 justify-center md:justify-start">
                 <span>ID: {discord.id}</span>
                 <div className="flex items-center gap-1.5">
                   <Calendar className="w-4 h-4" />
@@ -143,7 +146,7 @@ export default function MyInfoPage() {
               </div>
 
               {discord.roles && discord.roles.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-2">
                   {discord.roles.map((role: any) => {
                     const roleColor = role.color !== '#000000' ? role.color : '#ffffff';
                     const { primaryColor, secondaryColor, tertiaryColor } = generateGradientColors(roleColor);
@@ -167,30 +170,30 @@ export default function MyInfoPage() {
 
             {/* Streaks Badge */}
             {streaks && (
-              <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 px-6 py-4 rounded-2xl flex items-center gap-4 shadow-[0_0_20px_rgba(249,115,22,0.15)]">
+              <div className="w-full md:w-auto mt-4 md:mt-0 bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 px-4 md:px-6 py-3 md:py-4 rounded-2xl flex items-center justify-center gap-4 shadow-[0_0_20px_rgba(249,115,22,0.15)] shrink-0">
                 <div className="text-center">
-                  <p className="text-orange-200 text-xs font-bold uppercase tracking-wider mb-1">الستريك الحالي</p>
-                  <p className="text-3xl font-black text-white flex items-center justify-center gap-2">
+                  <p className="text-orange-200 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-1">الستريك الحالي</p>
+                  <p className="text-2xl md:text-3xl font-black text-white flex items-center justify-center gap-2">
                     {streaks.streak}
                     {streaks.streak_emoji_url ? (
-                      <CachedImage src={streaks.streak_emoji_url} alt="Streak" width={28} height={28} />
+                      <CachedImage src={streaks.streak_emoji_url} alt="Streak" width={24} height={24} className="md:w-7 md:h-7" />
                     ) : streaks.streak_emoji ? (
                       parseDiscordEmoji(streaks.streak_emoji) ? (
-                        <CachedImage src={parseDiscordEmoji(streaks.streak_emoji)!} alt="Streak" width={28} height={28} />
+                        <CachedImage src={parseDiscordEmoji(streaks.streak_emoji)!} alt="Streak" width={24} height={24} className="md:w-7 md:h-7" />
                       ) : (
-                        <span className="text-2xl drop-shadow-md">{streaks.streak_emoji}</span>
+                        <span className="text-xl md:text-2xl drop-shadow-md">{streaks.streak_emoji}</span>
                       )
                     ) : (
-                      <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
+                      <Flame className="w-5 h-5 md:w-6 md:h-6 text-orange-500 fill-orange-500" />
                     )}
                   </p>
                 </div>
-                <div className="w-px h-12 bg-orange-500/20 mx-2" />
+                <div className="w-px h-10 md:h-12 bg-orange-500/20 mx-1 md:mx-2" />
                 <div className="text-center">
-                  <p className="text-orange-200 text-xs font-bold uppercase tracking-wider mb-1">رسائل اليوم</p>
-                  <p className="text-xl font-bold text-white flex items-center justify-center gap-2">
+                  <p className="text-orange-200 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-1">رسائل اليوم</p>
+                  <p className="text-lg md:text-xl font-bold text-white flex items-center justify-center gap-1.5 md:gap-2">
                     {streaks.daily_messages}/100
-                    <MessageSquare className="w-4 h-4 text-orange-400" />
+                    <MessageSquare className="w-3.5 h-3.5 md:w-4 md:h-4 text-orange-400" />
                   </p>
                 </div>
               </div>
@@ -274,22 +277,14 @@ export default function MyInfoPage() {
                 <h4 className="text-xl font-black text-white tracking-tight">المهام المتبقية</h4>
               </div>
               <div className="flex flex-wrap gap-2">
-                {(() => {
-                  const remaining = typeof db.coins?.tasks_remaining === 'string' 
-                    ? db.coins.tasks_remaining.split(',').filter(Boolean) 
-                    : [];
-                  if (!db.streaks?.completed_today) {
-                    remaining.push("إكمال مهمة الستريك");
-                  }
-                  return remaining.length > 0 ? remaining.map((task: string, i: number) => (
-                    <div key={i} className="bg-red-500/10 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                      {task}
-                    </div>
-                  )) : (
-                    <div className="text-gray-500 font-bold italic py-1">لا توجد مهام متبقية 🎉</div>
-                  );
-                })()}
+                {remainingTasks.length > 0 ? remainingTasks.map((task: any, i: number) => (
+                  <div key={i} className="bg-red-500/10 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                    {task.task_name} {task.remaining ? `(${task.remaining})` : ''}
+                  </div>
+                )) : (
+                  <div className="text-gray-500 font-bold italic py-1">لا توجد مهام متبقية 🎉</div>
+                )}
               </div>
             </div>
             
@@ -303,21 +298,45 @@ export default function MyInfoPage() {
                 <h4 className="text-xl font-black text-white tracking-tight">المهام المكتملة</h4>
               </div>
               <div className="flex flex-wrap gap-2">
-                {(() => {
-                  const completed = typeof db.coins?.tasks_completed === 'string' 
-                    ? db.coins.tasks_completed.split(',').filter(Boolean) 
-                    : [];
-                  return completed.length > 0 ? completed.map((task: string, i: number) => (
-                    <div key={i} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      {task}
-                    </div>
-                  )) : (
-                    <div className="text-gray-500 font-bold italic py-1">لم يتم إكمال أي مهام بعد</div>
-                  );
-                })()}
+                {completedTasks.length > 0 ? completedTasks.map((task: any, i: number) => (
+                  <div key={i} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    {task.task_name}
+                  </div>
+                )) : (
+                  <div className="text-gray-500 font-bold italic py-1">لم يتم إكمال أي مهام بعد</div>
+                )}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Recent Purchases */}
+        <div className="md:col-span-2 lg:col-span-4 bg-[#111827]/80 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-6 shadow-lg relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-bl-full blur-3xl" />
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-purple-500/10 rounded-lg">
+              <History className="w-6 h-6 text-purple-400" />
+            </div>
+            <h4 className="text-xl font-black text-white tracking-tight">آخر المشتريات</h4>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {db.coins?.last_5 && db.coins.last_5.length > 0 ? (
+              db.coins.last_5.map((purchase: any, i: number) => (
+                <div key={i} className="bg-[#0a0f1a] border border-white/5 p-4 rounded-xl hover:border-purple-500/30 transition-colors flex flex-col justify-between">
+                  <div className="mb-2">
+                    <h5 className="font-bold text-gray-200 text-sm truncate">{purchase.item_name}</h5>
+                    <span className="text-yellow-400 font-mono text-xs">{purchase.price.toLocaleString()} عملة</span>
+                  </div>
+                  <div className="text-xs text-gray-500 flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    <span>{purchase.date}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-gray-500 font-bold italic py-2">لا توجد مشتريات حديثة</div>
+            )}
           </div>
         </div>
       </div>

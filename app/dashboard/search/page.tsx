@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo, Camera, CheckCircle2 } from 'lucide-react';
+import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo, Camera, CheckCircle2, History } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
 import { formatDateEn, formatVoiceTime, parseDiscordEmoji, generateGradientColors } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
@@ -139,7 +139,7 @@ function SearchContent() {
                 onClick={() => toggleExpand(user.id)}
               >
                 <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6">
-                  <div className="w-32 h-32 md:w-40 md:h-40 relative rounded-full overflow-hidden border-4 border-[#111827] bg-[#111827] z-10 shadow-2xl">
+                  <div className="w-32 h-32 md:w-40 md:h-40 relative rounded-full overflow-hidden border-4 border-[#111827] bg-[#111827] z-10 shadow-2xl shrink-0">
                     {user.avatar ? (
                       <CachedImage src={user.avatar} alt={user.username} fill className="object-cover" referrerPolicy="no-referrer" />
                     ) : (
@@ -310,16 +310,12 @@ function SearchContent() {
                               </div>
                               <div className="flex flex-wrap gap-3">
                                 {(() => {
-                                  const remaining = typeof expandedData.db.coins?.tasks_remaining === 'string' 
-                                    ? expandedData.db.coins.tasks_remaining.split(',').filter(Boolean) 
-                                    : [];
-                                  if (!expandedData.db.streaks?.completed_today) {
-                                    remaining.push("إكمال مهمة الستريك");
-                                  }
-                                  return remaining.length > 0 ? remaining.map((task: string, i: number) => (
+                                  const tasks = expandedData.db.tasks || [];
+                                  const remaining = tasks.filter((t: any) => !t.completed);
+                                  return remaining.length > 0 ? remaining.map((task: any, i: number) => (
                                     <div key={i} className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 animate-in fade-in zoom-in duration-300" style={{ animationDelay: `${i * 100}ms` }}>
                                       <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                                      {task}
+                                      {task.task_name} {task.remaining ? `(${task.remaining})` : ''}
                                     </div>
                                   )) : (
                                     <div className="text-gray-500 font-bold italic py-2">لا توجد مهام متبقية 🎉</div>
@@ -339,13 +335,12 @@ function SearchContent() {
                               </div>
                               <div className="flex flex-wrap gap-3">
                                 {(() => {
-                                  const completed = typeof expandedData.db.coins?.tasks_completed === 'string'
-                                    ? expandedData.db.coins.tasks_completed.split(',').filter(Boolean)
-                                    : [];
-                                  return completed.length > 0 ? completed.map((task: string, i: number) => (
+                                  const tasks = expandedData.db.tasks || [];
+                                  const completed = tasks.filter((t: any) => t.completed);
+                                  return completed.length > 0 ? completed.map((task: any, i: number) => (
                                     <div key={i} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 animate-in fade-in zoom-in duration-300" style={{ animationDelay: `${i * 100}ms` }}>
                                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                      {task}
+                                      {task.task_name}
                                     </div>
                                   )) : (
                                     <div className="text-gray-500 font-bold italic py-2">لم يتم إكمال أي مهام بعد</div>
@@ -353,6 +348,35 @@ function SearchContent() {
                                 })()}
                               </div>
                             </div>
+                          </div>
+                        </div>
+
+                        {/* Recent Purchases */}
+                        <div className="lg:col-span-3 bg-[#111827]/80 backdrop-blur-xl border border-purple-500/20 rounded-3xl p-8 shadow-2xl relative overflow-hidden group">
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-bl-full blur-3xl" />
+                          <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2 bg-purple-500/20 rounded-lg">
+                              <History className="w-6 h-6 text-purple-400" />
+                            </div>
+                            <h4 className="text-2xl font-black text-white tracking-tight">آخر المشتريات</h4>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                            {expandedData.db.coins?.last_5 && expandedData.db.coins.last_5.length > 0 ? (
+                              expandedData.db.coins.last_5.map((purchase: any, i: number) => (
+                                <div key={i} className="bg-[#0a0f1a] border border-white/5 p-4 rounded-xl hover:border-purple-500/30 transition-colors flex flex-col justify-between">
+                                  <div className="mb-2">
+                                    <h5 className="font-bold text-gray-200 text-sm truncate">{purchase.item_name}</h5>
+                                    <span className="text-yellow-400 font-mono text-xs">{purchase.price.toLocaleString()} عملة</span>
+                                  </div>
+                                  <div className="text-xs text-gray-500 flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    <span>{purchase.date}</span>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="col-span-full text-gray-500 font-bold italic py-2">لا توجد مشتريات حديثة</div>
+                            )}
                           </div>
                         </div>
 

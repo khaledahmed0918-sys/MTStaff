@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { getUserInfo, getEmojiDetails } from '@/lib/bot';
+import fs from 'fs/promises';
+
+async function readUserJson(userId: string) {
+  try {
+    const data = await fs.readFile(`/root/mtcoins/data/users/${userId}.json`, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    return null;
+  }
+}
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -12,7 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   try {
     // Run all queries concurrently to improve speed
-    const [discordRes, warnsRes, swarnsRes, timeoutsRes, bansRes, streaksRes, messagesRes, voiceRes, coinsRes, tasksRes] = await Promise.allSettled([
+    const [discordRes, warnsRes, swarnsRes, timeoutsRes, bansRes, streaksRes, messagesRes, voiceRes, userJson] = await Promise.allSettled([
       getUserInfo(guildId, id),
       query(`SELECT * FROM "warns_${id}" ORDER BY date_warn DESC`),
       query(`SELECT * FROM "swarns_${id}" ORDER BY date_warn DESC`),
@@ -21,8 +31,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       query(`SELECT * FROM streaks WHERE user_id = $1`, [id]),
       query(`SELECT * FROM messages WHERE user_id = $1`, [id]),
       query(`SELECT * FROM voice WHERE user_id = $1`, [id]),
-      query(`SELECT * FROM coins WHERE user_id = $1`, [id]),
-      query(`SELECT * FROM tasks WHERE user_id = $1 ORDER BY created_at DESC`, [id])
+      readUserJson(id)
     ]);
 
     const discordInfo = discordRes.status === 'fulfilled' ? discordRes.value : null;
@@ -33,8 +42,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const streaks = streaksRes.status === 'fulfilled' && streaksRes.value.rows.length > 0 ? streaksRes.value.rows[0] : null;
     const messages = messagesRes.status === 'fulfilled' && messagesRes.value.rows.length > 0 ? messagesRes.value.rows[0] : null;
     const voice = voiceRes.status === 'fulfilled' && voiceRes.value.rows.length > 0 ? voiceRes.value.rows[0] : null;
-    const coins = coinsRes.status === 'fulfilled' && coinsRes.value.rows.length > 0 ? coinsRes.value.rows[0] : null;
-    const tasks = tasksRes.status === 'fulfilled' ? tasksRes.value.rows : [];
+    
+    const userData = userJson.status === 'fulfilled' && userJson.value ? userJson.value : { data: { coins: 0, tasks_remaining: 0, tasks_completed: 0, last_5: [] }, tasks: [] };
 
     if (streaks && streaks.streak_emoji) {
       const emojiDetails = await getEmojiDetails(guildId, streaks.streak_emoji);
@@ -53,8 +62,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         streaks,
         messages,
         voice,
-        coins,
-        tasks,
+        coins: userData.data,
+        tasks: userData.tasks,
       },
     });
   } catch (err) {
