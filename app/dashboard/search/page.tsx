@@ -506,7 +506,7 @@ function SearchContent() {
                         </div>
 
                         {/* Bans */}
-                        {expandedData.db.bans ? (
+                        {expandedData.db.bans && (
                         <div className="bg-[#111827] border border-red-500/20 rounded-2xl overflow-hidden flex flex-col h-80 shadow-lg group hover:border-red-500/40 transition-all">
                           <div className="bg-red-500/10 p-4 border-b border-red-500/20 flex items-center gap-2">
                             <Ban className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform" />
@@ -537,9 +537,7 @@ function SearchContent() {
                             )}
                           </div>
                         </div>
-                      </div>
-                  ) : null}
-                </div>
+                        )}
               )}
             </div>
           </ScreenshotButton>
