@@ -30,10 +30,10 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
     return (
       <section className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both">
         <div className="flex items-center gap-3 px-2">
-          <div className="p-2 bg-blue-500/20 rounded-lg">
+          <div className="p-2 bg-blue-500/20 rounded-lg shadow-[0_0_15px_rgba(59,130,246,0.2)]">
             <Shield className="w-6 h-6 text-blue-400" />
           </div>
-          <h2 className="text-2xl font-bold text-white">فريق الإدارة</h2>
+          <h2 className="text-2xl font-bold text-white tracking-tight">فريق الإدارة</h2>
         </div>
         <div className="flex justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
@@ -46,12 +46,12 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
     return (
       <section className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both">
         <div className="flex items-center gap-3 px-2">
-          <div className="p-2 bg-blue-500/20 rounded-lg">
+          <div className="p-2 bg-blue-500/20 rounded-lg shadow-[0_0_15px_rgba(59,130,246,0.2)]">
             <Shield className="w-6 h-6 text-blue-400" />
           </div>
-          <h2 className="text-2xl font-bold text-white">فريق الإدارة</h2>
+          <h2 className="text-2xl font-bold text-white tracking-tight">فريق الإدارة</h2>
         </div>
-        <div className="flex justify-center py-12 text-gray-500">
+        <div className="flex justify-center py-12 text-gray-500 bg-[#111827]/40 backdrop-blur-xl rounded-3xl border border-white/5 shadow-2xl">
           لا يوجد أعضاء في فريق الإدارة حالياً
         </div>
       </section>
@@ -61,10 +61,10 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
   return (
     <section className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both">
       <div className="flex items-center gap-3 px-2">
-        <div className="p-2 bg-blue-500/20 rounded-lg">
+        <div className="p-2 bg-blue-500/20 rounded-lg shadow-[0_0_15px_rgba(59,130,246,0.2)]">
           <Shield className="w-6 h-6 text-blue-400" />
         </div>
-        <h2 className="text-2xl font-bold text-white">فريق الإدارة</h2>
+        <h2 className="text-2xl font-bold text-white tracking-tight">فريق الإدارة</h2>
       </div>
 
       <div className="space-y-16">
@@ -72,7 +72,7 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
           <div key={catIdx} className="space-y-10">
             <div className="flex items-center gap-4">
               <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-              <h2 className="text-2xl font-black text-white tracking-widest uppercase px-8 py-3 bg-white/5 rounded-full border border-white/10 backdrop-blur-md shadow-2xl">
+              <h2 className="text-2xl font-black text-white tracking-widest uppercase px-8 py-3 bg-[#111827]/60 rounded-full border border-white/10 backdrop-blur-xl shadow-[0_0_30px_rgba(255,255,255,0.05)]">
                 {category.name}
               </h2>
               <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
@@ -82,16 +82,16 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
               {category.roles.map((role: any, roleIdx: number) => (
                 <div key={roleIdx} className="space-y-6">
                   <div className="flex items-center gap-4 px-4">
-                    <div className="flex items-center gap-3 px-5 py-2 rounded-xl border border-white/5 bg-[#111827]/40 backdrop-blur-sm shadow-inner" style={{ borderColor: `${role.color}30` }}>
+                    <div className="flex items-center gap-3 px-5 py-2 rounded-xl border border-white/5 bg-[#111827]/60 backdrop-blur-md shadow-[0_0_20px_rgba(0,0,0,0.2)] hover:scale-105 transition-transform duration-300" style={{ borderColor: `${role.color}30` }}>
                       {role.icon ? (
-                        <CachedImage src={role.icon} alt={role.name} width={24} height={24} className="object-contain" />
+                        <CachedImage src={role.icon} alt={role.name} width={24} height={24} className="object-contain drop-shadow-md" />
                       ) : (
-                        <Shield className="w-5 h-5" style={{ color: role.color }} />
+                        <Shield className="w-5 h-5 drop-shadow-md" style={{ color: role.color }} />
                       )}
-                      <h3 className="text-lg font-bold tracking-wide" style={{ color: role.color }}>
+                      <h3 className="text-lg font-bold tracking-wide drop-shadow-sm" style={{ color: role.color }}>
                         {role.name}
                       </h3>
-                      <span className="text-[10px] font-mono bg-white/5 px-2 py-0.5 rounded-full text-gray-400 border border-white/5">
+                      <span className="text-[10px] font-mono bg-white/5 px-2 py-0.5 rounded-full text-gray-400 border border-white/5 shadow-inner">
                         {role.members.length}
                       </span>
                     </div>
@@ -105,7 +105,7 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                         elementId={`staff-card-${member.id}`} 
                         fileName={`${member.username}-staff-card.png`} 
                         memberData={member}
-                        className="h-full"
+                        className="h-full block"
                       >
                         <motion.div
                           id={`staff-card-${member.id}`}
@@ -115,14 +115,14 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                           whileHover={{ y: -4, scale: 1.01 }}
                           transition={{ duration: 0.4 }}
                           onClick={() => router.push(`/dashboard/search?q=${member.id}`)}
-                          className="bg-[#111827]/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-lg hover:shadow-[0_0_25px_rgba(59,130,246,0.15)] transition-all duration-300 cursor-pointer group relative overflow-hidden h-full"
+                          className="bg-[#111827]/40 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] transition-all duration-500 cursor-pointer group relative overflow-hidden h-full"
                           style={{ borderTopColor: `${member.highestRoleColor}80`, borderTopWidth: '2px' }}
                         >
-                          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full opacity-50 pointer-events-none" style={{ backgroundImage: `linear-gradient(to bottom right, ${member.highestRoleColor}20, transparent)` }} />
+                          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full opacity-50 pointer-events-none blur-2xl group-hover:scale-150 transition-transform duration-700" style={{ backgroundImage: `linear-gradient(to bottom right, ${member.highestRoleColor}20, transparent)` }} />
                           
                           <div className="flex items-start gap-4 relative z-10">
                             <div className="relative w-20 h-20 shrink-0 group/avatar">
-                              <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#111827] shadow-md relative z-10 bg-[#0a0f1a]" style={{ borderColor: member.highestRoleColor }}>
+                              <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#111827] shadow-xl relative z-10 bg-[#0a0f1a]" style={{ borderColor: member.highestRoleColor }}>
                                 <CachedImage 
                                   src={member.avatar} 
                                   alt={member.displayName} 
@@ -135,14 +135,14 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                                   <CachedImage src={member.avatarDecoration} alt="Decoration" fill className="object-cover" />
                                 </div>
                               )}
-                              <div className="absolute inset-0 rounded-full shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] z-15 pointer-events-none" />
+                              <div className="absolute inset-0 rounded-full shadow-[inset_0_0_15px_rgba(0,0,0,0.6)] z-15 pointer-events-none" />
                             </div>
                             
                             <div className="flex-1 min-w-0 pt-2">
-                              <h4 className="text-xl font-bold text-white truncate group-hover:text-blue-400 transition-colors" style={{ color: member.highestRoleColor }}>
+                              <h4 className="text-xl font-black text-white truncate group-hover:text-blue-400 transition-colors drop-shadow-md" style={{ color: member.highestRoleColor }}>
                                 {member.displayName}
                               </h4>
-                              <p className="text-base text-gray-400 truncate">@{member.username}</p>
+                              <p className="text-sm font-medium text-gray-400 truncate mt-0.5">@{member.username}</p>
                             </div>
                           </div>
 

@@ -12,12 +12,16 @@ export const metadata: Metadata = {
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="ar" dir="rtl" className={inter.variable} suppressHydrationWarning>
-      <body suppressHydrationWarning className="font-sans text-white min-h-screen bg-[#050505] relative overflow-x-hidden selection:bg-blue-500/30">
+      <body suppressHydrationWarning className="font-sans text-white min-h-screen bg-[#050b14] relative overflow-x-hidden selection:bg-blue-500/30">
         {/* Atmospheric Background */}
-        <div className="fixed inset-0 z-[-1] pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] opacity-30 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/40 via-blue-900/10 to-transparent blur-3xl"></div>
-          <div className="absolute bottom-0 right-0 w-[800px] h-[600px] opacity-20 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-indigo-600/30 via-transparent to-transparent blur-3xl"></div>
-          <div className="absolute top-1/2 left-0 w-[600px] h-[600px] -translate-y-1/2 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-600/20 via-transparent to-transparent blur-3xl"></div>
+        <div className="fixed inset-0 z-[-1] pointer-events-none bg-[#020813]">
+          {/* Neon Spots */}
+          <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.4)_0%,transparent_60%)]"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-[radial-gradient(circle_at_center,rgba(147,51,234,0.4)_0%,transparent_60%)]"></div>
+          <div className="absolute top-[40%] left-[60%] w-[40vw] h-[40vw] rounded-full bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.3)_0%,transparent_60%)]"></div>
+          
+          {/* Faint blue overlay with heavy blur to create the glass effect */}
+          <div className="absolute inset-0 bg-[#0a192f]/60 backdrop-blur-[80px]"></div>
         </div>
         
         {children}

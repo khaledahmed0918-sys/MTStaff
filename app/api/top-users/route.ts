@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { client } from '@/lib/bot';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   const guildId = process.env.DISCORD_GUILD_ID;
 
