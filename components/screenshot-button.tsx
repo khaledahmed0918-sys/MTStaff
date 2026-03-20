@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Camera, X, Download, Loader2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'motion/react';
+import CachedImage from '@/components/cached-image';
 
 interface ScreenshotModalProps {
   elementId: string;
@@ -329,8 +330,8 @@ export function ScreenshotButton({ elementId, fileName = 'screenshot.png', class
                 </button>
               </div>
               
-              <div className="p-6 overflow-auto flex-1 flex items-center justify-center bg-[#0a0f1a] custom-scrollbar">
-                <img src={image} alt="Screenshot" className="max-w-full h-auto rounded-xl shadow-lg border border-white/5" />
+              <div className="p-6 overflow-auto flex-1 flex items-center justify-center bg-[#0a0f1a] custom-scrollbar relative w-full h-[70vh]">
+                <CachedImage src={image} alt="Screenshot" fill className="object-contain rounded-xl shadow-lg border border-white/5" />
               </div>
 
               <div className="p-4 border-t border-white/10 bg-white/5 flex justify-end gap-3">

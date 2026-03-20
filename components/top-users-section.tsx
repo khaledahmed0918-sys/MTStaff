@@ -81,7 +81,11 @@ export function TopUsersSection({ guildId }: { guildId: string }) {
             >
               <motion.div 
                 id={`top-user-card-${member.id}`}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
                 whileHover={{ y: -5 }}
+                transition={{ duration: 0.4 }}
                 onClick={() => router.push(`/dashboard/search?q=${member.id}`)}
                 className={`relative overflow-hidden rounded-3xl border ${sec.border} bg-[#111827]/80 backdrop-blur-xl p-6 shadow-xl cursor-pointer group h-full`}
               >

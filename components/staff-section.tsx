@@ -109,7 +109,11 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                       >
                         <motion.div
                           id={`staff-card-${member.id}`}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true, margin: "-50px" }}
                           whileHover={{ y: -4, scale: 1.01 }}
+                          transition={{ duration: 0.4 }}
                           onClick={() => router.push(`/dashboard/search?q=${member.id}`)}
                           className="bg-[#111827]/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-lg hover:shadow-[0_0_25px_rgba(59,130,246,0.15)] transition-all duration-300 cursor-pointer group relative overflow-hidden h-full"
                           style={{ borderTopColor: `${member.highestRoleColor}80`, borderTopWidth: '2px' }}

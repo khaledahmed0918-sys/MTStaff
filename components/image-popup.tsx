@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { X, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import CachedImage from '@/components/cached-image';
 
 export function ImagePopup({ src, onClose }: { src: string; onClose: () => void }) {
   const handleDownload = () => {
@@ -35,8 +36,8 @@ export function ImagePopup({ src, onClose }: { src: string; onClose: () => void 
             <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="p-4 flex justify-center">
-          <img src={src} alt="Attachment" className="max-w-full max-h-[70vh] rounded-lg" />
+        <div className="p-4 flex justify-center relative w-full h-[70vh]">
+          <CachedImage src={src} alt="Attachment" fill className="object-contain rounded-lg" />
         </div>
         <div className="p-4 border-t border-white/10 flex justify-end gap-3">
           <button onClick={onClose} className="px-4 py-2 text-gray-300 hover:text-white rounded-lg">إغلاق</button>

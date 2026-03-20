@@ -5,6 +5,7 @@ import CachedImage from '@/components/cached-image';
 import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare, CheckCircle2, Camera, ListTodo, History } from 'lucide-react';
 import { formatVoiceTime, formatDateEn, parseDiscordEmoji, generateGradientColors } from '@/lib/utils';
 import { ScreenshotButton } from '@/components/screenshot-button';
+import { motion } from 'motion/react';
 
 const formatDateTime = (dateString: any) => {
   if (!dateString) return 'غير محدد';
@@ -90,7 +91,14 @@ export default function MyInfoPage() {
 
   return (
     <ScreenshotButton elementId="my-profile-card" fileName={`${discord.username}-profile.png`} className="block">
-      <div id="my-profile-card" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 bg-[#0a0f1a] p-4 sm:p-8 rounded-3xl relative">
+      <motion.div 
+        id="my-profile-card" 
+        className="space-y-8 bg-[#0a0f1a] p-4 sm:p-8 rounded-3xl relative"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5 }}
+      >
         {/* Profile Card */}
         <div className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative group">
         {/* Banner */}
@@ -457,7 +465,7 @@ export default function MyInfoPage() {
         </div>
 
       </div>
-    </div>
+    </motion.div>
   </ScreenshotButton>
 );
 }

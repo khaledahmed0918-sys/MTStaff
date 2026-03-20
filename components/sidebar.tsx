@@ -48,7 +48,6 @@ export function Sidebar() {
     { href: '/dashboard', label: 'الرئيسية', icon: Home },
     { href: '/dashboard/staff', label: 'الرتب الإدارية', icon: Users },
     { href: '/dashboard/search', label: 'البحث', icon: Search },
-    { href: '/dashboard/store', label: 'المتجر', icon: ShoppingCart },
     { href: '/dashboard/me', label: 'الملف الشخصي', icon: User },
   ];
 

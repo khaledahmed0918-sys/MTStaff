@@ -5,11 +5,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo, Camera, CheckCircle2, History } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
 import { formatDateEn, formatVoiceTime, parseDiscordEmoji, generateGradientColors } from '@/lib/utils';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { ScreenshotButton } from '@/components/screenshot-button';
 
 function SearchContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const initialQuery = searchParams.get('q') || '';
   
   const [query, setQuery] = useState(initialQuery);
@@ -47,6 +48,8 @@ function SearchContent() {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
+
+    router.push(`/dashboard/search?q=${encodeURIComponent(query)}`);
 
     setLoading(true);
     setExpandedId(null);
@@ -119,15 +122,21 @@ function SearchContent() {
           </div>
         )}
 
-        {results.map((user) => (
-          <ScreenshotButton 
-            key={user.id} 
-            elementId={`search-card-${user.id}`} 
-            fileName={`${user.username}-profile.png`}
-            memberData={user}
+        {results.map((user, index) => (
+          <motion.div
+            key={user.id}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
           >
-            <div id={`search-card-${user.id}`} className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 relative group">
-              {/* Banner */}
+            <ScreenshotButton 
+              elementId={`search-card-${user.id}`} 
+              fileName={`${user.username}-profile.png`}
+              memberData={user}
+            >
+              <div id={`search-card-${user.id}`} className="bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)] transition-all duration-300 relative group hover:border-white/20">
+                {/* Banner */}
               {user.banner && (
                 <div className="aspect-[5/2] w-full relative overflow-hidden">
                   <CachedImage src={user.banner} alt="Banner" fill className="object-cover w-full h-full" referrerPolicy="no-referrer" />
@@ -516,6 +525,7 @@ function SearchContent() {
               )}
             </div>
           </ScreenshotButton>
+          </motion.div>
         ))}
       </div>
     </div>
