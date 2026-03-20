@@ -324,6 +324,7 @@ function SearchContent() {
                             </div>
                           </div>
                         </div>
+                      </div>
 
                         {/* Tasks */}
                         <div className="lg:col-span-3 bg-[#111827]/80 backdrop-blur-xl border border-blue-500/20 rounded-3xl p-8 shadow-2xl relative overflow-hidden group hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] hover:border-blue-500/40 transition-all duration-500">
