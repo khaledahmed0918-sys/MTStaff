@@ -208,15 +208,19 @@ function SearchContent() {
                 <div className="border-t border-blue-500/20 bg-[#0a0f1a]/90 p-6 md:p-10 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none" />
                   <div className="relative z-10">
-                  {loadingDetails ? (
+                  {loadingDetails && (
                     <div className="flex justify-center py-12">
                       <div className="w-10 h-10 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
                     </div>
-                  ) : expandedData?.error ? (
+                  )}
+
+                  {!loadingDetails && expandedData?.error && (
                     <div className="flex justify-center py-8">
                       <p className="text-red-400 text-sm">حدث خطأ أثناء جلب البيانات: {expandedData.error}</p>
                     </div>
-                  ) : expandedData?.db ? (
+                  )}
+
+                  {!loadingDetails && !expandedData?.error && expandedData?.db && (
                     <div className="space-y-8">
                       {/* New Stats Grid - Larger and more prominent */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -538,6 +542,11 @@ function SearchContent() {
                           </div>
                         </div>
                         )}
+                      </div>
+                    </div>
+                  )}
+                  </div>
+                </div>
               )}
             </div>
           </ScreenshotButton>
