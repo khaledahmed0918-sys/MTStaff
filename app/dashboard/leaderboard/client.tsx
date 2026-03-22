@@ -1,12 +1,33 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Image from 'next/image';
-import { Search, Filter, MessageSquare, Mic, Flame, Coins, Shield, ArrowDownUp } from 'lucide-react';
+import { Search, Filter, MessageSquare, Mic, Flame, Coins, Shield, ArrowDownUp, Loader2 } from 'lucide-react';
 import { formatVoiceTime } from '@/lib/utils';
 
-export function LeaderboardClient({ initialUsers }: { initialUsers: any[] }) {
+export function LeaderboardClient() {
+  const [initialUsers, setInitialUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const res = await fetch('/api/leaderboard');
+        if (!res.ok) throw new Error('Failed to fetch leaderboard data');
+        const data = await res.json();
+        setInitialUsers(data);
+      } catch (err) {
+        console.error(err);
+        setError('حدث خطأ أثناء جلب البيانات');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUsers();
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'messages' | 'voice' | 'streak' | 'mtcoins' | 'rolesCount'>('messages');
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
@@ -92,6 +113,25 @@ export function LeaderboardClient({ initialUsers }: { initialUsers: any[] }) {
 
     return result;
   }, [initialUsers, searchQuery, sortBy, sortOrder, roleFilter, roleCountFilter]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+        <Loader2 className="w-12 h-12 animate-spin text-blue-500" />
+        <p className="text-gray-400 font-medium">جاري جلب بيانات المتصدرين...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+        <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

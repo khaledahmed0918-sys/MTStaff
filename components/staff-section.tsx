@@ -15,6 +15,20 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
   const router = useRouter();
 
   useEffect(() => {
+    if (initialCategories.length === 0) {
+      fetch('/api/staff')
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setCategories(data);
+          }
+        })
+        .catch(err => console.error('Failed to fetch staff:', err))
+        .finally(() => setLoading(false));
+    }
+  }, [initialCategories]);
+
+  useEffect(() => {
     if (document.body.style.overflow === 'hidden') {
         document.body.style.overflow = 'unset';
     }

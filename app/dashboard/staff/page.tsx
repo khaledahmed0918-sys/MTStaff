@@ -1,16 +1,6 @@
-import { getStaffWithStats } from '@/lib/bot';
 import { StaffSection } from '@/components/staff-section';
 
-export const dynamic = 'force-dynamic';
-
-export default async function StaffPage() {
-  const guildId = process.env.DISCORD_GUILD_ID;
-  let staffCategories: any[] = [];
-
-  if (guildId) {
-    staffCategories = await getStaffWithStats(guildId);
-  }
-
+export default function StaffPage() {
   return (
     <div className="space-y-8 pb-12">
       <div className="mb-8">
@@ -21,7 +11,7 @@ export default async function StaffPage() {
           قائمة بأعضاء الطاقم الإداري وإحصائياتهم
         </p>
       </div>
-      <StaffSection initialCategories={staffCategories} />
+      <StaffSection initialCategories={[]} />
     </div>
   );
 }

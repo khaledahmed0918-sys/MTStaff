@@ -7,6 +7,7 @@ import CachedImage from '@/components/cached-image';
 import { formatDateEn, formatVoiceTime, parseDiscordEmoji, generateGradientColors } from '@/lib/utils';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ScreenshotButton } from '@/components/screenshot-button';
+import { RolesDisplay } from '@/components/roles-display';
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -180,26 +181,7 @@ function SearchContent() {
                 </div>
                 
                 {user.roles && user.roles.length > 0 && (
-                  <div className="mt-8 flex flex-wrap justify-center md:justify-start gap-3">
-                    {user.roles.map((role: any) => {
-                      const roleColor = role.color !== '#000000' ? role.color : '#ffffff';
-                      const { primaryColor, secondaryColor, tertiaryColor } = generateGradientColors(roleColor);
-                      return (
-                        <div 
-                          key={role.id} 
-                          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-white/10 backdrop-blur-md shadow-sm hover:scale-105 transition-transform"
-                          style={{ 
-                            backgroundImage: `linear-gradient(to right, ${primaryColor}15, ${secondaryColor}15, ${tertiaryColor}15)`, 
-                            color: primaryColor,
-                            borderColor: `${primaryColor}30`
-                          }}
-                        >
-                          {role.icon && <CachedImage src={role.icon} alt={role.name} width={20} height={20} className="drop-shadow-sm" />}
-                          {role.name}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <RolesDisplay roles={user.roles} />
                 )}
               </motion.div>
 

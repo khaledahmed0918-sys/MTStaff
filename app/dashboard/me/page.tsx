@@ -5,6 +5,7 @@ import CachedImage from '@/components/cached-image';
 import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare, CheckCircle2, Camera, ListTodo, History } from 'lucide-react';
 import { formatVoiceTime, formatDateEn, parseDiscordEmoji, generateGradientColors } from '@/lib/utils';
 import { ScreenshotButton } from '@/components/screenshot-button';
+import { RolesDisplay } from '@/components/roles-display';
 import { motion } from 'motion/react';
 
 const formatDateTime = (dateString: any) => {
@@ -119,8 +120,9 @@ export default function MyInfoPage() {
 
         {/* Avatar & Info */}
         <div className="px-4 md:px-8 pb-8 relative">
-          <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center md:items-end -mt-16 md:-mt-20 mb-6">
-            <div className="relative w-32 h-32 md:w-40 md:h-40 z-10 shrink-0">
+          {/* Desktop Layout */}
+          <div className="hidden md:flex flex-row gap-6 items-end -mt-20 mb-6">
+            <div className="relative w-40 h-40 z-10 shrink-0">
               <div className="w-full h-full relative rounded-full overflow-hidden border-4 border-[#111827] shadow-[0_0_30px_rgba(59,130,246,0.4)] bg-[#111827]">
                 {discord.avatar ? (
                   <CachedImage
@@ -135,15 +137,16 @@ export default function MyInfoPage() {
                 )}
               </div>
             </div>
-            <div className="flex-1 text-center md:text-right mt-2 md:mt-0 pt-2 md:pt-0">
-              <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 justify-center md:justify-start">
-                <h1 className="text-2xl md:text-3xl font-bold" style={{ color: discord.highestRoleColor || '#ffffff' }}>
+            
+            <div className="flex-1 text-right pt-0">
+              <div className="flex flex-row items-center gap-4 justify-start">
+                <h1 className="text-3xl font-bold" style={{ color: discord.highestRoleColor || '#ffffff' }}>
                   {discord.displayName || discord.username}
                 </h1>
-                <span className="text-base md:text-lg text-gray-400 font-normal">({discord.username})</span>
+                <span className="text-lg text-gray-400 font-normal">({discord.username})</span>
               </div>
               
-              <div className="text-xs md:text-sm text-gray-500 mt-2 flex flex-col md:flex-row items-center gap-2 md:gap-4 justify-center md:justify-start">
+              <div className="text-sm text-gray-500 mt-2 flex flex-row items-center gap-4 justify-start">
                 <span>ID: {discord.id}</span>
                 <div className="flex items-center gap-1.5">
                   <Calendar className="w-4 h-4" />
@@ -158,31 +161,13 @@ export default function MyInfoPage() {
               </div>
 
               {discord.roles && discord.roles.length > 0 && (
-                <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-2 max-h-[120px] md:max-h-none overflow-y-auto custom-scrollbar pr-1">
-                  {discord.roles.map((role: any) => {
-                    const roleColor = role.color !== '#000000' ? role.color : '#ffffff';
-                    const { primaryColor, secondaryColor, tertiaryColor } = generateGradientColors(roleColor);
-                    return (
-                      <div 
-                        key={role.id} 
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border border-white/10" 
-                        style={{ 
-                          backgroundImage: `linear-gradient(to right, ${primaryColor}20, ${secondaryColor}20, ${tertiaryColor}20)`, 
-                          color: primaryColor 
-                        }}
-                      >
-                        {role.icon && <CachedImage src={role.icon} alt={role.name} width={16} height={16} />}
-                        {role.name}
-                      </div>
-                    );
-                  })}
-                </div>
+                <RolesDisplay roles={discord.roles} />
               )}
             </div>
 
             {/* Desktop Streaks Badge */}
             {streaks && (
-              <div className="hidden md:flex w-auto mt-0 bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 px-6 py-4 rounded-2xl items-center justify-center gap-4 shadow-[0_0_20px_rgba(249,115,22,0.15)] shrink-0">
+              <div className="flex w-auto mt-0 bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 px-6 py-4 rounded-2xl items-center justify-center gap-4 shadow-[0_0_20px_rgba(249,115,22,0.15)] shrink-0">
                 <div className="text-center">
                   <p className="text-orange-200 text-xs font-bold uppercase tracking-wider mb-1">الستريك الحالي</p>
                   <p className="text-3xl font-black text-white flex items-center justify-center gap-2">
@@ -212,36 +197,84 @@ export default function MyInfoPage() {
             )}
           </div>
 
-          {/* Mobile Streaks Badge (Separate Card) */}
-          {streaks && (
-            <div className="md:hidden w-full mt-6 bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 px-4 py-4 rounded-2xl flex items-center justify-between shadow-[0_0_20px_rgba(249,115,22,0.15)]">
-              <div className="text-center flex-1">
-                <p className="text-orange-200 text-[10px] font-bold uppercase tracking-wider mb-1">الستريك الحالي</p>
-                <p className="text-2xl font-black text-white flex items-center justify-center gap-2">
-                  {streaks.streak}
-                  {streaks.streak_emoji_url ? (
-                    <CachedImage src={streaks.streak_emoji_url} alt="Streak" width={24} height={24} />
-                  ) : streaks.streak_emoji ? (
-                    parseDiscordEmoji(streaks.streak_emoji) ? (
-                      <CachedImage src={parseDiscordEmoji(streaks.streak_emoji)!} alt="Streak" width={24} height={24} />
-                    ) : (
-                      <span className="text-xl drop-shadow-md">{streaks.streak_emoji}</span>
-                    )
-                  ) : (
-                    <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
+          {/* Mobile Layout */}
+          <div className="flex md:hidden flex-col -mt-16 mb-6">
+            <div className="flex justify-between items-start">
+              <div className="flex flex-col items-start gap-2 pt-16">
+                <div className="text-[10px] text-gray-500 flex flex-col items-start gap-1">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    <span>الإنشاء: {formatDateEn(discord.createdAt)}</span>
+                  </div>
+                  {discord.joinedAt && (
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      <span>الانضمام: {formatDateEn(discord.joinedAt)}</span>
+                    </div>
                   )}
-                </p>
+                </div>
+                {discord.roles && discord.roles.length > 0 && (
+                  <div className="w-32">
+                    <RolesDisplay roles={discord.roles} />
+                  </div>
+                )}
               </div>
-              <div className="w-px h-10 bg-orange-500/20 mx-2" />
-              <div className="text-center flex-1">
-                <p className="text-orange-200 text-[10px] font-bold uppercase tracking-wider mb-1">رسائل اليوم</p>
-                <p className="text-lg font-bold text-white flex items-center justify-center gap-1.5">
-                  {streaks.daily_messages}/100
-                  <MessageSquare className="w-3.5 h-3.5 text-orange-400" />
-                </p>
+
+              <div className="flex flex-col items-end">
+                <div className="relative w-28 h-28 z-10 shrink-0 mb-2">
+                  <div className="w-full h-full relative rounded-full overflow-hidden border-4 border-[#111827] shadow-[0_0_30px_rgba(59,130,246,0.4)] bg-[#111827]">
+                    {discord.avatar ? (
+                      <CachedImage
+                        src={discord.avatar}
+                        alt={discord.username}
+                        fill
+                        className="object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-3xl">{discord.username.charAt(0)}</div>
+                    )}
+                  </div>
+                </div>
+                <h1 className="text-xl font-bold text-right" style={{ color: discord.highestRoleColor || '#ffffff' }}>
+                  {discord.displayName || discord.username}
+                </h1>
+                <span className="text-sm text-gray-400 font-normal">@{discord.username}</span>
+                <span className="text-[10px] text-gray-500 mt-1">ID: {discord.id}</span>
               </div>
             </div>
-          )}
+
+            {/* Mobile Streaks Badge (Separate Card) */}
+            {streaks && (
+              <div className="w-full mt-6 bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 px-4 py-4 rounded-2xl flex items-center justify-between shadow-[0_0_20px_rgba(249,115,22,0.15)]">
+                <div className="text-center flex-1">
+                  <p className="text-orange-200 text-[10px] font-bold uppercase tracking-wider mb-1">الستريك الحالي</p>
+                  <p className="text-2xl font-black text-white flex items-center justify-center gap-2">
+                    {streaks.streak}
+                    {streaks.streak_emoji_url ? (
+                      <CachedImage src={streaks.streak_emoji_url} alt="Streak" width={24} height={24} />
+                    ) : streaks.streak_emoji ? (
+                      parseDiscordEmoji(streaks.streak_emoji) ? (
+                        <CachedImage src={parseDiscordEmoji(streaks.streak_emoji)!} alt="Streak" width={24} height={24} />
+                      ) : (
+                        <span className="text-xl drop-shadow-md">{streaks.streak_emoji}</span>
+                      )
+                    ) : (
+                      <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
+                    )}
+                  </p>
+                </div>
+                <div className="w-px h-10 bg-orange-500/20 mx-2" />
+                <div className="text-center flex-1">
+                  <p className="text-orange-200 text-[10px] font-bold uppercase tracking-wider mb-1">رسائل اليوم</p>
+                  <p className="text-lg font-bold text-white flex items-center justify-center gap-1.5">
+                    {streaks.daily_messages}/100
+                    <MessageSquare className="w-3.5 h-3.5 text-orange-400" />
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -308,48 +341,48 @@ export default function MyInfoPage() {
           </div>
         </div>
 
-        {/* Tasks */}
-        <div className="md:col-span-2 lg:col-span-4 bg-[#111827]/80 backdrop-blur-xl border border-blue-500/20 rounded-2xl p-6 shadow-lg relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-full blur-3xl" />
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="flex-1 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-500/10 rounded-lg">
-                  <ListTodo className="w-6 h-6 text-blue-400" />
-                </div>
-                <h4 className="text-xl font-black text-white tracking-tight">المهام المتبقية</h4>
+        {/* Remaining Tasks */}
+        <div className="md:col-span-1 lg:col-span-2 bg-[#111827]/80 backdrop-blur-xl border border-red-500/20 rounded-2xl p-6 shadow-lg relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-bl-full blur-3xl" />
+          <div className="flex-1 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-500/10 rounded-lg">
+                <ListTodo className="w-6 h-6 text-red-400" />
               </div>
-              <div className="flex flex-wrap gap-2">
-                {remainingTasks.length > 0 ? remainingTasks.map((task: any, i: number) => (
-                  <div key={i} className="bg-red-500/10 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                    {task.task_name} {task.remaining ? `(${task.remaining})` : ''}
-                  </div>
-                )) : (
-                  <div className="text-gray-500 font-bold italic py-1">لا توجد مهام متبقية 🎉</div>
-                )}
-              </div>
+              <h4 className="text-xl font-black text-white tracking-tight">المهام المتبقية</h4>
             </div>
-            
-            <div className="w-px bg-white/5 hidden md:block" />
-            
-            <div className="flex-1 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/10 rounded-lg">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+            <div className="flex flex-wrap gap-2">
+              {remainingTasks.length > 0 ? remainingTasks.map((task: any, i: number) => (
+                <div key={i} className="bg-red-500/10 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                  {task.task_name} {task.remaining ? `(${task.remaining})` : ''}
                 </div>
-                <h4 className="text-xl font-black text-white tracking-tight">المهام المكتملة</h4>
+              )) : (
+                <div className="text-gray-500 font-bold italic py-1">لا توجد مهام متبقية 🎉</div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Completed Tasks */}
+        <div className="md:col-span-1 lg:col-span-2 bg-[#111827]/80 backdrop-blur-xl border border-emerald-500/20 rounded-2xl p-6 shadow-lg relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-32 h-32 bg-emerald-500/5 rounded-br-full blur-3xl" />
+          <div className="flex-1 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-emerald-500/10 rounded-lg">
+                <CheckCircle2 className="w-6 h-6 text-emerald-400" />
               </div>
-              <div className="flex flex-wrap gap-2">
-                {completedTasks.length > 0 ? completedTasks.map((task: any, i: number) => (
-                  <div key={i} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    {task.task_name}
-                  </div>
-                )) : (
-                  <div className="text-gray-500 font-bold italic py-1">لم يتم إكمال أي مهام بعد</div>
-                )}
-              </div>
+              <h4 className="text-xl font-black text-white tracking-tight">المهام المكتملة</h4>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {completedTasks.length > 0 ? completedTasks.map((task: any, i: number) => (
+                <div key={i} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  {task.task_name}
+                </div>
+              )) : (
+                <div className="text-gray-500 font-bold italic py-1">لم يتم إكمال أي مهام بعد</div>
+              )}
             </div>
           </div>
         </div>

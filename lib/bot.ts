@@ -166,22 +166,9 @@ async function fetchStaffMembersBackground(guildId: string) {
 
     const guild = await client.guilds.fetch(guildId);
     
-    // Fetch all members using REST to avoid gateway rate limits
-    let allMembers: any[] = [];
-    let lastId = '0';
-    while (true) {
-      const res = await fetch(`https://discord.com/api/v10/guilds/${guildId}/members?limit=1000&after=${lastId}`, {
-        headers: {
-          Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
-        },
-      });
-      if (!res.ok) break;
-      const members = await res.json();
-      if (members.length === 0) break;
-      allMembers = allMembers.concat(members);
-      lastId = members[members.length - 1].user.id;
-      if (members.length < 1000) break;
-    }
+    // Fetch all members using Gateway (much faster than REST chunks)
+    await guild.members.fetch();
+    const allMembers = Array.from(guild.members.cache.values());
 
     const result = [];
     const processedUserIds = new Set();
@@ -201,12 +188,14 @@ async function fetchStaffMembersBackground(guildId: string) {
         const membersWithRole = allMembers.filter(m => {
           if (processedUserIds.has(m.user.id)) return false;
           
+          const memberRoleIds = Array.from(m.roles.cache.keys());
+          
           // Check if this is their highest role among all staff roles
-          const memberStaffRoles = m.roles.filter((rId: string) => allRoleIds.includes(rId));
+          const memberStaffRoles = memberRoleIds.filter(rId => allRoleIds.includes(rId));
           if (memberStaffRoles.length === 0) return false;
           
           // Find the index of each role in allRoleIds (lower index = higher priority)
-          const highestRoleIndex = Math.min(...memberStaffRoles.map((rId: string) => allRoleIds.indexOf(rId)));
+          const highestRoleIndex = Math.min(...memberStaffRoles.map(rId => allRoleIds.indexOf(rId)));
           
           if (allRoleIds[highestRoleIndex] === roleConfig.id) {
             processedUserIds.add(m.user.id);
@@ -221,9 +210,8 @@ async function fetchStaffMembersBackground(guildId: string) {
           // Find highest role color for the member
           let highestPosition = -1;
           let highestColor = '#ffffff';
-          for (const rId of member.roles) {
-            const r = guild.roles.cache.get(rId);
-            if (r && r.position > highestPosition) {
+          for (const r of member.roles.cache.values()) {
+            if (r.position > highestPosition) {
               highestPosition = r.position;
               highestColor = r.hexColor !== '#000000' ? r.hexColor : '#ffffff';
             }
@@ -232,9 +220,9 @@ async function fetchStaffMembersBackground(guildId: string) {
           roleMembers.push({
             id: user.id,
             username: user.username,
-            displayName: user.global_name || user.username,
+            displayName: user.globalName || user.username,
             avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256` : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator || '0') % 5}.png`,
-            avatarDecoration: user.avatar_decoration_data ? `https://cdn.discordapp.com/avatar-decoration-presets/${user.avatar_decoration_data.asset}.png?size=256` : null,
+            avatarDecoration: (user as any).avatarDecoration ? `https://cdn.discordapp.com/avatar-decoration-presets/${(user as any).avatarDecoration}.png?size=256` : null,
             highestRoleColor: highestColor,
           });
         }
