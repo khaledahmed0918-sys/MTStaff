@@ -464,3 +464,103 @@ export async function getRandomMembers(guildId: string, count: number = 10) {
     return [];
   }
 }
+
+export async function getAllUsersWithStats(guildId: string) {
+  try {
+    if (!client.isReady()) {
+      await new Promise((resolve) => client.once('ready', resolve));
+    }
+
+    const guild = await client.guilds.fetch(guildId);
+    
+    // Fetch all members using REST to avoid gateway rate limits
+    let allMembers: any[] = [];
+    let lastId = '0';
+    while (true) {
+      const res = await fetch(`https://discord.com/api/v10/guilds/${guildId}/members?limit=1000&after=${lastId}`, {
+        headers: {
+          Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+        },
+      });
+      if (!res.ok) break;
+      const members = await res.json();
+      if (members.length === 0) break;
+      allMembers = allMembers.concat(members);
+      lastId = members[members.length - 1].user.id;
+      if (members.length < 1000) break;
+    }
+
+    const userIds = allMembers.map(m => m.user.id);
+    
+    if (userIds.length === 0) return [];
+
+    // We need to query in chunks if there are too many users, but let's try to get all at once if < 10000
+    // Actually, it's better to just get all records from the DB and map them.
+    const [streaksRes, messagesRes, voiceRes, mtcoinsRes] = await Promise.allSettled([
+      query(`SELECT user_id, streak FROM streaks`),
+      query(`SELECT user_id, "all" as total FROM messages`),
+      query(`SELECT user_id, "all" as total FROM voice`),
+      query(`SELECT user_id, coins FROM mtcoins`)
+    ]);
+
+    const streaksMap = new Map();
+    if (streaksRes.status === 'fulfilled') {
+      streaksRes.value.rows.forEach(row => streaksMap.set(row.user_id, row.streak || 0));
+    }
+
+    const messagesMap = new Map();
+    if (messagesRes.status === 'fulfilled') {
+      messagesRes.value.rows.forEach(row => messagesMap.set(row.user_id, row.total || 0));
+    }
+
+    const voiceMap = new Map();
+    if (voiceRes.status === 'fulfilled') {
+      voiceRes.value.rows.forEach(row => voiceMap.set(row.user_id, row.total || 0));
+    }
+
+    const mtcoinsMap = new Map();
+    if (mtcoinsRes.status === 'fulfilled') {
+      mtcoinsRes.value.rows.forEach(row => mtcoinsMap.set(row.user_id, row.coins || 0));
+    }
+
+    const result = allMembers.map(member => {
+      const user = member.user;
+      
+      // Find highest role
+      let highestPosition = -1;
+      let highestRoleName = '';
+      let highestColor = '#ffffff';
+      
+      for (const rId of member.roles) {
+        const r = guild.roles.cache.get(rId);
+        if (r && r.position > highestPosition) {
+          highestPosition = r.position;
+          highestRoleName = r.name;
+          highestColor = r.hexColor !== '#000000' ? r.hexColor : '#ffffff';
+        }
+      }
+
+      return {
+        id: user.id,
+        username: user.username,
+        displayName: user.global_name || user.username,
+        avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256` : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator || '0') % 5}.png`,
+        avatarDecoration: user.avatar_decoration_data ? `https://cdn.discordapp.com/avatar-decoration-presets/${user.avatar_decoration_data.asset}.png?size=256` : null,
+        highestRoleColor: highestColor,
+        highestRoleName: highestRoleName,
+        rolesCount: member.roles.length,
+        stats: {
+          streak: streaksMap.get(user.id) || 0,
+          messages: messagesMap.get(user.id) || 0,
+          voice: voiceMap.get(user.id) || 0,
+          mtcoins: mtcoinsMap.get(user.id) || 0,
+        }
+      };
+    });
+
+    return result;
+  } catch (err) {
+    console.error('Error fetching all users with stats:', err);
+    return [];
+  }
+}

@@ -5,12 +5,12 @@ async function run() {
     connectionString: "postgres://mtc_user:ALKHAL3297@62.77.156.58:5432/mtc_db"
   });
   await client.connect();
-  const res = await client.query(`SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`);
-  console.log(res.rows.map(r => r.table_name).join(', '));
   
-  // Also check columns of messages table
-  const res2 = await client.query(`SELECT column_name FROM information_schema.columns WHERE table_name = 'messages'`);
-  console.log('messages columns:', res2.rows.map(r => r.column_name).join(', '));
+  const tables = ['voice', 'streaks', 'mtcoins', 'coins'];
+  for (const table of tables) {
+    const res = await client.query(`SELECT column_name FROM information_schema.columns WHERE table_name = '${table}'`);
+    console.log(`${table} columns:`, res.rows.map(r => r.column_name).join(', '));
+  }
 
   await client.end();
 }

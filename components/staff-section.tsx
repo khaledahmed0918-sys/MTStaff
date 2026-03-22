@@ -148,7 +148,7 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
 
                           {member.stats && (
                             <div className="mt-6 space-y-4">
-                              <div className="grid grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="bg-[#0a0f1a] rounded-2xl p-6 border border-white/10 flex flex-col gap-2 hover:bg-white/5 transition-all hover:scale-[1.02] shadow-inner">
                                   <div className="flex items-center gap-3 text-gray-400 text-sm font-bold">
                                     <MessageSquare className="w-5 h-5 text-blue-400" />

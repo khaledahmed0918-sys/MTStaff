@@ -180,37 +180,68 @@ export default function MyInfoPage() {
               )}
             </div>
 
-            {/* Streaks Badge */}
+            {/* Desktop Streaks Badge */}
             {streaks && (
-              <div className="w-full md:w-auto mt-4 md:mt-0 bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 px-4 md:px-6 py-3 md:py-4 rounded-2xl flex items-center justify-center gap-4 shadow-[0_0_20px_rgba(249,115,22,0.15)] shrink-0">
+              <div className="hidden md:flex w-auto mt-0 bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 px-6 py-4 rounded-2xl items-center justify-center gap-4 shadow-[0_0_20px_rgba(249,115,22,0.15)] shrink-0">
                 <div className="text-center">
-                  <p className="text-orange-200 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-1">الستريك الحالي</p>
-                  <p className="text-2xl md:text-3xl font-black text-white flex items-center justify-center gap-2">
+                  <p className="text-orange-200 text-xs font-bold uppercase tracking-wider mb-1">الستريك الحالي</p>
+                  <p className="text-3xl font-black text-white flex items-center justify-center gap-2">
                     {streaks.streak}
                     {streaks.streak_emoji_url ? (
-                      <CachedImage src={streaks.streak_emoji_url} alt="Streak" width={24} height={24} className="md:w-7 md:h-7" />
+                      <CachedImage src={streaks.streak_emoji_url} alt="Streak" width={28} height={28} />
                     ) : streaks.streak_emoji ? (
                       parseDiscordEmoji(streaks.streak_emoji) ? (
-                        <CachedImage src={parseDiscordEmoji(streaks.streak_emoji)!} alt="Streak" width={24} height={24} className="md:w-7 md:h-7" />
+                        <CachedImage src={parseDiscordEmoji(streaks.streak_emoji)!} alt="Streak" width={28} height={28} />
                       ) : (
-                        <span className="text-xl md:text-2xl drop-shadow-md">{streaks.streak_emoji}</span>
+                        <span className="text-2xl drop-shadow-md">{streaks.streak_emoji}</span>
                       )
                     ) : (
-                      <Flame className="w-5 h-5 md:w-6 md:h-6 text-orange-500 fill-orange-500" />
+                      <Flame className="w-6 h-6 text-orange-500 fill-orange-500" />
                     )}
                   </p>
                 </div>
-                <div className="w-px h-10 md:h-12 bg-orange-500/20 mx-1 md:mx-2" />
+                <div className="w-px h-12 bg-orange-500/20 mx-2" />
                 <div className="text-center">
-                  <p className="text-orange-200 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-1">رسائل اليوم</p>
-                  <p className="text-lg md:text-xl font-bold text-white flex items-center justify-center gap-1.5 md:gap-2">
+                  <p className="text-orange-200 text-xs font-bold uppercase tracking-wider mb-1">رسائل اليوم</p>
+                  <p className="text-xl font-bold text-white flex items-center justify-center gap-2">
                     {streaks.daily_messages}/100
-                    <MessageSquare className="w-3.5 h-3.5 md:w-4 md:h-4 text-orange-400" />
+                    <MessageSquare className="w-4 h-4 text-orange-400" />
                   </p>
                 </div>
               </div>
             )}
           </div>
+
+          {/* Mobile Streaks Badge (Separate Card) */}
+          {streaks && (
+            <div className="md:hidden w-full mt-6 bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 px-4 py-4 rounded-2xl flex items-center justify-between shadow-[0_0_20px_rgba(249,115,22,0.15)]">
+              <div className="text-center flex-1">
+                <p className="text-orange-200 text-[10px] font-bold uppercase tracking-wider mb-1">الستريك الحالي</p>
+                <p className="text-2xl font-black text-white flex items-center justify-center gap-2">
+                  {streaks.streak}
+                  {streaks.streak_emoji_url ? (
+                    <CachedImage src={streaks.streak_emoji_url} alt="Streak" width={24} height={24} />
+                  ) : streaks.streak_emoji ? (
+                    parseDiscordEmoji(streaks.streak_emoji) ? (
+                      <CachedImage src={parseDiscordEmoji(streaks.streak_emoji)!} alt="Streak" width={24} height={24} />
+                    ) : (
+                      <span className="text-xl drop-shadow-md">{streaks.streak_emoji}</span>
+                    )
+                  ) : (
+                    <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
+                  )}
+                </p>
+              </div>
+              <div className="w-px h-10 bg-orange-500/20 mx-2" />
+              <div className="text-center flex-1">
+                <p className="text-orange-200 text-[10px] font-bold uppercase tracking-wider mb-1">رسائل اليوم</p>
+                <p className="text-lg font-bold text-white flex items-center justify-center gap-1.5">
+                  {streaks.daily_messages}/100
+                  <MessageSquare className="w-3.5 h-3.5 text-orange-400" />
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
