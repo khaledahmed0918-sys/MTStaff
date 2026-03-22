@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import CachedImage from '@/components/cached-image';
-import { Shield, MessageSquare, Flame, AlertTriangle, Loader2, ChevronDown, ChevronUp, Camera, Ban, Clock, CheckCircle2, ListTodo } from 'lucide-react';
+import { Shield, MessageSquare, Flame, Loader2, ChevronDown, ChevronUp, Camera, Ban, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ScreenshotButton } from '@/components/screenshot-button';
@@ -112,30 +112,31 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                     <div className="h-px flex-1 bg-gradient-to-r from-white/5 to-transparent" style={{ backgroundColor: `${role.color}10` }} />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  <div className="flex flex-col gap-4">
                     {role.members.map((member: any) => (
                       <ScreenshotButton 
                         key={member.id}
                         elementId={`staff-card-${member.id}`} 
                         fileName={`${member.username}-staff-card.png`} 
                         memberData={member}
-                        className="h-full block"
+                        className="w-full block"
                       >
                         <motion.div
                           id={`staff-card-${member.id}`}
                           initial={{ opacity: 0, y: 20 }}
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true, margin: "-50px" }}
-                          whileHover={{ y: -4, scale: 1.01 }}
+                          whileHover={{ y: -2, scale: 1.005 }}
                           transition={{ duration: 0.4 }}
                           onClick={() => router.push(`/dashboard/search?q=${member.id}`)}
-                          className="bg-[#111827]/40 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] transition-all duration-500 cursor-pointer group relative overflow-hidden h-full"
-                          style={{ borderTopColor: `${member.highestRoleColor}80`, borderTopWidth: '2px' }}
+                          className="bg-[#111827]/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-xl hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] transition-all duration-500 cursor-pointer group relative overflow-hidden w-full flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
+                          style={{ borderRightColor: `${member.highestRoleColor}80`, borderRightWidth: '4px' }}
                         >
                           <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full opacity-50 pointer-events-none blur-2xl group-hover:scale-150 transition-transform duration-700" style={{ backgroundImage: `linear-gradient(to bottom right, ${member.highestRoleColor}20, transparent)` }} />
                           
-                          <div className="flex items-start gap-4 relative z-10">
-                            <div className="relative w-20 h-20 shrink-0 group/avatar">
+                          {/* User Info */}
+                          <div className="flex items-center gap-4 relative z-10 shrink-0">
+                            <div className="relative w-16 h-16 shrink-0 group/avatar">
                               <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#111827] shadow-xl relative z-10 bg-[#0a0f1a]" style={{ borderColor: member.highestRoleColor }}>
                                 <CachedImage 
                                   src={member.avatar} 
@@ -149,127 +150,52 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                                   <CachedImage src={member.avatarDecoration} alt="Decoration" fill className="object-cover" />
                                 </div>
                               )}
-                              <div className="absolute inset-0 rounded-full shadow-[inset_0_0_15px_rgba(0,0,0,0.6)] z-15 pointer-events-none" />
                             </div>
                             
-                            <div className="flex-1 min-w-0 pt-2">
-                              <h4 className="text-xl font-black text-white truncate group-hover:text-blue-400 transition-colors drop-shadow-md" style={{ color: member.highestRoleColor }}>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-lg font-black text-white truncate group-hover:text-blue-400 transition-colors drop-shadow-md" style={{ color: member.highestRoleColor }}>
                                 {member.displayName}
                               </h4>
-                              <p className="text-sm font-medium text-gray-400 truncate mt-0.5">@{member.username}</p>
+                              <p className="text-xs font-medium text-gray-400 truncate mt-0.5">@{member.username}</p>
                             </div>
                           </div>
 
+                          {/* Stats */}
                           {member.stats && (
-                            <div className="mt-6 space-y-4">
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="bg-[#0a0f1a] rounded-2xl p-6 border border-white/10 flex flex-col gap-2 hover:bg-white/5 transition-all hover:scale-[1.02] shadow-inner">
-                                  <div className="flex items-center gap-3 text-gray-400 text-sm font-bold">
-                                    <MessageSquare className="w-5 h-5 text-blue-400" />
-                                    <span className="tracking-wider">الرسائل</span>
-                                  </div>
-                                  <div className="text-4xl font-black text-white tracking-tighter">{member.stats.messages.total.toLocaleString()}</div>
-                                  <div className="flex justify-between text-[11px] text-gray-500 mt-2 border-t border-white/5 pt-2 font-mono">
-                                    <span className="bg-white/5 px-2 py-0.5 rounded">ي: {member.stats.messages.daily}</span>
-                                    <span className="bg-white/5 px-2 py-0.5 rounded">أ: {member.stats.messages.weekly}</span>
-                                    <span className="bg-white/5 px-2 py-0.5 rounded">ش: {member.stats.messages.monthly}</span>
-                                  </div>
+                            <div className="flex flex-wrap md:flex-nowrap items-center gap-3 md:gap-6 relative z-10 w-full md:w-auto">
+                              <div className="flex flex-col gap-1 bg-black/20 px-4 py-2 rounded-xl border border-white/5 flex-1 md:flex-none">
+                                <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold">
+                                  <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
+                                  <span>الرسائل</span>
                                 </div>
-
-                                <div className="bg-[#0a0f1a] rounded-2xl p-6 border border-white/10 flex flex-col gap-2 hover:bg-white/5 transition-all hover:scale-[1.02] shadow-inner">
-                                  <div className="flex items-center gap-3 text-gray-400 text-sm font-bold">
-                                    <Flame className="w-5 h-5 text-orange-400" />
-                                    <span className="tracking-wider">الستريك</span>
-                                  </div>
-                                  <div className="text-4xl font-black text-white tracking-tighter">{member.stats.streak}</div>
-                                  <div className="flex items-center gap-2 text-red-400 text-[11px] font-bold mt-2 border-t border-white/5 pt-2">
-                                    <AlertTriangle className="w-4 h-4" />
-                                    <span>تحذيرات: {member.stats.warns.length}</span>
-                                  </div>
+                                <div className="text-lg font-black text-white">{member.stats.messages.total.toLocaleString()}</div>
+                                <div className="flex gap-2 text-[9px] text-gray-500 font-mono">
+                                  <span>ي: {member.stats.messages.daily}</span>
+                                  <span>أ: {member.stats.messages.weekly}</span>
+                                  <span>ش: {member.stats.messages.monthly}</span>
                                 </div>
                               </div>
 
-                              {/* Tasks Section */}
-                              <div className="bg-[#0a0f1a] rounded-2xl p-6 border border-white/10 space-y-4 shadow-inner">
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2 bg-blue-500/20 rounded-lg">
-                                    <ListTodo className="w-5 h-5 text-blue-400" />
-                                  </div>
-                                  <h4 className="text-lg font-black text-white tracking-tight">المهام</h4>
+                              <div className="flex flex-col gap-1 bg-black/20 px-4 py-2 rounded-xl border border-white/5 flex-1 md:flex-none">
+                                <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold">
+                                  <Flame className="w-3.5 h-3.5 text-orange-400" />
+                                  <span>الستريك</span>
                                 </div>
-                                
-                                <div className="space-y-4">
-                                  <div className="space-y-2">
-                                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider flex items-center gap-2">
-                                      <div className="w-1 h-1 rounded-full bg-red-500" />
-                                      متبقية
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                      {(() => {
-                                        const remaining = member.stats.tasks_remaining ? member.stats.tasks_remaining.split(',').filter(Boolean) : [];
-                                        if (!member.stats.completed_today) {
-                                          remaining.push("إكمال مهمة الستريك");
-                                        }
-                                        return remaining.length > 0 ? remaining.map((task: string, i: number) => (
-                                          <span key={i} className="bg-red-500/10 text-red-400 px-2 py-1 rounded-lg text-[11px] font-bold border border-red-500/10">
-                                            {task}
-                                          </span>
-                                        )) : (
-                                          <span className="text-gray-600 text-[11px] italic">لا توجد مهام 🎉</span>
-                                        );
-                                      })()}
-                                    </div>
-                                  </div>
-
-                                  <div className="space-y-2">
-                                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider flex items-center gap-2">
-                                      <div className="w-1 h-1 rounded-full bg-emerald-500" />
-                                      مكتملة
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                      {(() => {
-                                        const completed = member.stats.tasks_completed ? member.stats.tasks_completed.split(',').filter(Boolean) : [];
-                                        return completed.length > 0 ? completed.map((task: string, i: number) => (
-                                          <span key={i} className="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-lg text-[11px] font-bold border border-emerald-500/10">
-                                            {task}
-                                          </span>
-                                        )) : (
-                                          <span className="text-gray-600 text-[11px] italic">لا توجد مهام مكتملة</span>
-                                        );
-                                      })()}
-                                    </div>
-                                  </div>
+                                <div className="text-lg font-black text-white">{member.stats.streak}</div>
+                                <div className="text-[9px] text-gray-500">
+                                  {member.stats.completed_today ? <span className="text-emerald-400">مكتمل اليوم</span> : <span className="text-red-400">غير مكتمل</span>}
                                 </div>
                               </div>
 
-                              {/* Detailed Logs */}
-                              <div className="space-y-3">
-                                {member.stats.warns.length > 0 && (
-                                  <div className="bg-[#0a0f1a] rounded-xl p-4 border border-white/5">
-                                    <h5 className="text-sm font-bold text-yellow-400 mb-2 flex items-center gap-2">
-                                      <Shield className="w-3.5 h-3.5" />
-                                      التحذيرات ({member.stats.warns.length})
-                                    </h5>
-                                    <div className="space-y-1.5">
-                                      {member.stats.warns.slice(0, 2).map((w: any, i: number) => (
-                                        <div key={i} className="text-sm text-gray-300 truncate cursor-pointer hover:text-white bg-white/5 px-2 py-1 rounded" onClick={(e) => { e.stopPropagation(); w.attachments && setPopupImage(w.attachments[0]); }}>#{w.warn_number}: {w.reason}</div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-                                {member.stats.timeouts.length > 0 && (
-                                  <div className="bg-[#0a0f1a] rounded-xl p-4 border border-white/5">
-                                    <h5 className="text-sm font-bold text-orange-400 mb-2 flex items-center gap-2">
-                                      <Clock className="w-3.5 h-3.5" />
-                                      التايم أوت ({member.stats.timeouts.length})
-                                    </h5>
-                                    <div className="space-y-1.5">
-                                      {member.stats.timeouts.slice(0, 2).map((t: any, i: number) => (
-                                        <div key={i} className="text-sm text-gray-300 truncate cursor-pointer hover:text-white bg-white/5 px-2 py-1 rounded" onClick={(e) => { e.stopPropagation(); t.attachments && setPopupImage(t.attachments[0]); }}>#{t.timeout_number}: {t.reason}</div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
+                              <div className="flex flex-col gap-1 bg-black/20 px-4 py-2 rounded-xl border border-white/5 flex-1 md:flex-none">
+                                <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold">
+                                  <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
+                                  <span>التحذيرات</span>
+                                </div>
+                                <div className="text-lg font-black text-white">{member.stats.warns.length}</div>
+                                <div className="text-[9px] text-gray-500">
+                                  تايم أوت: {member.stats.timeouts.length}
+                                </div>
                               </div>
                             </div>
                           )}

@@ -146,16 +146,16 @@ export default function MyInfoPage() {
                 <span className="text-lg text-gray-400 font-normal">({discord.username})</span>
               </div>
               
-              <div className="text-sm text-gray-500 mt-2 flex flex-row items-center gap-4 justify-start">
-                <span>ID: {discord.id}</span>
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4" />
-                  <span>تاريخ الإنشاء: {formatDateEn(discord.createdAt)}</span>
+              <div className="text-sm text-gray-500 mt-2 flex flex-wrap items-center gap-4 justify-start">
+                <span className="whitespace-nowrap">ID: {discord.id}</span>
+                <div className="flex items-center gap-1.5 whitespace-nowrap">
+                  <Calendar className="w-4 h-4 shrink-0" />
+                  <span className="text-xs sm:text-sm">تاريخ الإنشاء: {formatDateEn(discord.createdAt)}</span>
                 </div>
                 {discord.joinedAt && (
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4" />
-                    <span>تاريخ الانضمام: {formatDateEn(discord.joinedAt)}</span>
+                  <div className="flex items-center gap-1.5 whitespace-nowrap">
+                    <Calendar className="w-4 h-4 shrink-0" />
+                    <span className="text-xs sm:text-sm">تاريخ الانضمام: {formatDateEn(discord.joinedAt)}</span>
                   </div>
                 )}
               </div>
@@ -201,15 +201,15 @@ export default function MyInfoPage() {
           <div className="flex md:hidden flex-col -mt-16 mb-6">
             <div className="flex justify-between items-start">
               <div className="flex flex-col items-start gap-2 pt-16">
-                <div className="text-[10px] text-gray-500 flex flex-col items-start gap-1">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    <span>الإنشاء: {formatDateEn(discord.createdAt)}</span>
+                <div className="text-[10px] text-gray-500 flex flex-col items-start gap-1 w-full max-w-[140px]">
+                  <div className="flex items-center gap-1 whitespace-nowrap overflow-hidden text-ellipsis w-full">
+                    <Calendar className="w-3 h-3 shrink-0" />
+                    <span className="text-[9px] sm:text-[10px]">الإنشاء: {formatDateEn(discord.createdAt)}</span>
                   </div>
                   {discord.joinedAt && (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      <span>الانضمام: {formatDateEn(discord.joinedAt)}</span>
+                    <div className="flex items-center gap-1 whitespace-nowrap overflow-hidden text-ellipsis w-full">
+                      <Calendar className="w-3 h-3 shrink-0" />
+                      <span className="text-[9px] sm:text-[10px]">الانضمام: {formatDateEn(discord.joinedAt)}</span>
                     </div>
                   )}
                 </div>

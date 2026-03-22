@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Image from 'next/image';
 import { Search, Filter, MessageSquare, Mic, Flame, Coins, Shield, ArrowDownUp, Loader2 } from 'lucide-react';
@@ -33,6 +33,12 @@ export function LeaderboardClient() {
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [roleCountFilter, setRoleCountFilter] = useState<string>('all');
+  const [visibleCount, setVisibleCount] = useState(20);
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [searchQuery, sortBy, sortOrder, roleFilter, roleCountFilter]);
 
   // Extract unique roles for the filter
   const uniqueRoles = useMemo(() => {
@@ -113,6 +119,21 @@ export function LeaderboardClient() {
 
     return result;
   }, [initialUsers, searchQuery, sortBy, sortOrder, roleFilter, roleCountFilter]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => prev + 20);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+    return () => observer.disconnect();
+  }, [filteredAndSortedUsers]);
 
   if (loading) {
     return (
@@ -211,7 +232,7 @@ export function LeaderboardClient() {
       {/* Users List */}
       <div className="space-y-2">
         <AnimatePresence mode="popLayout">
-          {filteredAndSortedUsers.slice(0, 100).map((user, index) => (
+          {filteredAndSortedUsers.slice(0, visibleCount).map((user, index) => (
             <motion.div
               layout
               initial={{ opacity: 0, scale: 0.98 }}
@@ -308,9 +329,9 @@ export function LeaderboardClient() {
         </AnimatePresence>
       </div>
       
-      {filteredAndSortedUsers.length > 100 && (
-        <div className="text-center text-sm text-gray-500 mt-4">
-          يتم عرض أول 100 نتيجة فقط. استخدم البحث للوصول إلى المزيد.
+      {visibleCount < filteredAndSortedUsers.length && (
+        <div ref={observerTarget} className="flex justify-center py-8">
+          <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
         </div>
       )}
     </div>

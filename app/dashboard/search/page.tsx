@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo, Camera, CheckCircle2, History } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
@@ -20,6 +20,27 @@ function SearchContent() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedData, setExpandedData] = useState<any>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(20);
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [results]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => prev + 20);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+    return () => observer.disconnect();
+  }, [results]);
 
   useEffect(() => {
     const fetchDefault = async () => {
@@ -126,13 +147,13 @@ function SearchContent() {
           </div>
         )}
 
-        {results.map((user, index) => (
+        {results.slice(0, visibleCount).map((user, index) => (
           <motion.div
             key={user.id}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
+            transition={{ duration: 0.5, delay: (index % 20) * 0.05 }}
           >
             <ScreenshotButton 
               elementId={`search-card-${user.id}`} 
@@ -170,13 +191,13 @@ function SearchContent() {
                 </div>
                 
                 <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 mt-8 text-sm text-gray-400 w-full md:w-auto">
-                  <div className="flex items-center gap-3 bg-[#0a0f1a]/80 px-5 py-3 rounded-2xl border border-white/10 w-full md:w-auto justify-center shadow-inner hover:bg-white/5 hover:border-blue-500/30 transition-all">
-                    <Calendar className="w-5 h-5 text-blue-400" />
-                    <span className="font-medium">تاريخ الإنشاء: {formatDateEn(user.createdAt)}</span>
+                  <div className="flex items-center gap-3 bg-[#0a0f1a]/80 px-5 py-3 rounded-2xl border border-white/10 w-full md:w-auto justify-center shadow-inner hover:bg-white/5 hover:border-blue-500/30 transition-all whitespace-nowrap">
+                    <Calendar className="w-5 h-5 text-blue-400 shrink-0" />
+                    <span className="font-medium text-xs sm:text-sm">تاريخ الإنشاء: {formatDateEn(user.createdAt)}</span>
                   </div>
-                  <div className="flex items-center gap-3 bg-[#0a0f1a]/80 px-5 py-3 rounded-2xl border border-white/10 w-full md:w-auto justify-center shadow-inner hover:bg-white/5 hover:border-purple-500/30 transition-all">
-                    <Calendar className="w-5 h-5 text-purple-400" />
-                    <span className="font-medium">تاريخ الانضمام: {formatDateEn(user.joinedAt)}</span>
+                  <div className="flex items-center gap-3 bg-[#0a0f1a]/80 px-5 py-3 rounded-2xl border border-white/10 w-full md:w-auto justify-center shadow-inner hover:bg-white/5 hover:border-purple-500/30 transition-all whitespace-nowrap">
+                    <Calendar className="w-5 h-5 text-purple-400 shrink-0" />
+                    <span className="font-medium text-xs sm:text-sm">تاريخ الانضمام: {formatDateEn(user.joinedAt)}</span>
                   </div>
                 </div>
                 
@@ -535,6 +556,11 @@ function SearchContent() {
           </ScreenshotButton>
           </motion.div>
         ))}
+        {results.length > visibleCount && (
+          <div ref={observerTarget} className="flex justify-center py-8">
+            <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+          </div>
+        )}
       </div>
     </div>
   );

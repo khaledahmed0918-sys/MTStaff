@@ -31,11 +31,11 @@ export function RolesDisplay({ roles }: { roles: Role[] }) {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden mt-3"
+            initial={{ height: 0, opacity: 0, scale: 0.95 }}
+            animate={{ height: 'auto', opacity: 1, scale: 1 }}
+            exit={{ height: 0, opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="overflow-hidden mt-3 origin-top"
           >
             <div className="flex flex-wrap justify-center sm:justify-start gap-2 max-h-[150px] overflow-y-auto custom-scrollbar pr-2 p-2 bg-black/20 rounded-xl border border-white/5">
               {roles.map((role) => {
