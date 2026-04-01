@@ -51,8 +51,14 @@ export function ScreenshotButton({ elementId, fileName = 'mt-capture.png', class
     setTimeout(() => setShowFlash(false), 300);
 
     try {
+      // Wait for fonts to be ready
+      if (typeof document !== 'undefined' && 'fonts' in document) {
+        await (document as any).fonts.ready;
+      }
+
       // Create a temporary container for the stamp to be rendered by html2canvas
       const stampContainer = document.createElement('div');
+      stampContainer.className = 'screenshot-stamp-container';
       stampContainer.style.position = 'absolute';
       stampContainer.style.inset = '0';
       stampContainer.style.display = 'flex';
@@ -82,11 +88,12 @@ export function ScreenshotButton({ elementId, fileName = 'mt-capture.png', class
 
       // Wrap html2canvas in a promise with timeout
       const capturePromise = html2canvas(element, {
-        scale: 2, // Reduced scale slightly for better performance and reliability
+        scale: 3, // Increased scale for better quality
         useCORS: true,
-        allowTaint: true,
+        allowTaint: false,
         backgroundColor: null,
-        logging: false,
+        logging: true,
+        scrollY: -window.scrollY,
         onclone: (clonedDoc) => {
           const clonedElement = clonedDoc.getElementById(elementId);
           if (clonedElement) {
@@ -106,13 +113,15 @@ export function ScreenshotButton({ elementId, fileName = 'mt-capture.png', class
       });
 
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Capture timed out')), 15000)
+        setTimeout(() => reject(new Error('Capture timed out')), 20000)
       );
       
       const canvas = await Promise.race([capturePromise, timeoutPromise]) as HTMLCanvasElement;
 
       // Cleanup stamp
-      element.removeChild(stampContainer);
+      if (element.contains(stampContainer)) {
+        element.removeChild(stampContainer);
+      }
       if (!originalPosition || originalPosition === 'static') {
         element.style.position = originalPosition;
       }
@@ -124,8 +133,8 @@ export function ScreenshotButton({ elementId, fileName = 'mt-capture.png', class
       console.error('Capture failed:', err);
       setError('فشل التقاط الصورة. يرجى المحاولة مرة أخرى.');
       // Ensure cleanup if it fails
-      const stamp = element.querySelector('div[style*="MT COMMUNITY"]')?.parentElement;
-      if (stamp) element.removeChild(stamp);
+      const stamps = element.querySelectorAll('.screenshot-stamp-container');
+      stamps.forEach(s => element.removeChild(s));
     } finally {
       setLoading(false);
     }

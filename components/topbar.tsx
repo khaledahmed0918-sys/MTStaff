@@ -5,11 +5,12 @@ import { Menu, LogOut } from 'lucide-react';
 import { useNav } from './nav-context';
 import { signOut } from 'next-auth/react';
 import { ScreenshotButton } from './screenshot-button';
+import CachedImage from './cached-image';
 
 export function Topbar({ user }: { user: any }) {
   const { toggle } = useNav();
   const profile = user?.profile || {};
-  const [imgSrc, setImgSrc] = useState(user?.image || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=');
+  const avatarUrl = user?.image || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=';
   const [timestamp] = useState(() => Date.now());
 
   if (!user) return null;
@@ -53,14 +54,12 @@ export function Topbar({ user }: { user: any }) {
           <p className="text-sm font-bold text-white tracking-wide">{profile.global_name || profile.username || user.name}</p>
         </div>
         <div className="w-10 h-10 relative rounded-full overflow-hidden border-2 border-[#111827] shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-          <Image
-            src={imgSrc}
+          <CachedImage
+            src={avatarUrl}
             alt={profile.username || user.name || 'User'}
             fill
             className="object-cover"
             referrerPolicy="no-referrer"
-            unoptimized
-            onError={() => setImgSrc('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=')}
           />
         </div>
       </div>
