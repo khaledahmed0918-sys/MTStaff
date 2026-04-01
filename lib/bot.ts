@@ -323,6 +323,19 @@ export async function getStaffWithStats(guildId: string) {
   const timeoutsMap = new Map();
   const bansMap = new Map();
 
+  // Read ticket points
+  const pointsMap = new Map();
+  try {
+    const fs = require('fs/promises');
+    const pointsRaw = await fs.readFile('/root/MTC-System/data/Tickets/points.json', 'utf-8');
+    const pointsData = JSON.parse(pointsRaw);
+    for (const [uid, pts] of Object.entries(pointsData)) {
+      pointsMap.set(uid, Number(pts));
+    }
+  } catch (e) {
+    // Ignore if file doesn't exist
+  }
+
   await Promise.allSettled(userIds.map(async (id) => {
     try {
       const [swarnsRes, warnsRes, timeoutsRes] = await Promise.all([
@@ -357,7 +370,8 @@ export async function getStaffWithStats(guildId: string) {
           swarns: swarnsMap.get(member.id) || [],
           warns: warnsMap.get(member.id) || [],
           timeouts: timeoutsMap.get(member.id) || [],
-          bans: bansMap.get(member.id) || []
+          bans: bansMap.get(member.id) || [],
+          tickets: pointsMap.get(member.id) || 0
         };
       }
     }
@@ -511,6 +525,19 @@ export async function getAllUsersWithStats(guildId: string) {
       mtcoinsRes.value.rows.forEach(row => mtcoinsMap.set(row.user_id, row.coins || 0));
     }
 
+    // Read ticket points
+    const pointsMap = new Map();
+    try {
+      const fs = require('fs/promises');
+      const pointsRaw = await fs.readFile('/root/MTC-System/data/Tickets/points.json', 'utf-8');
+      const pointsData = JSON.parse(pointsRaw);
+      for (const [uid, pts] of Object.entries(pointsData)) {
+        pointsMap.set(uid, Number(pts));
+      }
+    } catch (e) {
+      // Ignore if file doesn't exist
+    }
+
     const result = allMembers.map(member => {
       const user = member.user;
       
@@ -542,6 +569,7 @@ export async function getAllUsersWithStats(guildId: string) {
           messages: messagesMap.get(user.id) || 0,
           voice: voiceMap.get(user.id) || 0,
           mtcoins: mtcoinsMap.get(user.id) || 0,
+          tickets: pointsMap.get(user.id) || 0,
         }
       };
     });

@@ -2,11 +2,44 @@
 
 import { useState, useEffect } from 'react';
 import CachedImage from '@/components/cached-image';
-import { Shield, MessageSquare, Flame, Loader2, ChevronDown, ChevronUp, Camera, Ban, ShieldAlert } from 'lucide-react';
+import { Shield, MessageSquare, Flame, Loader2, ChevronDown, ChevronUp, Camera, Ban, ShieldAlert, Ticket } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ScreenshotButton } from '@/components/screenshot-button';
 import { ImagePopup } from '@/components/image-popup';
+
+// Tooltip Component
+function Tooltip({ children, text }: { children: React.ReactNode, text: string }) {
+  const [show, setShow] = useState(false);
+  
+  return (
+    <div 
+      className="relative flex-1 md:flex-none"
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+      onClick={(e) => {
+        e.stopPropagation();
+        setShow(!show);
+      }}
+    >
+      {children}
+      <AnimatePresence>
+        {show && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 border border-white/10 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-xl pointer-events-none"
+          >
+            {text}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export function StaffSection({ initialCategories }: { initialCategories: any[] }) {
   const [categories, setCategories] = useState(initialCategories);
@@ -163,40 +196,61 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                           {/* Stats */}
                           {member.stats && (
                             <div className="flex flex-wrap md:flex-nowrap items-center gap-3 md:gap-6 relative z-10 w-full md:w-auto">
-                              <div className="flex flex-col gap-1 bg-black/20 px-4 py-2 rounded-xl border border-white/5 flex-1 md:flex-none">
-                                <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold">
-                                  <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
-                                  <span>الرسائل</span>
+                              <Tooltip text="عدد الرسائل التي أرسلها العضو">
+                                <div className="flex flex-col gap-1 bg-black/20 px-4 py-2 rounded-xl border border-white/5 w-full h-full">
+                                  <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold">
+                                    <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
+                                    <span>الرسائل</span>
+                                  </div>
+                                  <div className="text-lg font-black text-white">{member.stats.messages.total.toLocaleString()}</div>
+                                  <div className="flex gap-2 text-[9px] text-gray-500 font-mono">
+                                    <span>ي: {member.stats.messages.daily}</span>
+                                    <span>أ: {member.stats.messages.weekly}</span>
+                                    <span>ش: {member.stats.messages.monthly}</span>
+                                  </div>
                                 </div>
-                                <div className="text-lg font-black text-white">{member.stats.messages.total.toLocaleString()}</div>
-                                <div className="flex gap-2 text-[9px] text-gray-500 font-mono">
-                                  <span>ي: {member.stats.messages.daily}</span>
-                                  <span>أ: {member.stats.messages.weekly}</span>
-                                  <span>ش: {member.stats.messages.monthly}</span>
-                                </div>
-                              </div>
+                              </Tooltip>
 
-                              <div className="flex flex-col gap-1 bg-black/20 px-4 py-2 rounded-xl border border-white/5 flex-1 md:flex-none">
-                                <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold">
-                                  <Flame className="w-3.5 h-3.5 text-orange-400" />
-                                  <span>الستريك</span>
+                              <Tooltip text="عدد الأيام المتتالية التي أكمل فيها المهام">
+                                <div className="flex flex-col gap-1 bg-black/20 px-4 py-2 rounded-xl border border-white/5 w-full h-full">
+                                  <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold">
+                                    <Flame className="w-3.5 h-3.5 text-orange-400" />
+                                    <span>الستريك</span>
+                                  </div>
+                                  <div className="text-lg font-black text-white">{member.stats.streak}</div>
+                                  <div className="text-[9px] text-gray-500">
+                                    {member.stats.completed_today ? <span className="text-emerald-400">مكتمل اليوم</span> : <span className="text-red-400">غير مكتمل</span>}
+                                  </div>
                                 </div>
-                                <div className="text-lg font-black text-white">{member.stats.streak}</div>
-                                <div className="text-[9px] text-gray-500">
-                                  {member.stats.completed_today ? <span className="text-emerald-400">مكتمل اليوم</span> : <span className="text-red-400">غير مكتمل</span>}
-                                </div>
-                              </div>
+                              </Tooltip>
 
-                              <div className="flex flex-col gap-1 bg-black/20 px-4 py-2 rounded-xl border border-white/5 flex-1 md:flex-none">
-                                <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold">
-                                  <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
-                                  <span>التحذيرات</span>
+                              <Tooltip text="عدد التحذيرات التي تلقاها العضو">
+                                <div className="flex flex-col gap-1 bg-black/20 px-4 py-2 rounded-xl border border-white/5 w-full h-full">
+                                  <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold">
+                                    <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
+                                    <span>التحذيرات</span>
+                                  </div>
+                                  <div className="text-lg font-black text-white">{member.stats.warns.length}</div>
+                                  <div className="text-[9px] text-gray-500">
+                                    تايم أوت: {member.stats.timeouts.length}
+                                  </div>
                                 </div>
-                                <div className="text-lg font-black text-white">{member.stats.warns.length}</div>
-                                <div className="text-[9px] text-gray-500">
-                                  تايم أوت: {member.stats.timeouts.length}
-                                </div>
-                              </div>
+                              </Tooltip>
+
+                              {member.stats.tickets > 0 && (
+                                <Tooltip text="عدد التذاكر التي استلمها العضو">
+                                  <div className="flex flex-col gap-1 bg-black/20 px-4 py-2 rounded-xl border border-white/5 w-full h-full">
+                                    <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold">
+                                      <Ticket className="w-3.5 h-3.5 text-emerald-400" />
+                                      <span>التذاكر</span>
+                                    </div>
+                                    <div className="text-lg font-black text-white">{member.stats.tickets}</div>
+                                    <div className="text-[9px] text-gray-500">
+                                      مستلمة
+                                    </div>
+                                  </div>
+                                </Tooltip>
+                              )}
                             </div>
                           )}
                         </motion.div>

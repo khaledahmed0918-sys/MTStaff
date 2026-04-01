@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo, Camera, CheckCircle2, History } from 'lucide-react';
+import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo, Camera, CheckCircle2, History, Ticket } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
 import { formatDateEn, formatVoiceTime, parseDiscordEmoji, generateGradientColors } from '@/lib/utils';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -328,6 +328,27 @@ function SearchContent() {
                           </div>
                         </div>
                       </div>
+
+                        {/* Tickets */}
+                        {expandedData.db.tickets > 0 && (
+                          <div className="bg-[#111827]/80 backdrop-blur-xl border border-emerald-500/20 rounded-3xl p-8 shadow-2xl hover:shadow-[0_0_30px_rgba(16,185,129,0.15)] hover:border-emerald-500/40 hover:-translate-y-1 transition-all duration-500 group flex flex-col justify-between relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-full blur-2xl group-hover:bg-emerald-500/10 transition-colors" />
+                            <div className="relative z-10">
+                              <div className="flex items-center gap-4 mb-6">
+                                <div className="p-3 bg-emerald-500/10 rounded-2xl group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all duration-300 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                                  <Ticket className="w-8 h-8 text-emerald-400" />
+                                </div>
+                                <h4 className="font-black text-2xl text-emerald-400 tracking-tight drop-shadow-sm">التذاكر</h4>
+                              </div>
+                              <div className="space-y-6">
+                                <div className="flex justify-between items-end border-b border-white/10 pb-4">
+                                  <span className="text-gray-400 font-bold">المستلمة:</span> 
+                                  <span className="text-4xl sm:text-5xl font-black text-white font-mono tracking-tighter leading-none drop-shadow-md">{expandedData.db.tickets}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Tasks */}
                         <div className="lg:col-span-3 bg-[#111827]/80 backdrop-blur-xl border border-blue-500/20 rounded-3xl p-8 shadow-2xl relative overflow-hidden group hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] hover:border-blue-500/40 transition-all duration-500">

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { getUserInfo, getEmojiDetails } from '@/lib/bot';
+import fs from 'fs/promises';
+import path from 'path';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -34,6 +36,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const voice = voiceRes.status === 'fulfilled' && voiceRes.value.rows.length > 0 ? voiceRes.value.rows[0] : null;
     const coinsData = coinsRes.status === 'fulfilled' && coinsRes.value.rows.length > 0 ? coinsRes.value.rows[0] : { coins: 0, tasks_remaining: {}, tasks_completed: {}, last_5_purchases: [] };
 
+    let ticketsCount = 0;
+    try {
+      const pointsPath = path.join(process.cwd(), '..', 'MTC-System', 'data', 'Tickets', 'points.json');
+      const pointsData = await fs.readFile(pointsPath, 'utf-8');
+      const points = JSON.parse(pointsData);
+      if (points[id]) {
+        ticketsCount = points[id];
+      }
+    } catch (e) {
+      console.error('Error reading ticket points:', e);
+    }
+
     if (streaks && streaks.streak_emoji) {
       const emojiDetails = await getEmojiDetails(guildId, streaks.streak_emoji);
       if (emojiDetails) {
@@ -51,6 +65,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         streaks,
         messages,
         voice,
+        tickets: ticketsCount,
         coins: {
           coins: coinsData.coins || 0,
           tasks_remaining: Object.keys(coinsData.tasks_remaining || {}).join(', '),
