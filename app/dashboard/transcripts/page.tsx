@@ -38,7 +38,9 @@ export default function TranscriptsPage() {
       try {
         const res = await fetchWithRetry('/api/tickets/transcripts');
         const data = await res.json();
-        setTranscripts(data);
+        // Filter out transcripts missing ticketId or creatorId
+        const validTranscripts = data.filter((t: any) => t.ticketId && t.creatorId);
+        setTranscripts(validTranscripts);
       } catch (err) {
         console.error(err);
         setError('فشل في جلب الترانسكريبت بعد عدة محاولات');

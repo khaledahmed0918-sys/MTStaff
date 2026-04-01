@@ -20,6 +20,7 @@ export function ScreenshotButton({ elementId, fileName = 'mt-capture.png', class
   const [loading, setLoading] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Disable scroll when modal is open
   useEffect(() => {
@@ -43,6 +44,7 @@ export function ScreenshotButton({ elementId, fileName = 'mt-capture.png', class
     if (!element) return;
 
     setLoading(true);
+    setError(null);
     
     // iPhone-like flash effect
     setShowFlash(true);
@@ -72,16 +74,17 @@ export function ScreenshotButton({ elementId, fileName = 'mt-capture.png', class
 
       // Append stamp temporarily to the element
       const originalPosition = element.style.position;
-      const originalZIndex = element.style.zIndex;
       
       if (!originalPosition || originalPosition === 'static') {
         element.style.position = 'relative';
       }
       element.appendChild(stampContainer);
 
-      const canvas = await html2canvas(element, {
-        scale: 4, // High quality as requested
+      // Wrap html2canvas in a promise with timeout
+      const capturePromise = html2canvas(element, {
+        scale: 2, // Reduced scale slightly for better performance and reliability
         useCORS: true,
+        allowTaint: true,
         backgroundColor: null,
         logging: false,
         onclone: (clonedDoc) => {
@@ -102,6 +105,12 @@ export function ScreenshotButton({ elementId, fileName = 'mt-capture.png', class
         }
       });
 
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Capture timed out')), 15000)
+      );
+      
+      const canvas = await Promise.race([capturePromise, timeoutPromise]) as HTMLCanvasElement;
+
       // Cleanup stamp
       element.removeChild(stampContainer);
       if (!originalPosition || originalPosition === 'static') {
@@ -113,6 +122,10 @@ export function ScreenshotButton({ elementId, fileName = 'mt-capture.png', class
       setIsOpen(true);
     } catch (err) {
       console.error('Capture failed:', err);
+      setError('فشل التقاط الصورة. يرجى المحاولة مرة أخرى.');
+      // Ensure cleanup if it fails
+      const stamp = element.querySelector('div[style*="MT COMMUNITY"]')?.parentElement;
+      if (stamp) element.removeChild(stamp);
     } finally {
       setLoading(false);
     }
@@ -195,6 +208,29 @@ export function ScreenshotButton({ elementId, fileName = 'mt-capture.png', class
             )}
           </button>
         )}
+        
+        {/* Error Message */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="absolute top-full mt-2 right-0 bg-red-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-lg z-[60] whitespace-nowrap border border-red-400/50"
+            >
+              {error}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setError(null);
+                }}
+                className="ml-2 hover:text-red-200"
+              >
+                <X className="w-3 h-3 inline" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <AnimatePresence>

@@ -351,7 +351,7 @@ function SearchContent() {
                               <div className="space-y-6">
                                 <div className="flex justify-between items-end border-b border-white/10 pb-4">
                                   <span className="text-gray-400 font-bold">المستلمة:</span> 
-                                  <span className="text-4xl sm:text-5xl font-black text-white font-mono tracking-tighter leading-none drop-shadow-md">{expandedData.db.tickets}</span>
+                                  <span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-mono tracking-tighter leading-none drop-shadow-md">{expandedData.db.tickets}</span>
                                 </div>
                               </div>
                             </div>

@@ -195,7 +195,7 @@ export default function TicketPointsPage() {
                       <div className="p-6">
                         <h4 className="text-sm font-bold text-gray-400 mb-4 flex items-center gap-2">
                           <Ticket className="w-4 h-4" />
-                          التذاكر المستلمة ({userTickets.length})
+                          التذاكر المستلمة ({p.points})
                         </h4>
                         
                         {userTickets.length === 0 ? (

@@ -265,10 +265,12 @@ export function AdminSection({ initialCategories }: { initialCategories: any[] }
                                 <Tooltip text="عدد التذاكر التي استلمها العضو">
                                   <div className="flex flex-col gap-1 bg-black/20 px-4 py-2 rounded-xl border border-white/5 w-full h-full">
                                     <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold">
-                                      <Ticket className="w-3.5 h-3.5 text-emerald-400" />
-                                      <span>التذاكر</span>
+                                      <Ticket className="w-3.5 h-3.5 text-blue-400" />
+                                      <span>النقاط</span>
                                     </div>
-                                    <div className="text-lg font-black text-white">{member.stats.tickets}</div>
+                                    <div className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                                      {member.stats.tickets}
+                                    </div>
                                     <div className="text-[9px] text-gray-500">
                                       مستلمة
                                     </div>
