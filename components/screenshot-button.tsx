@@ -1,226 +1,37 @@
 'use client';
 
-import { useState } from 'react';
-import { Camera, X, Download, Loader2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Camera, X, Download, Loader2, Share2, CheckCircle2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'motion/react';
-import CachedImage from '@/components/cached-image';
+import Image from 'next/image';
 
 interface ScreenshotModalProps {
   elementId: string;
   fileName?: string;
   className?: string;
   memberData?: any;
+  variant?: 'global' | 'card';
 }
 
-export function ScreenshotButton({ elementId, fileName = 'screenshot.png', className = '', memberData, children }: ScreenshotModalProps & { children?: React.ReactNode }) {
+export function ScreenshotButton({ elementId, fileName = 'mt-capture.png', className = '', memberData, variant = 'card', children }: ScreenshotModalProps & { children?: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showFlash, setShowFlash] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
 
-  const addStampToCanvas = (canvas: HTMLCanvasElement) => {
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const stampRadius = Math.min(canvas.width, canvas.height) * 0.18; // Even larger stamp
-    const stampX = canvas.width - stampRadius - 60;
-    const stampY = canvas.height - stampRadius - 60;
-    
-    ctx.save();
-    ctx.translate(stampX, stampY);
-    ctx.rotate(-0.2); // Slightly more tilt for "stamped" look
-    
-    // Outer thick circle
-    ctx.beginPath();
-    ctx.arc(0, 0, stampRadius, 0, 2 * Math.PI);
-    ctx.strokeStyle = 'rgba(59, 130, 246, 0.8)'; // Blue with some transparency
-    ctx.lineWidth = stampRadius * 0.1;
-    ctx.stroke();
-
-    // Inner thin circle
-    ctx.beginPath();
-    ctx.arc(0, 0, stampRadius * 0.82, 0, 2 * Math.PI);
-    ctx.strokeStyle = 'rgba(59, 130, 246, 0.6)';
-    ctx.lineWidth = stampRadius * 0.03;
-    ctx.stroke();
-    
-    ctx.fillStyle = 'rgba(59, 130, 246, 0.9)';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    
-    // Server Name - Curved text would be better but let's stick to centered for now
-    ctx.font = `black ${stampRadius * 0.25}px Arial`;
-    ctx.fillText('MT Community', 0, -stampRadius * 0.2);
-    
-    // Admin Team
-    ctx.font = `bold ${stampRadius * 0.2}px Arial`;
-    ctx.fillText('Admin Team', 0, stampRadius * 0.2);
-    
-    // Decorative lines
-    ctx.beginPath();
-    ctx.moveTo(-stampRadius * 0.7, 0);
-    ctx.lineTo(stampRadius * 0.7, 0);
-    ctx.strokeStyle = 'rgba(59, 130, 246, 0.5)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Add some "distress" effect (optional but looks more like a stamp)
-    ctx.globalCompositeOperation = 'destination-out';
-    for (let i = 0; i < 50; i++) {
-      const x = (Math.random() - 0.5) * stampRadius * 2;
-      const y = (Math.random() - 0.5) * stampRadius * 2;
-      const r = Math.random() * 2;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
+  // Disable scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
     }
-
-    ctx.restore();
-  };
-
-  const drawFallbackCanvas = async (member: any): Promise<string> => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return '';
-
-    // Set canvas size (standard card size)
-    canvas.width = 1000;
-    canvas.height = 1200;
-
-    // Background
-    ctx.fillStyle = '#0a0f1a';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Border
-    ctx.strokeStyle = member.highestRoleColor || '#3b82f6';
-    ctx.lineWidth = 15;
-    ctx.strokeRect(7.5, 7.5, canvas.width - 15, canvas.height - 15);
-
-    // Header Gradient
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 400);
-    gradient.addColorStop(0, `${member.highestRoleColor || '#3b82f6'}44`);
-    gradient.addColorStop(1, 'transparent');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, 400);
-
-    // Helper to load image
-    const loadImage = (url: string): Promise<HTMLImageElement> => {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
-        img.src = url;
-      });
+    return () => {
+      document.body.style.overflow = 'unset';
     };
-
-    try {
-      // Set RTL for Arabic text
-      ctx.direction = 'rtl';
-      ctx.textAlign = 'right';
-
-      // Draw Avatar
-      if (member.avatar) {
-        try {
-          const avatarImg = await loadImage(member.avatar);
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(canvas.width - 150, 180, 100, 0, Math.PI * 2);
-          ctx.clip();
-          ctx.drawImage(avatarImg, canvas.width - 250, 80, 200, 200);
-          ctx.restore();
-          
-          // Avatar Border
-          ctx.strokeStyle = member.highestRoleColor || '#3b82f6';
-          ctx.lineWidth = 6;
-          ctx.beginPath();
-          ctx.arc(canvas.width - 150, 180, 100, 0, Math.PI * 2);
-          ctx.stroke();
-        } catch (e) {
-          ctx.fillStyle = '#1f2937';
-          ctx.beginPath();
-          ctx.arc(canvas.width - 150, 180, 100, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-
-      // User Info
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'black 60px Arial';
-      ctx.fillText(member.displayName || member.username, canvas.width - 280, 160);
-      
-      ctx.fillStyle = '#9ca3af';
-      ctx.font = '32px Arial';
-      ctx.fillText(`@${member.username}`, canvas.width - 280, 210);
-
-      // Stats Section
-      if (member.stats) {
-        // Messages Box
-        ctx.fillStyle = '#111827';
-        ctx.roundRect?.(canvas.width - 450, 350, 400, 200, 30);
-        ctx.fill();
-        ctx.strokeStyle = '#ffffff22';
-        ctx.stroke();
-
-        ctx.fillStyle = '#3b82f6';
-        ctx.font = 'bold 36px Arial';
-        ctx.fillText('الرسائل', canvas.width - 100, 410);
-        
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'black 64px Arial';
-        ctx.fillText(member.stats.messages.total.toLocaleString(), canvas.width - 100, 490);
-
-        // Streak Box
-        ctx.fillStyle = '#111827';
-        ctx.roundRect?.(50, 350, 400, 200, 30);
-        ctx.fill();
-        ctx.strokeStyle = '#ffffff22';
-        ctx.stroke();
-
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#f97316';
-        ctx.font = 'bold 36px Arial';
-        ctx.fillText('الستريك', 100, 410);
-        
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'black 64px Arial';
-        ctx.fillText(member.stats.streak.toString(), 100, 490);
-
-        // Detailed Stats
-        ctx.textAlign = 'right';
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'black 40px Arial';
-        ctx.fillText('إحصائيات إضافية', canvas.width - 50, 650);
-
-        const statsY = 730;
-        ctx.fillStyle = '#9ca3af';
-        ctx.font = '30px Arial';
-        ctx.fillText(`يومي: ${member.stats.messages.daily}`, canvas.width - 50, statsY);
-        ctx.fillText(`أسبوعي: ${member.stats.messages.weekly}`, canvas.width - 50, statsY + 50);
-        ctx.fillText(`شهري: ${member.stats.messages.monthly}`, canvas.width - 50, statsY + 100);
-        
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#ef4444';
-        ctx.fillText(`التحذيرات: ${member.stats.warns.length}`, 50, statsY);
-        ctx.fillStyle = '#f97316';
-        ctx.fillText(`التايم أوت: ${member.stats.timeouts.length}`, 50, statsY + 50);
-      }
-
-      // Watermark Stamp
-      addStampToCanvas(canvas);
-
-      // Footer
-      ctx.fillStyle = '#ffffff44';
-      ctx.font = '20px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(`Generated on ${new Date().toLocaleString()}`, canvas.width / 2, canvas.height - 40);
-
-      return canvas.toDataURL('image/png');
-    } catch (err) {
-      console.error('Canvas fallback failed:', err);
-      return '';
-    }
-  };
+  }, [isOpen]);
 
   const handleCapture = async (e?: React.MouseEvent) => {
     if (e) {
@@ -232,48 +43,76 @@ export function ScreenshotButton({ elementId, fileName = 'screenshot.png', class
     if (!element) return;
 
     setLoading(true);
+    
+    // iPhone-like flash effect
+    setShowFlash(true);
+    setTimeout(() => setShowFlash(false), 300);
+
     try {
-      // Try html2canvas first with optimized settings
+      // Create a temporary container for the stamp to be rendered by html2canvas
+      const stampContainer = document.createElement('div');
+      stampContainer.style.position = 'absolute';
+      stampContainer.style.inset = '0';
+      stampContainer.style.display = 'flex';
+      stampContainer.style.alignItems = 'center';
+      stampContainer.style.justifyContent = 'center';
+      stampContainer.style.pointerEvents = 'none';
+      stampContainer.style.zIndex = '9999';
+      
+      // The Red Professional Stamp SVG - More beautiful and detailed
+      stampContainer.innerHTML = `
+        <div style="transform: rotate(-15deg); opacity: 0.3; border: 8px double red; border-radius: 50%; width: 320px; height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: red; font-family: 'Inter', sans-serif; text-align: center; background: rgba(255,0,0,0.02);">
+          <div style="font-size: 28px; font-weight: 900; letter-spacing: 2px; margin-bottom: 5px;">MT COMMUNITY</div>
+          <div style="width: 80%; height: 2px; background: red; margin: 10px 0;"></div>
+          <div style="font-size: 20px; font-weight: 700;">OFFICIAL RECORD</div>
+          <div style="font-size: 14px; font-weight: 500; margin-top: 10px;">${new Date().toLocaleDateString('en-GB')}</div>
+          <div style="font-size: 12px; font-weight: 400; margin-top: 5px;">VERIFIED SYSTEM</div>
+        </div>
+      `;
+
+      // Append stamp temporarily to the element
+      const originalPosition = element.style.position;
+      const originalZIndex = element.style.zIndex;
+      
+      if (!originalPosition || originalPosition === 'static') {
+        element.style.position = 'relative';
+      }
+      element.appendChild(stampContainer);
+
       const canvas = await html2canvas(element, {
-        backgroundColor: '#111827',
-        scale: 1.5, // Reduced from 2 for speed
+        scale: 4, // High quality as requested
         useCORS: true,
-        allowTaint: false,
+        backgroundColor: null,
         logging: false,
-        imageTimeout: 5000, // Reduced from 15000 for faster failure/fallback
         onclone: (clonedDoc) => {
           const clonedElement = clonedDoc.getElementById(elementId);
           if (clonedElement) {
-            // Only fix essential styles
+            // Ensure everything is visible in the clone
             const scrollableElements = clonedElement.querySelectorAll('.overflow-y-auto, .overflow-auto');
             scrollableElements.forEach((el) => {
               (el as HTMLElement).style.overflow = 'visible';
               (el as HTMLElement).style.maxHeight = 'none';
               (el as HTMLElement).style.height = 'auto';
             });
+            
+            // Force some styles for better capture
+            clonedElement.style.borderRadius = '24px';
+            clonedElement.style.boxShadow = 'none';
           }
         }
       });
 
-      // Add stamp to the generated canvas
-      addStampToCanvas(canvas);
+      // Cleanup stamp
+      element.removeChild(stampContainer);
+      if (!originalPosition || originalPosition === 'static') {
+        element.style.position = originalPosition;
+      }
 
-      const dataUrl = canvas.toDataURL('image/png', 0.8); // Slightly lower quality for faster generation
+      const dataUrl = canvas.toDataURL('image/png');
       setImage(dataUrl);
       setIsOpen(true);
     } catch (err) {
-      console.error('html2canvas failed, trying canvas fallback:', err);
-      if (memberData) {
-        const fallbackUrl = await drawFallbackCanvas(memberData);
-        if (fallbackUrl) {
-          setImage(fallbackUrl);
-          setIsOpen(true);
-        } else {
-          alert('عذراً، فشل التقاط الصورة. يرجى المحاولة مرة أخرى.');
-        }
-      } else {
-        alert('عذراً، فشل التقاط الصورة.');
-      }
+      console.error('Capture failed:', err);
     } finally {
       setLoading(false);
     }
@@ -289,65 +128,150 @@ export function ScreenshotButton({ elementId, fileName = 'screenshot.png', class
     document.body.removeChild(link);
   };
 
+  const handleShare = async () => {
+    if (!image) return;
+    setIsSharing(true);
+    try {
+      const response = await fetch(image);
+      const blob = await response.blob();
+      const file = new File([blob], fileName, { type: 'image/png' });
+      
+      if (navigator.share) {
+        await navigator.share({
+          files: [file],
+          title: 'MT Community Capture',
+          text: 'Check out this capture from MT Community Dashboard!',
+        });
+      } else {
+        // Fallback: copy to clipboard or just download
+        handleDownload();
+        alert('تم تحميل الصورة (متصفحك لا يدعم المشاركة المباشرة)');
+      }
+    } catch (err) {
+      console.error('Share failed:', err);
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
   return (
     <>
+      {/* Flash Effect */}
+      <AnimatePresence>
+        {showFlash && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-white pointer-events-none"
+          />
+        )}
+      </AnimatePresence>
+
       <div 
         onDoubleClick={handleCapture} 
-        className={`cursor-pointer ${className} relative group/screenshot`}
-        title="انقر مرتين لالتقاط صورة للبطاقة"
+        className={`${className} relative group/screenshot`}
       >
-        {children}
-        {loading && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] rounded-inherit">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-          </div>
+        {children || (
+          <button 
+            onClick={handleCapture}
+            disabled={loading}
+            className={variant === 'global' 
+              ? "p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 group relative overflow-hidden flex items-center gap-2"
+              : `p-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg transition-all duration-300 group ${className}`
+            }
+            title="التقاط صورة"
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />
+            ) : (
+              <Camera className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
+            )}
+            {variant === 'global' && (
+              <>
+                <span className="text-sm font-bold text-gray-300 group-hover:text-white hidden sm:inline">التقاط الشاشة</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              </>
+            )}
+          </button>
         )}
       </div>
 
       <AnimatePresence>
         {isOpen && image && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/60 backdrop-blur-[30px]"
               onClick={() => setIsOpen(false)}
             />
+            
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.9, y: 40 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-3xl bg-[#111827] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh]"
+              exit={{ opacity: 0, scale: 0.9, y: 40 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-4xl bg-[#111827]/80 border border-white/10 rounded-[32px] shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh]"
             >
-              <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
-                <h3 className="text-lg font-bold text-white">معاينة الصورة</h3>
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-white/10 bg-white/5">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-500/20 rounded-xl">
+                    <Camera className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-white tracking-tight">معاينة الالتقاط</h3>
+                    <p className="text-xs text-gray-400 font-medium">تمت إضافة الختم الرسمي بنجاح</p>
+                  </div>
+                </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                  className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-6 h-6" />
                 </button>
               </div>
               
-              <div className="p-6 overflow-auto flex-1 flex items-center justify-center bg-[#0a0f1a] custom-scrollbar relative w-full h-[70vh]">
-                <CachedImage src={image} alt="Screenshot" fill className="object-contain rounded-xl shadow-lg border border-white/5" />
+              {/* Image Preview */}
+              <div className="p-8 overflow-auto flex-1 flex items-center justify-center bg-black/20 custom-scrollbar relative">
+                <div className="relative group/preview max-w-full w-full aspect-video sm:aspect-[16/9]">
+                  <Image 
+                    src={image} 
+                    alt="Screenshot" 
+                    fill
+                    className="object-contain rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 transition-transform duration-500 group-hover/preview:scale-[1.02]" 
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                </div>
               </div>
 
-              <div className="p-4 border-t border-white/10 bg-white/5 flex justify-end gap-3">
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-medium"
-                >
-                  إلغاء
-                </button>
-                <button
-                  onClick={handleDownload}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  تحميل الصورة
-                </button>
+              {/* Footer Actions */}
+              <div className="p-6 border-t border-white/10 bg-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span className="text-xs font-bold">جاهز للتحميل والمشاركة</span>
+                </div>
+
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <button
+                    onClick={handleShare}
+                    disabled={isSharing}
+                    className="flex-1 sm:flex-none px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all font-bold flex items-center justify-center gap-2 border border-white/10"
+                  >
+                    {isSharing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Share2 className="w-5 h-5" />}
+                    مشاركة
+                  </button>
+                  <button
+                    onClick={handleDownload}
+                    className="flex-1 sm:flex-none px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl transition-all font-bold flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(37,99,235,0.3)]"
+                  >
+                    <Download className="w-5 h-5" />
+                    تحميل بجودة عالية
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>

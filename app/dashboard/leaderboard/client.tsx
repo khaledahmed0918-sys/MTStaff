@@ -3,8 +3,9 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Image from 'next/image';
-import { Search, Filter, MessageSquare, Mic, Flame, Coins, Shield, ArrowDownUp, Loader2 } from 'lucide-react';
+import { Search, Filter, MessageSquare, Mic, Flame, Coins, Shield, ArrowDownUp, Loader2, Camera } from 'lucide-react';
 import { formatVoiceTime, fetchWithRetry } from '@/lib/utils';
+import { ScreenshotButton } from '@/components/screenshot-button';
 
 export function LeaderboardClient() {
   const [initialUsers, setInitialUsers] = useState<any[]>([]);
@@ -232,15 +233,29 @@ export function LeaderboardClient() {
       <div className="space-y-2">
         <AnimatePresence mode="popLayout">
           {filteredAndSortedUsers.slice(0, visibleCount).map((user, index) => (
-            <motion.div
-              layout
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              transition={{ duration: 0.2 }}
+            <ScreenshotButton 
               key={user.id}
-              className="bg-[#111827]/60 backdrop-blur-md border border-white/5 rounded-xl p-2 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 hover:bg-white/10 transition-all group relative overflow-hidden"
+              elementId={`user-card-${user.id}`} 
+              fileName={`mt-user-${user.username}.png`}
+              memberData={user}
             >
+              <motion.div
+                layout
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.2 }}
+                id={`user-card-${user.id}`}
+                className="bg-[#111827]/60 backdrop-blur-md border border-white/5 rounded-xl p-2 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 hover:bg-white/10 transition-all group relative overflow-hidden"
+              >
+                {/* Screenshot Button Overlay */}
+                <div className="absolute top-1 right-1 z-20 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                  <ScreenshotButton 
+                    elementId={`user-card-${user.id}`} 
+                    fileName={`mt-user-${user.username}.png`}
+                    memberData={user}
+                  />
+                </div>
               {/* Nameplate / Banner Effect */}
               {user.highestRoleColor && user.highestRoleColor !== '#000000' && (
                 <div 
@@ -319,7 +334,8 @@ export function LeaderboardClient() {
                 </div>
               </div>
             </motion.div>
-          ))}
+          </ScreenshotButton>
+        ))}
           {filteredAndSortedUsers.length === 0 && (
             <div className="text-center py-10 text-gray-400">
               لا يوجد نتائج مطابقة للبحث

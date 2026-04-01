@@ -4,11 +4,13 @@ import Image from 'next/image';
 import { Menu, LogOut } from 'lucide-react';
 import { useNav } from './nav-context';
 import { signOut } from 'next-auth/react';
+import { ScreenshotButton } from './screenshot-button';
 
 export function Topbar({ user }: { user: any }) {
   const { toggle } = useNav();
   const profile = user?.profile || {};
   const [imgSrc, setImgSrc] = useState(user?.image || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=');
+  const [timestamp] = useState(() => Date.now());
 
   if (!user) return null;
 
@@ -36,6 +38,11 @@ export function Topbar({ user }: { user: any }) {
         </div>
       </div>
       <div className="flex items-center gap-3">
+        <ScreenshotButton 
+          elementId="dashboard-content" 
+          variant="global" 
+          fileName={`mt-dashboard-${timestamp}.png`} 
+        />
         <button
           onClick={() => signOut({ callbackUrl: '/' })}
           className="md:hidden p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/20"

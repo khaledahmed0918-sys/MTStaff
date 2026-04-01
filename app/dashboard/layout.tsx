@@ -37,7 +37,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <Sidebar />
         <div className="flex-1 flex flex-col relative z-10 w-full overflow-hidden">
           <Topbar user={session.user} />
-          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-10 custom-scrollbar relative z-0">
+          <main id="dashboard-content" className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-10 custom-scrollbar relative z-0">
             {children}
           </main>
         </div>

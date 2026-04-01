@@ -70,7 +70,10 @@ export function AdminSection({ initialCategories }: { initialCategories: any[] }
 
   useEffect(() => {
     if (initialCategories.length === 0) {
-      fetchAdminData();
+      const timer = setTimeout(() => {
+        fetchAdminData();
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [initialCategories]);
 

@@ -161,6 +161,14 @@ function SearchContent() {
               memberData={user}
             >
               <div id={`search-card-${user.id}`} className="bg-[#0a0f1a]/80 border border-blue-500/20 rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.5)] transition-all duration-500 relative group hover:shadow-[0_0_40px_rgba(59,130,246,0.2)] hover:border-blue-500/50">
+                {/* Screenshot Button Overlay */}
+                <div className="absolute top-4 right-4 z-[40] opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                  <ScreenshotButton 
+                    elementId={`search-card-${user.id}`} 
+                    fileName={`${user.username}-profile.png`}
+                    memberData={user}
+                  />
+                </div>
                 {/* Banner */}
               {user.banner && (
                 <div className="aspect-[5/2] w-full relative overflow-hidden">
