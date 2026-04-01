@@ -5,6 +5,27 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export async function fetchWithRetry(url: string, options: RequestInit = {}, maxRetries = 5) {
+  let lastError;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const res = await fetch(url, options);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res;
+    } catch (error) {
+      lastError = error;
+      console.warn(`Fetch attempt ${i + 1} failed for ${url}. Retrying...`);
+      if (i < maxRetries - 1) {
+        // Wait before retrying (exponential backoff: 1s, 2s, 4s, 8s)
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+      }
+    }
+  }
+  throw lastError;
+}
+
 export function parseDiscordEmoji(emojiString: string) {
   if (!emojiString) return null;
   const animatedMatch = emojiString.match(/<a:[^:]+:(\d+)>/);

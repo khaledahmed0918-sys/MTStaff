@@ -14,7 +14,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   try {
     // Run all queries concurrently to improve speed
-    const [discordRes, warnsRes, swarnsRes, timeoutsRes, bansRes, streaksRes, messagesRes, voiceRes, coinsRes] = await Promise.allSettled([
+    const [discordRes, warnsRes, swarnsRes, timeoutsRes, bansRes, streaksRes, messagesRes, voiceRes] = await Promise.allSettled([
       getUserInfo(guildId, id),
       query(`SELECT * FROM "warns_${id}" ORDER BY date_warn DESC`),
       query(`SELECT * FROM "swarns_${id}" ORDER BY date_warn DESC`),
@@ -22,8 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       query(`SELECT * FROM "bans_${id}" ORDER BY date DESC`),
       query(`SELECT * FROM streaks WHERE user_id = $1`, [id]),
       query(`SELECT * FROM messages WHERE user_id = $1`, [id]),
-      query(`SELECT * FROM voice WHERE user_id = $1`, [id]),
-      query(`SELECT * FROM coins WHERE user_id = $1`, [id])
+      query(`SELECT * FROM voice WHERE user_id = $1`, [id])
     ]);
 
     const discordInfo = discordRes.status === 'fulfilled' ? discordRes.value : null;
@@ -34,7 +33,27 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const streaks = streaksRes.status === 'fulfilled' && streaksRes.value.rows.length > 0 ? streaksRes.value.rows[0] : null;
     const messages = messagesRes.status === 'fulfilled' && messagesRes.value.rows.length > 0 ? messagesRes.value.rows[0] : null;
     const voice = voiceRes.status === 'fulfilled' && voiceRes.value.rows.length > 0 ? voiceRes.value.rows[0] : null;
-    const coinsData = coinsRes.status === 'fulfilled' && coinsRes.value.rows.length > 0 ? coinsRes.value.rows[0] : { coins: 0, tasks_remaining: {}, tasks_completed: {}, last_5_purchases: [] };
+
+    let coinsData = { coins: 0, tasks_remaining: 0, tasks_completed: 0, last_5: [] };
+    let tasksList = [];
+    try {
+      const coinsPath = path.join('/root/mtcoins/data/users', `${id}.json`);
+      const coinsContent = await fs.readFile(coinsPath, 'utf-8');
+      const parsedCoins = JSON.parse(coinsContent);
+      if (parsedCoins && parsedCoins.data) {
+        coinsData = {
+          coins: parsedCoins.data.coins || 0,
+          tasks_remaining: parsedCoins.data.tasks_remaining || 0,
+          tasks_completed: parsedCoins.data.tasks_completed || 0,
+          last_5: parsedCoins.data.last_5 || []
+        };
+      }
+      if (parsedCoins && parsedCoins.tasks) {
+        tasksList = parsedCoins.tasks;
+      }
+    } catch (e) {
+      // Ignore if file doesn't exist
+    }
 
     let ticketsCount = 0;
     try {
@@ -68,11 +87,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         tickets: ticketsCount,
         coins: {
           coins: coinsData.coins || 0,
-          tasks_remaining: Object.keys(coinsData.tasks_remaining || {}).join(', '),
-          tasks_completed: Object.keys(coinsData.tasks_completed || {}).join(', '),
-          last_5: coinsData.last_5_purchases || []
+          tasks_remaining: coinsData.tasks_remaining || 0,
+          tasks_completed: coinsData.tasks_completed || 0,
+          last_5: coinsData.last_5 || []
         },
-        tasks: [] // The tasks list was previously from JSON, we can leave it empty or fetch from tasks table if needed
+        tasks: tasksList
       },
     });
   } catch (err) {

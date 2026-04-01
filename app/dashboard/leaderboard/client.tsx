@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Image from 'next/image';
 import { Search, Filter, MessageSquare, Mic, Flame, Coins, Shield, ArrowDownUp, Loader2 } from 'lucide-react';
-import { formatVoiceTime } from '@/lib/utils';
+import { formatVoiceTime, fetchWithRetry } from '@/lib/utils';
 
 export function LeaderboardClient() {
   const [initialUsers, setInitialUsers] = useState<any[]>([]);
@@ -14,13 +14,12 @@ export function LeaderboardClient() {
   useEffect(() => {
     async function fetchUsers() {
       try {
-        const res = await fetch('/api/leaderboard');
-        if (!res.ok) throw new Error('Failed to fetch leaderboard data');
+        const res = await fetchWithRetry('/api/leaderboard');
         const data = await res.json();
         setInitialUsers(data);
       } catch (err) {
         console.error(err);
-        setError('حدث خطأ أثناء جلب البيانات');
+        setError('فشل في جلب بيانات المتصدرين بعد عدة محاولات');
       } finally {
         setLoading(false);
       }

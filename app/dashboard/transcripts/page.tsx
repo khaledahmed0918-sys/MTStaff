@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Loader2, Search, Filter, Calendar, User as UserIcon, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
+import { fetchWithRetry } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface Transcript {
@@ -35,12 +36,12 @@ export default function TranscriptsPage() {
   useEffect(() => {
     const fetchTranscripts = async () => {
       try {
-        const res = await fetch('/api/tickets/transcripts');
-        if (!res.ok) throw new Error('Failed to fetch transcripts');
+        const res = await fetchWithRetry('/api/tickets/transcripts');
         const data = await res.json();
         setTranscripts(data);
       } catch (err) {
-        setError('حدث خطأ أثناء جلب الترانسكريبت');
+        console.error(err);
+        setError('فشل في جلب الترانسكريبت بعد عدة محاولات');
       } finally {
         setLoading(false);
       }

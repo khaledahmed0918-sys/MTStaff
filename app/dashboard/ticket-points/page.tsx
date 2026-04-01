@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Loader2, Search, Ticket, ChevronDown, ChevronUp, User as UserIcon } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
+import { fetchWithRetry } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface PointUser {
@@ -38,11 +39,9 @@ export default function TicketPointsPage() {
     const fetchData = async () => {
       try {
         const [pointsRes, ticketsRes] = await Promise.all([
-          fetch('/api/tickets/points'),
-          fetch('/api/tickets')
+          fetchWithRetry('/api/tickets/points'),
+          fetchWithRetry('/api/tickets')
         ]);
-        
-        if (!pointsRes.ok || !ticketsRes.ok) throw new Error('Failed to fetch data');
         
         const pointsData = await pointsRes.json();
         const ticketsData = await ticketsRes.json();
@@ -50,7 +49,8 @@ export default function TicketPointsPage() {
         setPoints(pointsData);
         setTickets(ticketsData);
       } catch (err) {
-        setError('حدث خطأ أثناء جلب البيانات');
+        console.error(err);
+        setError('فشل في جلب بيانات نقاط التذاكر بعد عدة محاولات');
       } finally {
         setLoading(false);
       }

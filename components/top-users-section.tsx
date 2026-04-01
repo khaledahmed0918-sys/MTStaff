@@ -7,6 +7,8 @@ import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ScreenshotButton } from '@/components/screenshot-button';
 
+import { fetchWithRetry } from '@/lib/utils';
+
 export function TopUsersSection({ guildId, initialData }: { guildId: string, initialData?: any }) {
   const [data, setData] = useState<any>(initialData || null);
   const [loading, setLoading] = useState(!initialData); 
@@ -20,11 +22,9 @@ export function TopUsersSection({ guildId, initialData }: { guildId: string, ini
 
     async function fetchTopUsers() {
       try {
-        const res = await fetch('/api/top-users');
-        if (res.ok) {
-          const json = await res.json();
-          setData(json);
-        }
+        const res = await fetchWithRetry('/api/top-users');
+        const json = await res.json();
+        setData(json);
       } catch (err) {
         console.error('Failed to fetch top users', err);
       } finally {

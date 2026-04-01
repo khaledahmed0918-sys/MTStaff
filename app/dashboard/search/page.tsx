@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo, Camera, CheckCircle2, History, Ticket } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
-import { formatDateEn, formatVoiceTime, parseDiscordEmoji, generateGradientColors } from '@/lib/utils';
+import { formatDateEn, formatVoiceTime, parseDiscordEmoji, generateGradientColors, fetchWithRetry } from '@/lib/utils';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ScreenshotButton } from '@/components/screenshot-button';
 import { RolesDisplay } from '@/components/roles-display';
@@ -46,14 +46,14 @@ function SearchContent() {
     const fetchDefault = async () => {
       try {
         if (initialQuery) {
-          const res = await fetch(`/api/search?q=${encodeURIComponent(initialQuery)}`);
+          const res = await fetchWithRetry(`/api/search?q=${encodeURIComponent(initialQuery)}`);
           const data = await res.json();
           setResults(data.results || []);
           if (data.results && data.results.length > 0) {
             toggleExpand(data.results[0].id);
           }
         } else {
-          const res = await fetch('/api/search');
+          const res = await fetchWithRetry('/api/search');
           const data = await res.json();
           setResults(data.results || []);
         }
@@ -77,7 +77,7 @@ function SearchContent() {
     setExpandedId(null);
     setExpandedData(null);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const res = await fetchWithRetry(`/api/search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
       setResults(data.results || []);
       if (data.results && data.results.length > 0) {
@@ -100,7 +100,7 @@ function SearchContent() {
     setExpandedId(id);
     setLoadingDetails(true);
     try {
-      const res = await fetch(`/api/user/${id}`);
+      const res = await fetchWithRetry(`/api/user/${id}`);
       const data = await res.json();
       setExpandedData(data);
     } catch (err) {

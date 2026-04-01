@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { ScreenshotButton } from '@/components/screenshot-button';
 import { ImagePopup } from '@/components/image-popup';
+import { fetchWithRetry } from '@/lib/utils';
 
 // Tooltip Component
 function Tooltip({ children, text }: { children: React.ReactNode, text: string }) {
@@ -51,11 +52,8 @@ export function AdminSection({ initialCategories }: { initialCategories: any[] }
   const fetchAdminData = () => {
     setLoading(true);
     setError(false);
-    fetch('/api/admin')
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch');
-        return res.json();
-      })
+    fetchWithRetry('/api/admin')
+      .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
           setCategories(data);

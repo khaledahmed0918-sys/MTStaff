@@ -51,28 +51,37 @@ export async function GET() {
       let ticketId = null;
       let ticketName = file.replace('.html', '');
 
-      // Try to parse filename: {creatorId}_{transcrip_Date}.html
-      const match = file.match(/^(\d+)_([^\.]+)\.html$/);
+      // Try to parse filename: {creatorID}_{channelID}_{Date.now()}.html
+      const match = file.match(/^(\d+)_(\d+)_(\d+)\.html$/);
       if (match) {
         creatorId = match[1];
-        dateStr = match[2];
+        ticketId = match[2];
+        dateStr = new Date(parseInt(match[3])).toISOString();
+      } else {
+        // Fallback for old format: {creatorId}_{transcrip_Date}.html
+        const oldMatch = file.match(/^(\d+)_([^\.]+)\.html$/);
+        if (oldMatch) {
+          creatorId = oldMatch[1];
+          dateStr = oldMatch[2];
+        }
       }
 
-      // Read HTML file to extract ticket ID and other info
+      // Read HTML file to extract ticket ID and other info if not found in filename
       try {
         const htmlContent = await fs.readFile(path.join(transcriptsDir, file), 'utf-8');
         
-        // Extract ticket ID: ايدي التذكرة: 1488852700249456660
-        const idMatch = htmlContent.match(/ايدي التذكرة:\s*(\d+)/);
-        if (idMatch) {
-          ticketId = idMatch[1];
+        if (!ticketId) {
+          // Extract ticket ID: ايدي التذكرة: 1488852700249456660
+          const idMatch = htmlContent.match(/ايدي التذكرة:\s*(\d+)/);
+          if (idMatch) {
+            ticketId = idMatch[1];
+          }
         }
 
         // Extract creator ID from claimed by if not in filename
         if (creatorId === 'Unknown') {
            const creatorMatch = htmlContent.match(/المُنشئ:\s*<@(\d+)>/) || htmlContent.match(/المُنشئ:\s*([^\n<]+)/);
            if (creatorMatch) {
-               // We might just get the name if it's not a mention, but let's try
                creatorId = creatorMatch[1].trim();
            }
         }
@@ -90,6 +99,12 @@ export async function GET() {
       let ticketDetails = null;
       if (ticketId && ticketsData[ticketId]) {
         ticketDetails = ticketsData[ticketId];
+      } else {
+        // Default to closed if no info found
+        ticketDetails = {
+          closed: true,
+          division: 'تذكرة غير معروفة'
+        };
       }
 
       transcripts.push({

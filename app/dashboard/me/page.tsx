@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import CachedImage from '@/components/cached-image';
 import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare, CheckCircle2, Camera, ListTodo, History } from 'lucide-react';
-import { formatVoiceTime, formatDateEn, parseDiscordEmoji, generateGradientColors } from '@/lib/utils';
+import { formatVoiceTime, formatDateEn, parseDiscordEmoji, generateGradientColors, fetchWithRetry } from '@/lib/utils';
 import { ScreenshotButton } from '@/components/screenshot-button';
 import { RolesDisplay } from '@/components/roles-display';
 import { motion } from 'motion/react';
@@ -22,12 +22,11 @@ export default function MyInfoPage() {
   useEffect(() => {
     async function fetchMyInfo() {
       try {
-        const resMe = await fetch('/api/me', { cache: 'no-store' });
-        if (!resMe.ok) throw new Error('Failed to fetch session');
+        const resMe = await fetchWithRetry('/api/me', { cache: 'no-store' });
         const me = await resMe.json();
         
         if (me.user && me.user.id) {
-          const res = await fetch(`/api/user/${me.user.id}`, { cache: 'no-store' });
+          const res = await fetchWithRetry(`/api/user/${me.user.id}`, { cache: 'no-store' });
           const userData = await res.json();
           
           // Initialize with safe defaults

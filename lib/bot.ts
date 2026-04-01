@@ -297,10 +297,9 @@ export async function getAdminWithStats(guildId: string) {
 
   const placeholders = userIds.map((_, i) => `$${i + 1}`).join(',');
   
-  const [streaksRes, messagesRes, coinsRes] = await Promise.allSettled([
+  const [streaksRes, messagesRes] = await Promise.allSettled([
     query(`SELECT user_id, streak, completed_today FROM streaks WHERE user_id IN (${placeholders})`, userIds),
-    query(`SELECT user_id, "all" as total, top_day as daily, top_week as weekly, top_month as monthly FROM messages WHERE user_id IN (${placeholders})`, userIds),
-    query(`SELECT user_id, tasks_remaining, tasks_completed FROM coins WHERE user_id IN (${placeholders})`, userIds)
+    query(`SELECT user_id, "all" as total, top_day as daily, top_week as weekly, top_month as monthly FROM messages WHERE user_id IN (${placeholders})`, userIds)
   ]);
 
   const streaksMap = new Map();
@@ -314,8 +313,27 @@ export async function getAdminWithStats(guildId: string) {
   }
 
   const coinsMap = new Map();
-  if (coinsRes.status === 'fulfilled') {
-    coinsRes.value.rows.forEach(row => coinsMap.set(row.user_id, row));
+  try {
+    const fs = require('fs/promises');
+    const path = require('path');
+    const coinsDir = '/root/mtcoins/data/users/';
+    
+    await Promise.all(userIds.map(async (userId) => {
+      try {
+        const content = await fs.readFile(path.join(coinsDir, `${userId}.json`), 'utf-8');
+        const data = JSON.parse(content);
+        if (data && data.data) {
+          coinsMap.set(userId, {
+            tasks_remaining: data.data.tasks_remaining || 0,
+            tasks_completed: data.data.tasks_completed || 0
+          });
+        }
+      } catch (e) {
+        // Ignore individual file read errors
+      }
+    }));
+  } catch (e) {
+    console.error('Error reading mtcoins directory:', e);
   }
 
   const swarnsMap = new Map();
@@ -475,22 +493,9 @@ export async function getAllUsersWithStats(guildId: string) {
 
     const guild = await client.guilds.fetch(guildId);
     
-    // Fetch all members using REST to avoid gateway rate limits
-    let allMembers: any[] = [];
-    let lastId = '0';
-    while (true) {
-      const res = await fetch(`https://discord.com/api/v10/guilds/${guildId}/members?limit=1000&after=${lastId}`, {
-        headers: {
-          Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
-        },
-      });
-      if (!res.ok) break;
-      const members = await res.json();
-      if (members.length === 0) break;
-      allMembers = allMembers.concat(members);
-      lastId = members[members.length - 1].user.id;
-      if (members.length < 1000) break;
-    }
+    // Fetch all members using Gateway (much faster than REST chunks)
+    await guild.members.fetch();
+    const allMembers = Array.from(guild.members.cache.values());
 
     const userIds = allMembers.map(m => m.user.id);
     
@@ -498,11 +503,10 @@ export async function getAllUsersWithStats(guildId: string) {
 
     // We need to query in chunks if there are too many users, but let's try to get all at once if < 10000
     // Actually, it's better to just get all records from the DB and map them.
-    const [streaksRes, messagesRes, voiceRes, mtcoinsRes] = await Promise.allSettled([
+    const [streaksRes, messagesRes, voiceRes] = await Promise.allSettled([
       query(`SELECT user_id, streak FROM streaks`),
       query(`SELECT user_id, "all" as total FROM messages`),
-      query(`SELECT user_id, "all" as total FROM voice`),
-      query(`SELECT user_id, coins FROM mtcoins`)
+      query(`SELECT user_id, "all" as total FROM voice`)
     ]);
 
     const streaksMap = new Map();
@@ -520,9 +524,35 @@ export async function getAllUsersWithStats(guildId: string) {
       voiceRes.value.rows.forEach(row => voiceMap.set(row.user_id, row.total || 0));
     }
 
+    // Read mtcoins from JSON files
     const mtcoinsMap = new Map();
-    if (mtcoinsRes.status === 'fulfilled') {
-      mtcoinsRes.value.rows.forEach(row => mtcoinsMap.set(row.user_id, row.coins || 0));
+    try {
+      const fs = require('fs/promises');
+      const path = require('path');
+      const coinsDir = '/root/mtcoins/data/users/';
+      const files = await fs.readdir(coinsDir);
+      
+      // Process in chunks of 100 to avoid EMFILE
+      const chunkSize = 100;
+      for (let i = 0; i < files.length; i += chunkSize) {
+        const chunk = files.slice(i, i + chunkSize);
+        await Promise.all(chunk.map(async (file: string) => {
+          if (file.endsWith('.json')) {
+            const userId = file.replace('.json', '');
+            try {
+              const content = await fs.readFile(path.join(coinsDir, file), 'utf-8');
+              const data = JSON.parse(content);
+              if (data && data.data && typeof data.data.coins === 'number') {
+                mtcoinsMap.set(userId, data.data.coins);
+              }
+            } catch (e) {
+              // Ignore individual file read errors
+            }
+          }
+        }));
+      }
+    } catch (e) {
+      console.error('Error reading mtcoins directory:', e);
     }
 
     // Read ticket points
@@ -546,9 +576,8 @@ export async function getAllUsersWithStats(guildId: string) {
       let highestRoleName = '';
       let highestColor = '#ffffff';
       
-      for (const rId of member.roles) {
-        const r = guild.roles.cache.get(rId);
-        if (r && r.position > highestPosition) {
+      for (const r of member.roles.cache.values()) {
+        if (r.position > highestPosition) {
           highestPosition = r.position;
           highestRoleName = r.name;
           highestColor = r.hexColor !== '#000000' ? r.hexColor : '#ffffff';
@@ -558,12 +587,12 @@ export async function getAllUsersWithStats(guildId: string) {
       return {
         id: user.id,
         username: user.username,
-        displayName: user.global_name || user.username,
-        avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=256` : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator || '0') % 5}.png`,
-        avatarDecoration: user.avatar_decoration_data ? `https://cdn.discordapp.com/avatar-decoration-presets/${user.avatar_decoration_data.asset}.png?size=256` : null,
+        displayName: user.globalName || user.displayName || user.username,
+        avatar: user.displayAvatarURL({ forceStatic: false, size: 256 }),
+        avatarDecoration: user.avatarDecorationURL({ size: 256 }),
         highestRoleColor: highestColor,
         highestRoleName: highestRoleName,
-        rolesCount: member.roles.length,
+        rolesCount: member.roles.cache.size,
         stats: {
           streak: streaksMap.get(user.id) || 0,
           messages: messagesMap.get(user.id) || 0,
