@@ -180,10 +180,10 @@ export default function TranscriptsPage() {
                 <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                   <div className="text-right">
                     <p className="text-sm text-gray-300">
-                      {new Date(t.date).toLocaleDateString('ar-SA')}
+                      {new Date(t.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {new Date(t.date).toLocaleTimeString('ar-SA')}
+                      {new Date(t.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                   <div className="p-2 bg-white/5 rounded-lg">
@@ -210,16 +210,20 @@ export default function TranscriptsPage() {
                       <div className="space-y-4">
                         <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider">المنشئ</h4>
                         <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
-                          <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0">
-                            {t.creator?.avatar ? (
-                              <CachedImage src={t.creator.avatar} alt="Creator" fill className="object-cover" />
-                            ) : (
-                              <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                                <UserIcon className="w-6 h-6 text-gray-400" />
-                              </div>
-                            )}
+                          <div className="relative w-12 h-12 shrink-0">
+                            <div className="w-full h-full rounded-full overflow-hidden relative z-10">
+                              {t.creator?.avatar ? (
+                                <CachedImage src={t.creator.avatar} alt="Creator" fill className="object-cover" />
+                              ) : (
+                                <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                                  <UserIcon className="w-6 h-6 text-gray-400" />
+                                </div>
+                              )}
+                            </div>
                             {t.creator?.avatarDecoration && (
-                              <CachedImage src={t.creator.avatarDecoration} alt="Decoration" fill className="object-cover scale-125" />
+                              <div className="absolute -inset-2.5 z-20 pointer-events-none">
+                                <CachedImage src={t.creator.avatarDecoration} alt="Decoration" fill className="object-cover" />
+                              </div>
                             )}
                           </div>
                           <div>
@@ -234,16 +238,20 @@ export default function TranscriptsPage() {
                         <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider">المستلم</h4>
                         {t.details?.claimed ? (
                           <div className="flex items-center gap-4 bg-blue-500/10 p-4 rounded-xl border border-blue-500/20">
-                            <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0">
-                              {t.claimer?.avatar ? (
-                                <CachedImage src={t.claimer.avatar} alt="Claimer" fill className="object-cover" />
-                              ) : (
-                                <div className="w-full h-full bg-blue-900 flex items-center justify-center">
-                                  <UserIcon className="w-6 h-6 text-blue-400" />
-                                </div>
-                              )}
+                            <div className="relative w-12 h-12 shrink-0">
+                              <div className="w-full h-full rounded-full overflow-hidden relative z-10">
+                                {t.claimer?.avatar ? (
+                                  <CachedImage src={t.claimer.avatar} alt="Claimer" fill className="object-cover" />
+                                ) : (
+                                  <div className="w-full h-full bg-blue-900 flex items-center justify-center">
+                                    <UserIcon className="w-6 h-6 text-blue-400" />
+                                  </div>
+                                )}
+                              </div>
                               {t.claimer?.avatarDecoration && (
-                                <CachedImage src={t.claimer.avatarDecoration} alt="Decoration" fill className="object-cover scale-125" />
+                                <div className="absolute -inset-2.5 z-20 pointer-events-none">
+                                  <CachedImage src={t.claimer.avatarDecoration} alt="Decoration" fill className="object-cover" />
+                                </div>
                               )}
                             </div>
                             <div>
@@ -265,7 +273,7 @@ export default function TranscriptsPage() {
                           <div>
                             <p className="text-xs text-gray-400">تاريخ الإنشاء</p>
                             <p className="text-sm font-bold text-white">
-                              {t.details?.createdAt ? new Date(t.details.createdAt).toLocaleString('ar-SA') : 'غير متوفر'}
+                              {t.details?.createdAt ? new Date(t.details.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'غير متوفر'}
                             </p>
                           </div>
                         </div>
@@ -289,7 +297,7 @@ export default function TranscriptsPage() {
                             </p>
                             {t.details?.closedAt && (
                               <p className="text-xs text-gray-500 mt-1">
-                                {new Date(t.details.closedAt).toLocaleString('ar-SA')}
+                                {new Date(t.details.closedAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                               </p>
                             )}
                           </div>

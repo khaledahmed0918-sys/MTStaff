@@ -30,10 +30,12 @@ export async function GET() {
     try {
       const ticketsRaw = await fs.readFile(ticketsJsonPath, 'utf-8');
       const parsed = JSON.parse(ticketsRaw);
-      // The JSON has server ID at the root, we need to get the inner object
-      const serverId = Object.keys(parsed)[0];
-      if (serverId) {
+      const serverId = '852218081837449246';
+      if (parsed[serverId]) {
         ticketsData = parsed[serverId];
+      } else {
+        const firstKey = Object.keys(parsed)[0];
+        if (firstKey) ticketsData = parsed[firstKey];
       }
     } catch (err) {
       console.error('Error reading tickets.json:', err);

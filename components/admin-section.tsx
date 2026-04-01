@@ -185,7 +185,7 @@ export function AdminSection({ initialCategories }: { initialCategories: any[] }
                           whileHover={{ y: -2, scale: 1.005 }}
                           transition={{ duration: 0.4 }}
                           onClick={() => router.push(`/dashboard/search?q=${member.id}`)}
-                          className="bg-[#111827]/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-xl hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] transition-all duration-500 cursor-pointer group relative overflow-hidden w-full flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
+                          className="bg-[#111827]/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-xl hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] transition-all duration-500 cursor-pointer group relative w-full flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
                           style={{ borderRightColor: `${member.highestRoleColor}80`, borderRightWidth: '4px' }}
                         >
                           <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full opacity-50 pointer-events-none blur-2xl group-hover:scale-150 transition-transform duration-700" style={{ backgroundImage: `linear-gradient(to bottom right, ${member.highestRoleColor}20, transparent)` }} />
@@ -260,7 +260,7 @@ export function AdminSection({ initialCategories }: { initialCategories: any[] }
                                 </div>
                               </Tooltip>
 
-                              {member.stats.tickets > 0 && (
+                              {member.stats.tickets >= 0 && (
                                 <Tooltip text="عدد التذاكر التي استلمها العضو">
                                   <div className="flex flex-col gap-1 bg-black/20 px-4 py-2 rounded-xl border border-white/5 w-full h-full">
                                     <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold">

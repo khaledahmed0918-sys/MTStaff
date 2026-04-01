@@ -141,16 +141,20 @@ export default function TicketPointsPage() {
                     <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-sm font-bold text-gray-400 shrink-0">
                       #{index + 1}
                     </div>
-                    <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 border-2 border-white/10">
-                      {p.user?.avatar ? (
-                        <CachedImage src={p.user.avatar} alt="User" fill className="object-cover" />
-                      ) : (
-                        <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-                          <UserIcon className="w-6 h-6 text-gray-400" />
-                        </div>
-                      )}
+                    <div className="relative w-14 h-14 shrink-0">
+                      <div className="w-full h-full rounded-full overflow-hidden relative z-10 border-2 border-white/10">
+                        {p.user?.avatar ? (
+                          <CachedImage src={p.user.avatar} alt="User" fill className="object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                            <UserIcon className="w-6 h-6 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
                       {p.user?.avatarDecoration && (
-                        <CachedImage src={p.user.avatarDecoration} alt="Decoration" fill className="object-cover scale-125" />
+                        <div className="absolute -inset-2.5 z-20 pointer-events-none">
+                          <CachedImage src={p.user.avatarDecoration} alt="Decoration" fill className="object-cover" />
+                        </div>
                       )}
                     </div>
                     <div>
@@ -214,7 +218,7 @@ export default function TicketPointsPage() {
                                 </div>
                                 <p className="text-xs text-gray-400 font-mono mb-2">#{ticket.ticketId}</p>
                                 <p className="text-xs text-gray-500">
-                                  {new Date(ticket.createdAt).toLocaleString('ar-SA')}
+                                  {new Date(ticket.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                 </p>
                               </button>
                             ))}
