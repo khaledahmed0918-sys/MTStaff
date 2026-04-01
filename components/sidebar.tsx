@@ -46,7 +46,7 @@ export function Sidebar() {
   const { isOpen, setIsOpen } = useNav();
   const links = [
     { href: '/dashboard', label: 'الرئيسية', icon: Home },
-    { href: '/dashboard/staff', label: 'الرتب الإدارية', icon: Users },
+    { href: '/dashboard/admin', label: 'الرتب الإدارية', icon: Users },
     { href: '/dashboard/leaderboard', label: 'التوبات', icon: Trophy },
     { href: '/dashboard/search', label: 'البحث', icon: Search },
     { href: '/dashboard/transcripts', label: 'ترانسكريبت التذاكر', icon: FileText },
@@ -65,7 +65,7 @@ export function Sidebar() {
       )}
       
       <aside className={`
-        fixed md:static inset-y-0 right-0 z-[100] w-64 bg-gradient-to-b md:bg-gradient-to-l from-[#0a0f1a] to-[#050505] backdrop-blur-2xl border-l border-white/10 
+        fixed md:static inset-y-0 right-0 z-[100] w-64 bg-[#0a0f1a]/70 backdrop-blur-[27px] border-l border-white/10 
         flex flex-col h-full shadow-2xl transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
       `}>

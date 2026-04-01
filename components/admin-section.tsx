@@ -41,23 +41,38 @@ function Tooltip({ children, text }: { children: React.ReactNode, text: string }
   );
 }
 
-export function StaffSection({ initialCategories }: { initialCategories: any[] }) {
+export function AdminSection({ initialCategories }: { initialCategories: any[] }) {
   const [categories, setCategories] = useState(initialCategories);
   const [loading, setLoading] = useState(initialCategories.length === 0);
+  const [error, setError] = useState(false);
   const [popupImage, setPopupImage] = useState<string | null>(null);
   const router = useRouter();
 
+  const fetchAdminData = () => {
+    setLoading(true);
+    setError(false);
+    fetch('/api/admin')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch');
+        return res.json();
+      })
+      .then(data => {
+        if (Array.isArray(data)) {
+          setCategories(data);
+        } else {
+          setError(true);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch admin data:', err);
+        setError(true);
+      })
+      .finally(() => setLoading(false));
+  };
+
   useEffect(() => {
     if (initialCategories.length === 0) {
-      fetch('/api/staff')
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setCategories(data);
-          }
-        })
-        .catch(err => console.error('Failed to fetch staff:', err))
-        .finally(() => setLoading(false));
+      fetchAdminData();
     }
   }, [initialCategories]);
 
@@ -89,7 +104,7 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
     );
   }
 
-  if (!categories || categories.length === 0) {
+  if (error || !categories || categories.length === 0) {
     return (
       <section className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both">
         <div className="flex items-center gap-3 px-2">
@@ -98,8 +113,16 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
           </div>
           <h2 className="text-2xl font-bold text-white tracking-tight">فريق الإدارة</h2>
         </div>
-        <div className="flex justify-center py-12 text-gray-500 bg-[#111827]/40 backdrop-blur-xl rounded-3xl border border-white/5 shadow-2xl">
-          لا يوجد أعضاء في فريق الإدارة حالياً
+        <div className="flex flex-col items-center justify-center py-12 gap-4 bg-[#111827]/40 backdrop-blur-xl rounded-3xl border border-white/5 shadow-2xl">
+          <p className="text-gray-500">
+            {error ? 'حدث خطأ أثناء جلب بيانات الإدارة' : 'لا يوجد أعضاء في فريق الإدارة حالياً'}
+          </p>
+          <button 
+            onClick={fetchAdminData}
+            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors"
+          >
+            إعادة المحاولة
+          </button>
         </div>
       </section>
     );
@@ -149,13 +172,13 @@ export function StaffSection({ initialCategories }: { initialCategories: any[] }
                     {role.members.map((member: any) => (
                       <ScreenshotButton 
                         key={member.id}
-                        elementId={`staff-card-${member.id}`} 
-                        fileName={`${member.username}-staff-card.png`} 
+                        elementId={`admin-card-${member.id}`} 
+                        fileName={`${member.username}-admin-card.png`} 
                         memberData={member}
                         className="w-full block"
                       >
                         <motion.div
-                          id={`staff-card-${member.id}`}
+                          id={`admin-card-${member.id}`}
                           initial={{ opacity: 0, y: 20 }}
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true, margin: "-50px" }}

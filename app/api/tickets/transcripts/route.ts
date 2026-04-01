@@ -44,23 +44,43 @@ export async function GET() {
     for (const file of files) {
       if (!file.endsWith('.html')) continue;
 
-      // Filename format: {creatorId}_{transcrip_Date}.html
-      // Example: 968563794974478366_2026-04-01.html
-      const match = file.match(/^(\d+)_([^\.]+)\.html$/);
-      if (!match) continue;
-
-      const creatorId = match[1];
-      const dateStr = match[2]; // Might not be ISO, but we'll try to parse it
-
-      // Read HTML file to extract ticket ID
+      let creatorId = 'Unknown';
+      let dateStr = new Date().toISOString();
       let ticketId = null;
+      let ticketName = file.replace('.html', '');
+
+      // Try to parse filename: {creatorId}_{transcrip_Date}.html
+      const match = file.match(/^(\d+)_([^\.]+)\.html$/);
+      if (match) {
+        creatorId = match[1];
+        dateStr = match[2];
+      }
+
+      // Read HTML file to extract ticket ID and other info
       try {
         const htmlContent = await fs.readFile(path.join(transcriptsDir, file), 'utf-8');
+        
         // Extract ticket ID: ايدي التذكرة: 1488852700249456660
         const idMatch = htmlContent.match(/ايدي التذكرة:\s*(\d+)/);
         if (idMatch) {
           ticketId = idMatch[1];
         }
+
+        // Extract creator ID from claimed by if not in filename
+        if (creatorId === 'Unknown') {
+           const creatorMatch = htmlContent.match(/المُنشئ:\s*<@(\d+)>/) || htmlContent.match(/المُنشئ:\s*([^\n<]+)/);
+           if (creatorMatch) {
+               // We might just get the name if it's not a mention, but let's try
+               creatorId = creatorMatch[1].trim();
+           }
+        }
+        
+        // Extract ticket name (usually at the top like #🎟️〡221k)
+        const nameMatch = htmlContent.match(/#([^\n<]+)/);
+        if (nameMatch) {
+            ticketName = nameMatch[1].trim();
+        }
+
       } catch (err) {
         console.error(`Error reading HTML file ${file}:`, err);
       }
@@ -72,8 +92,9 @@ export async function GET() {
 
       transcripts.push({
         fileName: file,
+        ticketName,
         creatorId,
-        date: new Date(dateStr).toISOString(),
+        date: new Date(dateStr).toString() !== 'Invalid Date' ? new Date(dateStr).toISOString() : new Date().toISOString(),
         ticketId,
         details: ticketDetails,
       });

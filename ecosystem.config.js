@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'staff',
+      name: 'admin',
       script: '.next/standalone/server.js',
       env: {
         NODE_ENV: 'production',

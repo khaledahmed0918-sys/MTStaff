@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getStaffWithStats } from '@/lib/bot';
+import { getAdminWithStats } from '@/lib/bot';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,10 +10,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Discord Guild ID is not configured' }, { status: 500 });
     }
 
-    const staffCategories = await getStaffWithStats(guildId);
-    return NextResponse.json(staffCategories);
+    const adminCategories = await getAdminWithStats(guildId);
+    return NextResponse.json(adminCategories);
   } catch (error) {
-    console.error('Error fetching staff:', error);
-    return NextResponse.json({ error: 'Failed to fetch staff data' }, { status: 500 });
+    console.error('Error fetching admin:', error);
+    return NextResponse.json({ error: 'Failed to fetch admin data' }, { status: 500 });
   }
 }

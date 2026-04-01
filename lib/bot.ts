@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import { query } from '@/lib/db';
-import { STAFF_GROUPS } from '@/lib/constants';
+import { ADMIN_GROUPS } from '@/lib/constants';
 
 // Use a singleton pattern to prevent multiple clients in dev
 const globalForDiscord = global as unknown as { discordClient: Client };
@@ -152,13 +152,13 @@ export async function getUserInfo(guildId: string, userId: string) {
   }
 }
 
-let cachedStaffMembers: any = null;
-let lastStaffFetch = 0;
-let isFetchingStaff = false;
+let cachedAdminMembers: any = null;
+let lastAdminFetch = 0;
+let isFetchingAdmin = false;
 
-async function fetchStaffMembersBackground(guildId: string) {
-  if (isFetchingStaff) return;
-  isFetchingStaff = true;
+async function fetchAdminMembersBackground(guildId: string) {
+  if (isFetchingAdmin) return;
+  isFetchingAdmin = true;
   try {
     if (!client.isReady()) {
       await new Promise((resolve) => client.once('ready', resolve));
@@ -174,9 +174,9 @@ async function fetchStaffMembersBackground(guildId: string) {
     const processedUserIds = new Set();
 
     // Flatten all role IDs to determine global priority
-    const allRoleIds = STAFF_GROUPS.flatMap(g => g.roles.map(r => r.id));
+    const allRoleIds = ADMIN_GROUPS.flatMap(g => g.roles.map(r => r.id));
 
-    for (const group of STAFF_GROUPS) {
+    for (const group of ADMIN_GROUPS) {
       const groupRoles = [];
       
       for (const roleConfig of group.roles) {
@@ -184,18 +184,18 @@ async function fetchStaffMembersBackground(guildId: string) {
         if (!role) continue;
 
         const roleMembers = [];
-        // Find members whose HIGHEST staff role is this one
+        // Find members whose HIGHEST admin role is this one
         const membersWithRole = allMembers.filter(m => {
           if (processedUserIds.has(m.user.id)) return false;
           
           const memberRoleIds = Array.from(m.roles.cache.keys());
           
-          // Check if this is their highest role among all staff roles
-          const memberStaffRoles = memberRoleIds.filter(rId => allRoleIds.includes(rId));
-          if (memberStaffRoles.length === 0) return false;
+          // Check if this is their highest role among all admin roles
+          const memberAdminRoles = memberRoleIds.filter(rId => allRoleIds.includes(rId));
+          if (memberAdminRoles.length === 0) return false;
           
           // Find the index of each role in allRoleIds (lower index = higher priority)
-          const highestRoleIndex = Math.min(...memberStaffRoles.map(rId => allRoleIds.indexOf(rId)));
+          const highestRoleIndex = Math.min(...memberAdminRoles.map(rId => allRoleIds.indexOf(rId)));
           
           if (allRoleIds[highestRoleIndex] === roleConfig.id) {
             processedUserIds.add(m.user.id);
@@ -246,44 +246,44 @@ async function fetchStaffMembersBackground(guildId: string) {
       }
     }
 
-    cachedStaffMembers = result;
-    lastStaffFetch = Date.now();
+    cachedAdminMembers = result;
+    lastAdminFetch = Date.now();
   } catch (err) {
-    console.error('Error fetching staff members in background:', err);
+    console.error('Error fetching admin members in background:', err);
   } finally {
-    isFetchingStaff = false;
+    isFetchingAdmin = false;
   }
 }
 
-export async function getStaffMembers(guildId: string) {
-  if (cachedStaffMembers && Date.now() - lastStaffFetch < 5 * 60 * 1000) {
-    return cachedStaffMembers;
+export async function getAdminMembers(guildId: string) {
+  if (cachedAdminMembers && Date.now() - lastAdminFetch < 5 * 60 * 1000) {
+    return cachedAdminMembers;
   }
 
   // If cache is empty or stale, trigger background fetch
-  fetchStaffMembersBackground(guildId);
+  fetchAdminMembersBackground(guildId);
 
   // If we have stale cache, return it while fetching
-  if (cachedStaffMembers) {
-    return cachedStaffMembers;
+  if (cachedAdminMembers) {
+    return cachedAdminMembers;
   }
 
   // If no cache at all, wait a bit to see if it finishes quickly (e.g. first 1000 members)
   // But we don't want to block for 19 seconds. We'll wait up to 5 seconds.
   let retries = 0;
-  while (!cachedStaffMembers && retries < 10) {
+  while (!cachedAdminMembers && retries < 10) {
     await new Promise(resolve => setTimeout(resolve, 500));
     retries++;
   }
 
-  return cachedStaffMembers || [];
+  return cachedAdminMembers || [];
 }
 
-export async function getStaffWithStats(guildId: string) {
-  const staffCategories = await getStaffMembers(guildId);
+export async function getAdminWithStats(guildId: string) {
+  const adminCategories = await getAdminMembers(guildId);
   
   const userIds: string[] = [];
-  for (const category of staffCategories) {
+  for (const category of adminCategories) {
     for (const role of category.roles) {
       for (const member of role.members) {
         userIds.push(member.id);
@@ -292,7 +292,7 @@ export async function getStaffWithStats(guildId: string) {
   }
 
   if (userIds.length === 0) {
-    return staffCategories;
+    return adminCategories;
   }
 
   const placeholders = userIds.map((_, i) => `$${i + 1}`).join(',');
@@ -356,7 +356,7 @@ export async function getStaffWithStats(guildId: string) {
     }
   }));
 
-  for (const category of staffCategories) {
+  for (const category of adminCategories) {
     for (const role of category.roles) {
       for (const member of role.members) {
         const streakData = streaksMap.get(member.id) || { streak: 0, completed_today: false };
@@ -377,7 +377,7 @@ export async function getStaffWithStats(guildId: string) {
     }
   }
 
-  return staffCategories;
+  return adminCategories;
 }
 
 export async function getTopUsers(guildId: string) {

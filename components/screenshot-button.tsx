@@ -52,9 +52,9 @@ export function ScreenshotButton({ elementId, fileName = 'screenshot.png', class
     ctx.font = `black ${stampRadius * 0.25}px Arial`;
     ctx.fillText('MT Community', 0, -stampRadius * 0.2);
     
-    // Staff Team
+    // Admin Team
     ctx.font = `bold ${stampRadius * 0.2}px Arial`;
-    ctx.fillText('Staff Team', 0, stampRadius * 0.2);
+    ctx.fillText('Admin Team', 0, stampRadius * 0.2);
     
     // Decorative lines
     ctx.beginPath();

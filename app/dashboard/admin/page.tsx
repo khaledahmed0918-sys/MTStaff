@@ -1,6 +1,6 @@
-import { StaffSection } from '@/components/staff-section';
+import { AdminSection } from '@/components/admin-section';
 
-export default function StaffPage() {
+export default function AdminPage() {
   return (
     <div className="space-y-8 pb-12">
       <div className="mb-8">
@@ -11,7 +11,7 @@ export default function StaffPage() {
           قائمة بأعضاء الطاقم الإداري وإحصائياتهم
         </p>
       </div>
-      <StaffSection initialCategories={[]} />
+      <AdminSection initialCategories={[]} />
     </div>
   );
 }

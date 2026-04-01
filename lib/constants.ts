@@ -1,6 +1,6 @@
-export const STAFF_GROUPS = [
+export const ADMIN_GROUPS = [
   {
-    name: 'Staff Managers',
+    name: 'Admin Managers',
     roles: [
       { id: '1465838966904197294' },
       { id: '1383128056708993219' },
@@ -20,7 +20,7 @@ export const STAFF_GROUPS = [
     roles: [{ id: '1383158445846560870' }]
   },
   {
-    name: 'Staff Team',
+    name: 'Admin Team',
     roles: [
       { id: '1383158823744966736' },
       { id: '1383161407742148761' },

@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'motion/react';
 
 interface Transcript {
   fileName: string;
+  ticketName: string;
   creatorId: string;
   date: string;
   ticketId: string | null;
@@ -168,7 +169,7 @@ export default function TranscriptsPage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-lg text-white">
-                      {t.details?.division || 'تذكرة غير معروفة'}
+                      {t.ticketName ? `#${t.ticketName}` : (t.details?.division || 'تذكرة غير معروفة')}
                     </h3>
                     <p className="text-sm text-gray-400 font-mono">
                       {t.ticketId ? `#${t.ticketId}` : t.fileName}

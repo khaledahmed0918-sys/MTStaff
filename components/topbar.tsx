@@ -13,7 +13,7 @@ export function Topbar({ user }: { user: any }) {
   if (!user) return null;
 
   return (
-    <header className="h-16 bg-gradient-to-r from-[#050505] to-[#0a0f1a] backdrop-blur-2xl border-b border-white/5 flex items-center justify-between px-4 md:px-6 z-20 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+    <header className="h-16 bg-[#0a0f1a]/70 backdrop-blur-[27px] border-b border-white/5 flex items-center justify-between px-4 md:px-6 z-20 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
       <div className="flex items-center gap-4">
         <button 
           onClick={toggle}
