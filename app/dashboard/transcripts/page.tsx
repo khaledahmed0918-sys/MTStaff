@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Loader2, Search, Filter, Calendar, User as UserIcon, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, FileText } from 'lucide-react';
+import { Loader2, Search, Filter, Calendar, User as UserIcon, CheckCircle2, XCircle, Clock, ChevronDown, ChevronUp, FileText, Download } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
 import { fetchWithRetry } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
+import { useSettings } from '@/components/settings-context';
 
 interface Transcript {
   fileName: string;
@@ -21,6 +22,7 @@ interface Transcript {
 export default function TranscriptsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { settings } = useSettings();
   
   const [transcripts, setTranscripts] = useState<Transcript[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,6 +34,22 @@ export default function TranscriptsPage() {
   const [dateFilter, setDateFilter] = useState(searchParams.get('date') || '');
   
   const [expandedTicket, setExpandedTicket] = useState<string | null>(searchParams.get('ticket') || null);
+  const [loadedIframes, setLoadedIframes] = useState<Record<string, boolean>>({});
+
+  const handleExpand = (fileName: string) => {
+    if (expandedTicket === fileName) {
+      setExpandedTicket(null);
+    } else {
+      setExpandedTicket(fileName);
+      if (settings.transcriptLoading === 'auto') {
+        setLoadedIframes(prev => ({ ...prev, [fileName]: true }));
+      }
+    }
+  };
+
+  const handleLoadIframe = (fileName: string) => {
+    setLoadedIframes(prev => ({ ...prev, [fileName]: true }));
+  };
 
   useEffect(() => {
     const fetchTranscripts = async () => {
@@ -138,15 +156,25 @@ export default function TranscriptsPage() {
               className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pr-10 pl-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
             />
           </div>
-          <div className="relative">
-            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pr-10 pl-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
-              style={{ colorScheme: 'dark' }}
-            />
+          <div className="relative flex gap-2">
+            <div className="relative flex-1">
+              <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pr-10 pl-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all appearance-none"
+                style={{ colorScheme: 'dark' }}
+              />
+            </div>
+            {dateFilter && (
+              <button 
+                onClick={() => setDateFilter('')}
+                className="px-4 py-2.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition-all font-bold text-sm whitespace-nowrap"
+              >
+                Reset
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -164,7 +192,7 @@ export default function TranscriptsPage() {
             >
               <div 
                 className="p-5 cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-                onClick={() => setExpandedTicket(expandedTicket === t.fileName ? null : t.fileName)}
+                onClick={() => handleExpand(t.fileName)}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
@@ -307,6 +335,35 @@ export default function TranscriptsPage() {
                         </div>
                       </div>
                       
+                      {/* Transcript Viewer */}
+                      <div className="md:col-span-2 mt-4 border border-white/10 rounded-2xl overflow-hidden bg-[#36393f] relative h-[600px] flex items-center justify-center">
+                        {loadedIframes[t.fileName] ? (
+                          <iframe 
+                            src={`/api/tickets/transcripts/download?file=${encodeURIComponent(t.fileName)}`}
+                            className="w-full h-full border-none absolute inset-0"
+                            title="Transcript Viewer"
+                            sandbox="allow-same-origin allow-scripts"
+                          />
+                        ) : (
+                          <div className="text-center space-y-4">
+                            <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto">
+                              <FileText className="w-8 h-8 text-blue-400" />
+                            </div>
+                            <div>
+                              <h3 className="text-white font-bold text-lg">الترانسكريبت جاهز</h3>
+                              <p className="text-gray-400 text-sm">اضغط على الزر أدناه لتحميل وعرض المحتوى</p>
+                            </div>
+                            <button
+                              onClick={() => handleLoadIframe(t.fileName)}
+                              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors flex items-center gap-2 mx-auto"
+                            >
+                              <Download className="w-4 h-4" />
+                              تحميل وعرض
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      
                       {/* Download/View Button */}
                       <div className="md:col-span-2 flex justify-end">
                         <a 
@@ -315,7 +372,7 @@ export default function TranscriptsPage() {
                           rel="noopener noreferrer"
                           className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)]"
                         >
-                          عرض الترانسكريبت
+                          فتح في نافذة جديدة
                         </a>
                       </div>
                     </div>

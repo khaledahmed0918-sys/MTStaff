@@ -5,7 +5,6 @@ import CachedImage from '@/components/cached-image';
 import { Shield, MessageSquare, Flame, Loader2, ChevronDown, ChevronUp, Camera, Ban, ShieldAlert, Ticket } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { ScreenshotButton } from '@/components/screenshot-button';
 import { ImagePopup } from '@/components/image-popup';
 import { fetchWithRetry } from '@/lib/utils';
 
@@ -171,13 +170,8 @@ export function AdminSection({ initialCategories }: { initialCategories: any[] }
 
                   <div className="flex flex-col gap-4">
                     {role.members.map((member: any) => (
-                      <ScreenshotButton 
-                        key={member.id}
-                        elementId={`admin-card-${member.id}`} 
-                        fileName={`${member.username}-admin-card.png`} 
-                        className="w-full block"
-                      >
                         <motion.div
+                          key={member.id}
                           id={`admin-card-${member.id}`}
                           initial={{ opacity: 0, y: 20 }}
                           whileInView={{ opacity: 1, y: 0 }}
@@ -217,7 +211,14 @@ export function AdminSection({ initialCategories }: { initialCategories: any[] }
                           </div>
 
                           {/* Stats */}
-                          {member.stats && (
+                          {member.hideStats ? (
+                            <div className="flex-1 flex items-center justify-center relative z-10 w-full md:w-auto">
+                              <div className="bg-blue-500/10 border border-blue-500/20 px-6 py-3 rounded-xl flex items-center gap-3">
+                                <ShieldAlert className="w-5 h-5 text-blue-400" />
+                                <span className="text-blue-200 font-medium text-sm">الإحصائيات مخفية من قبل المستخدم</span>
+                              </div>
+                            </div>
+                          ) : member.stats && (
                             <div className="flex flex-wrap md:flex-nowrap items-center gap-3 md:gap-6 relative z-10 w-full md:w-auto">
                               <Tooltip text="عدد الرسائل التي أرسلها العضو">
                                 <div className="flex flex-col gap-1 bg-black/20 px-4 py-2 rounded-xl border border-white/5 w-full h-full">
@@ -279,7 +280,6 @@ export function AdminSection({ initialCategories }: { initialCategories: any[] }
                             </div>
                           )}
                         </motion.div>
-                      </ScreenshotButton>
                     ))}
                   </div>
                 </div>

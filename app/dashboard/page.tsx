@@ -2,7 +2,6 @@ import { getServerInfo, getTopUsers } from '@/lib/bot';
 import { query } from '@/lib/db';
 import CachedImage from '@/components/cached-image';
 import { Users, UserCheck, Shield, MessageSquare, Clock, Flame, Trophy, Crown, Medal, Star } from 'lucide-react';
-import { TopUsersSection } from '@/components/top-users-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -138,7 +137,6 @@ export default async function DashboardHome() {
       </section>
 
       {/* Top Users Section */}
-      <TopUsersSection guildId={guildId || ''} initialData={topUsersData} />
     </div>
   );
 }

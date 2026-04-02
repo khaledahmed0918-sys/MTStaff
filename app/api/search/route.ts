@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { getUserInfo, getRandomMembers } from '@/lib/bot';
+import fs from 'fs/promises';
+import path from 'path';
+
+async function getPrivacyData() {
+  try {
+    const data = await fs.readFile(path.join(process.cwd(), 'privacy.json'), 'utf-8');
+    return JSON.parse(data);
+  } catch (e) {
+    return {};
+  }
+}
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get('q');
@@ -13,9 +24,19 @@ export async function GET(req: NextRequest) {
   try {
     if (!q) {
       const randomMembers = await getRandomMembers(guildId, 10);
+      const privacyData = await getPrivacyData();
       
       // Fetch stats for these random members
       const results = await Promise.all(randomMembers.map(async (member) => {
+        const userPrivacy = privacyData[member.id] || { showProfile: true, hideStats: false };
+        
+        if (!userPrivacy.showProfile) {
+          return {
+            ...member,
+            isHidden: true,
+            stats: null
+          };
+        }
         const [warnsRes, timeoutsRes, bansRes, streaksRes] = await Promise.allSettled([
           query(`SELECT COUNT(*) as count FROM "warns_${member.id}"`),
           query(`SELECT COUNT(*) as count FROM "timeouts_${member.id}"`),
@@ -47,7 +68,9 @@ export async function GET(req: NextRequest) {
 
         return {
           ...member,
-          stats: {
+          isHidden: false,
+          hideStats: userPrivacy.hideStats,
+          stats: userPrivacy.hideStats ? null : {
             warns: warnsCount,
             timeouts: timeoutsCount,
             bans: bansCount,
@@ -64,8 +87,21 @@ export async function GET(req: NextRequest) {
 
     // If the query is an ID, we can fetch their info directly
     const discordInfo = await getUserInfo(guildId, q);
+    const privacyData = await getPrivacyData();
+    const userPrivacy = privacyData[q] || { showProfile: true, hideStats: false };
 
     if (discordInfo) {
+      if (!userPrivacy.showProfile) {
+        return NextResponse.json({
+          results: [
+            {
+              ...discordInfo,
+              isHidden: true,
+              stats: null
+            }
+          ]
+        });
+      }
       const [warnsRes, timeoutsRes, bansRes, streaksRes] = await Promise.allSettled([
         query(`SELECT COUNT(*) as count FROM "warns_${q}"`),
         query(`SELECT COUNT(*) as count FROM "timeouts_${q}"`),
@@ -99,7 +135,9 @@ export async function GET(req: NextRequest) {
         results: [
           {
             ...discordInfo,
-            stats: {
+            isHidden: false,
+            hideStats: userPrivacy.hideStats,
+            stats: userPrivacy.hideStats ? null : {
               warns: warnsCount,
               timeouts: timeoutsCount,
               bans: bansCount,

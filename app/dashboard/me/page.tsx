@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import CachedImage from '@/components/cached-image';
 import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare, CheckCircle2, Camera, ListTodo, History } from 'lucide-react';
 import { formatVoiceTime, formatDateEn, parseDiscordEmoji, generateGradientColors, fetchWithRetry } from '@/lib/utils';
-import { ScreenshotButton } from '@/components/screenshot-button';
 import { RolesDisplay } from '@/components/roles-display';
 import { motion } from 'motion/react';
 
@@ -90,7 +89,7 @@ export default function MyInfoPage() {
   }
 
   return (
-    <ScreenshotButton elementId="my-profile-card" fileName={`${discord.username}-profile.png`} className="block">
+    <div className="block">
       <motion.div 
         id="my-profile-card" 
         className="space-y-8 bg-[#0a0f1a] p-4 sm:p-8 rounded-3xl relative"
@@ -529,6 +528,6 @@ export default function MyInfoPage() {
 
       </div>
     </motion.div>
-  </ScreenshotButton>
+  </div>
 );
 }

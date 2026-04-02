@@ -4,6 +4,7 @@ import { Sidebar } from '@/components/sidebar';
 import { Topbar } from '@/components/topbar';
 import { hasRole } from '@/lib/bot';
 import { NavProvider } from '@/components/nav-context';
+import { SettingsProvider } from '@/components/settings-context';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,16 +33,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <NavProvider>
-      <div className="flex h-[100dvh] text-white overflow-hidden font-sans relative bg-transparent">
-        <Sidebar />
-        <div className="flex-1 flex flex-col relative z-10 w-full overflow-hidden">
-          <Topbar user={session.user} />
-          <main id="dashboard-content" className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-10 custom-scrollbar relative z-0">
-            {children}
-          </main>
+    <SettingsProvider>
+      <NavProvider>
+        <div className="flex h-[100dvh] text-white overflow-hidden font-sans relative bg-transparent">
+          <Sidebar />
+          <div className="flex-1 flex flex-col relative z-10 w-full overflow-hidden">
+            <Topbar user={session.user} />
+            <main id="dashboard-content" className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-10 custom-scrollbar relative z-0">
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
-    </NavProvider>
+      </NavProvider>
+    </SettingsProvider>
   );
 }

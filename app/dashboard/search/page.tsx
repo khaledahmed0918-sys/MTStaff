@@ -6,7 +6,6 @@ import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, 
 import CachedImage from '@/components/cached-image';
 import { formatDateEn, formatVoiceTime, parseDiscordEmoji, generateGradientColors, fetchWithRetry } from '@/lib/utils';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ScreenshotButton } from '@/components/screenshot-button';
 import { RolesDisplay } from '@/components/roles-display';
 
 function SearchContent() {
@@ -155,18 +154,16 @@ function SearchContent() {
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, delay: (index % 20) * 0.05 }}
           >
-            <ScreenshotButton 
-              elementId={`search-card-${user.id}`} 
-              fileName={`${user.username}-profile.png`}
-            >
               <div id={`search-card-${user.id}`} className="bg-[#0a0f1a]/80 border border-blue-500/20 rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.5)] transition-all duration-500 relative group hover:shadow-[0_0_40px_rgba(59,130,246,0.2)] hover:border-blue-500/50">
-                {/* Screenshot Button Overlay */}
-                <div className="absolute top-4 right-4 z-[40] opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                  <ScreenshotButton 
-                    elementId={`search-card-${user.id}`} 
-                    fileName={`${user.username}-profile.png`}
-                  />
-                </div>
+                
+                {user.isHidden && (
+                  <div className="absolute inset-0 z-50 bg-blue-900/85 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6">
+                    <ShieldAlert className="w-16 h-16 text-blue-300 mb-4" />
+                    <h3 className="text-2xl font-bold text-white mb-2">ملف شخصي خاص</h3>
+                    <p className="text-blue-200">هذا المستخدم قام بإخفاء ملفه الشخصي.</p>
+                  </div>
+                )}
+
                 {/* Banner */}
               {user.banner && (
                 <div className="aspect-[5/2] w-full relative overflow-hidden">
@@ -176,8 +173,8 @@ function SearchContent() {
               )}
 
               <motion.div 
-                className={`p-8 flex flex-col items-center md:items-start cursor-pointer hover:bg-white/5 transition-colors relative z-30 ${user.banner ? '-mt-16 md:-mt-24' : ''}`}
-                onClick={() => toggleExpand(user.id)}
+                className={`p-8 flex flex-col items-center md:items-start ${user.isHidden ? '' : 'cursor-pointer hover:bg-white/5'} transition-colors relative z-30 ${user.banner ? '-mt-16 md:-mt-24' : ''}`}
+                onClick={() => !user.isHidden && toggleExpand(user.id)}
               >
                 <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
                   <div className="w-32 h-32 md:w-44 md:h-44 relative rounded-full overflow-hidden border-4 border-[#0a0f1a] bg-[#0a0f1a] z-10 shadow-[0_0_30px_rgba(0,0,0,0.8)] shrink-0 group-hover:scale-105 transition-transform duration-500">
@@ -210,10 +207,19 @@ function SearchContent() {
                 {user.roles && user.roles.length > 0 && (
                   <RolesDisplay roles={user.roles} />
                 )}
+
+                {user.hideStats && !user.isHidden && (
+                  <div className="mt-6 w-full bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl text-center">
+                    <p className="text-blue-400 font-medium flex items-center justify-center gap-2">
+                      <ShieldAlert className="w-5 h-5" />
+                      الإحصائيات مخفية من قبل المستخدم
+                    </p>
+                  </div>
+                )}
               </motion.div>
 
               {/* Expanded Details */}
-              {expandedId === user.id && (
+              {expandedId === user.id && !user.isHidden && !user.hideStats && (
                 <div className="border-t border-blue-500/20 bg-[#0a0f1a]/90 p-6 md:p-10 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none" />
                   <div className="relative z-10">
@@ -580,7 +586,6 @@ function SearchContent() {
                 </div>
               )}
             </div>
-          </ScreenshotButton>
           </motion.div>
         ))}
         {results.length > visibleCount && (
