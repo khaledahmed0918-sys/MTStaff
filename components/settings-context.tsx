@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { translations, Language, TranslationKey } from '@/lib/translations';
 
 export type Theme = 'dark' | 'light';
@@ -42,79 +42,70 @@ interface SettingsContextType {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<Settings>(defaultSettings);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    // Load from localStorage on mount
-    const saved = localStorage.getItem('mt-settings');
-    if (saved) {
-      try {
-        setSettings({ ...defaultSettings, ...JSON.parse(saved) });
-      } catch (e) {
-        console.error('Failed to parse settings', e);
+  // Use lazy initializer to avoid setState in useEffect
+  const [settings, setSettings] = useState<Settings>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('mt-settings');
+      if (saved) {
+        try {
+          return { ...defaultSettings, ...JSON.parse(saved) };
+        } catch (e) {
+          console.error('Failed to parse settings', e);
+        }
       }
     }
-    setMounted(true);
+    return defaultSettings;
+  });
+
+  // Apply settings to document
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    localStorage.setItem('mt-settings', JSON.stringify(settings));
+    
+    const root = document.documentElement;
+    root.setAttribute('dir', settings.language === 'ar' ? 'rtl' : 'ltr');
+    root.setAttribute('lang', settings.language);
+
+    if (settings.theme === 'light') {
+      root.classList.add('light-theme');
+    } else {
+      root.classList.remove('light-theme');
+    }
+
+    root.classList.remove('text-sm', 'text-base', 'text-lg');
+    if (settings.fontSize === 'small') root.classList.add('text-sm');
+    if (settings.fontSize === 'medium') root.classList.add('text-base');
+    if (settings.fontSize === 'large') root.classList.add('text-lg');
+
+    root.style.setProperty('--card-radius', settings.cardShape === 'rounded' ? '1.5rem' : '0.5rem');
+    
+    const colors = {
+      blue: '#3b82f6',
+      purple: '#a855f7',
+      emerald: '#10b981',
+      rose: '#f43f5e',
+      amber: '#f59e0b'
+    };
+    root.style.setProperty('--accent-color', colors[settings.accentColor]);
+    root.style.setProperty('--color-primary', colors[settings.accentColor]);
+    
+    if (settings.reducedAnimations) {
+      root.classList.add('reduce-motion');
+    } else {
+      root.classList.remove('reduce-motion');
+    }
+  }, [settings]);
+
+  const updateSettings = useCallback((newSettings: Partial<Settings>) => {
+    setSettings(prev => ({ ...prev, ...newSettings }));
   }, []);
 
-  useEffect(() => {
-    if (mounted) {
-      localStorage.setItem('mt-settings', JSON.stringify(settings));
-      
-      // Apply settings to document
-      const root = document.documentElement;
-      
-      // Language & Direction
-      root.setAttribute('dir', settings.language === 'ar' ? 'rtl' : 'ltr');
-      root.setAttribute('lang', settings.language);
-
-      // Theme
-      if (settings.theme === 'light') {
-        root.classList.add('light-theme');
-      } else {
-        root.classList.remove('light-theme');
-      }
-
-      // Font Size
-      root.classList.remove('text-sm', 'text-base', 'text-lg');
-      if (settings.fontSize === 'small') root.classList.add('text-sm');
-      if (settings.fontSize === 'medium') root.classList.add('text-base');
-      if (settings.fontSize === 'large') root.classList.add('text-lg');
-
-      // Card Shape
-      root.style.setProperty('--card-radius', settings.cardShape === 'rounded' ? '1.5rem' : '0.5rem');
-      
-      // Accent Color
-      const colors = {
-        blue: '#3b82f6',
-        purple: '#a855f7',
-        emerald: '#10b981',
-        rose: '#f43f5e',
-        amber: '#f59e0b'
-      };
-      root.style.setProperty('--accent-color', colors[settings.accentColor]);
-      // Also set Tailwind primary color variables
-      root.style.setProperty('--color-primary', colors[settings.accentColor]);
-      
-      // Reduced Animations
-      if (settings.reducedAnimations) {
-        root.classList.add('reduce-motion');
-      } else {
-        root.classList.remove('reduce-motion');
-      }
-    }
-  }, [settings, mounted]);
-
-  const updateSettings = (newSettings: Partial<Settings>) => {
-    setSettings(prev => ({ ...prev, ...newSettings }));
-  };
-
-  const t = (key: TranslationKey) => {
+  const t = useCallback((key: TranslationKey) => {
     return translations[settings.language][key] || translations.en[key] || key;
-  };
+  }, [settings.language]);
 
-  const formatDate = (dateString: string | Date | null | undefined, options?: Intl.DateTimeFormatOptions) => {
+  const formatDate = useCallback((dateString: string | Date | null | undefined, options?: Intl.DateTimeFormatOptions) => {
     if (!dateString) return t('noData');
     try {
       const date = new Date(dateString);
@@ -131,14 +122,17 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       return String(dateString);
     }
-  };
+  }, [settings.language, settings.timezone, settings.timeFormat, t]);
 
-  if (!mounted) {
-    return <div className="hidden">{children}</div>; // Prevent hydration mismatch
-  }
+  const contextValue = useMemo(() => ({
+    settings,
+    updateSettings,
+    t,
+    formatDate
+  }), [settings, updateSettings, t, formatDate]);
 
   return (
-    <SettingsContext.Provider value={{ settings, updateSettings, t, formatDate }}>
+    <SettingsContext.Provider value={contextValue}>
       {children}
     </SettingsContext.Provider>
   );

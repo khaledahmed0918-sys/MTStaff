@@ -1,13 +1,29 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
+import path from 'path';
 import { getUserInfo } from '@/lib/bot';
+import { getSession } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
+async function getPrivacyData() {
+  try {
+    const filePath = path.join(process.cwd(), 'privacy.json');
+    const content = await fs.readFile(filePath, 'utf-8');
+    return JSON.parse(content);
+  } catch (e) {
+    return {};
+  }
+}
+
 export async function GET() {
   try {
+    const session = await getSession();
+    const viewerId = session?.user?.id;
+
     const pointsJsonPath = '/root/MTC-System/data/Tickets/points.json';
     const guildId = process.env.DISCORD_GUILD_ID || '852218081837449246';
+    const privacyData = await getPrivacyData();
 
     let pointsData: any = {};
     try {
@@ -27,31 +43,41 @@ export async function GET() {
       pointsData = {};
     }
 
-    // Convert to array and sort by points
-    const pointsArray = Object.entries(pointsData).map(([userId, data]: [string, any]) => {
+    // Convert to array and filter by privacy
+    const pointsArray = await Promise.all(Object.entries(pointsData).map(async ([userId, data]: [string, any]) => {
+      const userPrivacy = privacyData[userId] || { 
+        showProfile: true, 
+        hideStats: false,
+        pointsVisibility: 'everyone'
+      };
+
+      const isSelf = viewerId === userId;
+      const isFriend = !!viewerId;
+
+      const canSeeProfile = userPrivacy.showProfile || isSelf;
+      const canSeePoints = 
+        userPrivacy.pointsVisibility === 'everyone' || 
+        (userPrivacy.pointsVisibility === 'friends' && isFriend) || 
+        isSelf;
+
+      if (!canSeeProfile) return null;
+
       // Handle both formats: { "userId": 10 } OR { "userId": { "points": 10, "tickets": [...] } }
       const points = typeof data === 'object' ? (data.points || 0) : Number(data);
       const tickets = typeof data === 'object' ? (data.tickets || []) : [];
       
+      const userInfo = await getUserInfo(guildId, userId);
+
       return {
         userId,
         points,
-        tickets,
+        tickets: canSeePoints ? tickets : [],
+        user: userInfo,
+        hidePoints: !canSeePoints
       };
-    });
+    }));
 
-    pointsArray.sort((a, b) => b.points - a.points);
-
-    // Fetch user info for each user
-    const enrichedPoints = await Promise.all(
-      pointsArray.map(async (item) => {
-        const userInfo = await getUserInfo(guildId, item.userId);
-        return {
-          ...item,
-          user: userInfo,
-        };
-      })
-    );
+    const enrichedPoints = pointsArray.filter(r => r !== null).sort((a: any, b: any) => b.points - a.points);
 
     return NextResponse.json(enrichedPoints);
   } catch (error) {

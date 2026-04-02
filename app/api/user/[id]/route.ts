@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { getUserInfo, getEmojiDetails } from '@/lib/bot';
+import { getSession } from '@/lib/auth';
 import fs from 'fs/promises';
 import path from 'path';
+
+async function getPrivacyData() {
+  try {
+    const filePath = path.join(process.cwd(), 'privacy.json');
+    const content = await fs.readFile(filePath, 'utf-8');
+    return JSON.parse(content);
+  } catch (e) {
+    return {};
+  }
+}
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -13,6 +24,30 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   try {
+    const session = await getSession();
+    const viewerId = session?.user?.id;
+
+    const privacyData = await getPrivacyData();
+    const userPrivacy = privacyData[id] || { 
+      showProfile: true, 
+      hideStats: false,
+      pointsVisibility: 'everyone'
+    };
+
+    const isSelf = viewerId === id;
+    const isFriend = !!viewerId; // In this simplified version, any logged-in user is a "friend"
+
+    const canSeeProfile = userPrivacy.showProfile || isSelf;
+    const canSeeStats = !userPrivacy.hideStats || isSelf;
+    const canSeePoints = 
+      userPrivacy.pointsVisibility === 'everyone' || 
+      (userPrivacy.pointsVisibility === 'friends' && isFriend) || 
+      isSelf;
+
+    if (!canSeeProfile) {
+      return NextResponse.json({ error: 'Private Profile' }, { status: 403 });
+    }
+
     // Run all queries concurrently to improve speed
     const [discordRes, warnsRes, swarnsRes, timeoutsRes, bansRes, streaksRes, messagesRes, voiceRes] = await Promise.allSettled([
       getUserInfo(guildId, id),
@@ -36,35 +71,39 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     let coinsData = { coins: 0, tasks_remaining: 0, tasks_completed: 0, last_5: [] };
     let tasksList = [];
-    try {
-      const coinsPath = path.join('/root/mtcoins/data/users', `${id}.json`);
-      const coinsContent = await fs.readFile(coinsPath, 'utf-8');
-      const parsedCoins = JSON.parse(coinsContent);
-      if (parsedCoins && parsedCoins.data) {
-        coinsData = {
-          coins: parsedCoins.data.coins || 0,
-          tasks_remaining: parsedCoins.data.tasks_remaining || 0,
-          tasks_completed: parsedCoins.data.tasks_completed || 0,
-          last_5: parsedCoins.data.last_5 || []
-        };
+    if (canSeePoints) {
+      try {
+        const coinsPath = path.join('/root/mtcoins/data/users', `${id}.json`);
+        const coinsContent = await fs.readFile(coinsPath, 'utf-8');
+        const parsedCoins = JSON.parse(coinsContent);
+        if (parsedCoins && parsedCoins.data) {
+          coinsData = {
+            coins: parsedCoins.data.coins || 0,
+            tasks_remaining: parsedCoins.data.tasks_remaining || 0,
+            tasks_completed: parsedCoins.data.tasks_completed || 0,
+            last_5: parsedCoins.data.last_5 || []
+          };
+        }
+        if (parsedCoins && parsedCoins.tasks) {
+          tasksList = parsedCoins.tasks;
+        }
+      } catch (e) {
+        // Ignore if file doesn't exist
       }
-      if (parsedCoins && parsedCoins.tasks) {
-        tasksList = parsedCoins.tasks;
-      }
-    } catch (e) {
-      // Ignore if file doesn't exist
     }
 
     let ticketsCount = 0;
-    try {
-      const pointsPath = path.join(process.cwd(), '..', 'MTC-System', 'data', 'Tickets', 'points.json');
-      const pointsData = await fs.readFile(pointsPath, 'utf-8');
-      const points = JSON.parse(pointsData);
-      if (points[id]) {
-        ticketsCount = points[id];
+    if (canSeePoints) {
+      try {
+        const pointsPath = path.join(process.cwd(), '..', 'MTC-System', 'data', 'Tickets', 'points.json');
+        const pointsData = await fs.readFile(pointsPath, 'utf-8');
+        const points = JSON.parse(pointsData);
+        if (points[id]) {
+          ticketsCount = points[id];
+        }
+      } catch (e) {
+        console.error('Error reading ticket points:', e);
       }
-    } catch (e) {
-      console.error('Error reading ticket points:', e);
     }
 
     if (streaks && streaks.streak_emoji) {
@@ -76,7 +115,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json({
       discord: discordInfo,
-      db: {
+      hideStats: !canSeeStats,
+      hidePoints: !canSeePoints,
+      db: canSeeStats ? {
         warns,
         swarns,
         timeouts,
@@ -84,17 +125,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         streaks,
         messages,
         voice,
-        tickets: ticketsCount,
-        coins: {
+        tickets: canSeePoints ? ticketsCount : 0,
+        coins: canSeePoints ? {
           coins: coinsData.coins || 0,
           tasks_remaining: coinsData.tasks_remaining || 0,
           tasks_completed: coinsData.tasks_completed || 0,
           last_5: coinsData.last_5 || []
-        },
-        tasks: tasksList
-      },
+        } : null,
+        tasks: canSeePoints ? tasksList : []
+      } : null,
     });
   } catch (err) {
+    console.error('Error fetching user details:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

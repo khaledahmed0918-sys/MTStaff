@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { getUserInfo, getRandomMembers } from '@/lib/bot';
+import { getSession } from '@/lib/auth';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -22,15 +23,32 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const session = await getSession();
+    const viewerId = session?.user?.id;
+
     if (!q) {
       const randomMembers = await getRandomMembers(guildId, 10);
       const privacyData = await getPrivacyData();
       
       // Fetch stats for these random members
       const results = await Promise.all(randomMembers.map(async (member) => {
-        const userPrivacy = privacyData[member.id] || { showProfile: true, hideStats: false };
+        const userPrivacy = privacyData[member.id] || { 
+          showProfile: true, 
+          hideStats: false,
+          pointsVisibility: 'everyone'
+        };
         
-        if (!userPrivacy.showProfile) {
+        const isSelf = viewerId === member.id;
+        const isFriend = !!viewerId; // Simple logic: any logged in user is a "friend" in this community context
+
+        const canSeeProfile = userPrivacy.showProfile || isSelf;
+        const canSeeStats = !userPrivacy.hideStats || isSelf;
+        const canSeePoints = 
+          userPrivacy.pointsVisibility === 'everyone' || 
+          (userPrivacy.pointsVisibility === 'friends' && isFriend) || 
+          isSelf;
+
+        if (!canSeeProfile) {
           return {
             ...member,
             isHidden: true,
@@ -50,27 +68,28 @@ export async function GET(req: NextRequest) {
         const streaks = streaksRes.status === 'fulfilled' && streaksRes.value.rows.length > 0 ? streaksRes.value.rows[0] : null;
 
         let coinsData = { tasks_remaining: 0, tasks_completed: 0 };
-        try {
-          const fs = require('fs/promises');
-          const path = require('path');
-          const coinsPath = path.join('/root/mtcoins/data/users', `${member.id}.json`);
-          const coinsContent = await fs.readFile(coinsPath, 'utf-8');
-          const parsedCoins = JSON.parse(coinsContent);
-          if (parsedCoins && parsedCoins.data) {
-            coinsData = {
-              tasks_remaining: parsedCoins.data.tasks_remaining || 0,
-              tasks_completed: parsedCoins.data.tasks_completed || 0
-            };
+        if (canSeePoints) {
+          try {
+            const coinsPath = path.join('/root/mtcoins/data/users', `${member.id}.json`);
+            const coinsContent = await fs.readFile(coinsPath, 'utf-8');
+            const parsedCoins = JSON.parse(coinsContent);
+            if (parsedCoins && parsedCoins.data) {
+              coinsData = {
+                tasks_remaining: parsedCoins.data.tasks_remaining || 0,
+                tasks_completed: parsedCoins.data.tasks_completed || 0
+              };
+            }
+          } catch (e) {
+            // Ignore if file doesn't exist
           }
-        } catch (e) {
-          // Ignore if file doesn't exist
         }
 
         return {
           ...member,
           isHidden: false,
-          hideStats: userPrivacy.hideStats,
-          stats: userPrivacy.hideStats ? null : {
+          hideStats: !canSeeStats,
+          hidePoints: !canSeePoints,
+          stats: canSeeStats ? {
             warns: warnsCount,
             timeouts: timeoutsCount,
             bans: bansCount,
@@ -78,7 +97,7 @@ export async function GET(req: NextRequest) {
             completed_today: streaks?.completed_today || false,
             tasks_remaining: coinsData.tasks_remaining,
             tasks_completed: coinsData.tasks_completed,
-          }
+          } : null
         };
       }));
 
@@ -88,10 +107,24 @@ export async function GET(req: NextRequest) {
     // If the query is an ID, we can fetch their info directly
     const discordInfo = await getUserInfo(guildId, q);
     const privacyData = await getPrivacyData();
-    const userPrivacy = privacyData[q] || { showProfile: true, hideStats: false };
+    const userPrivacy = privacyData[q] || { 
+      showProfile: true, 
+      hideStats: false,
+      pointsVisibility: 'everyone'
+    };
+
+    const isSelf = viewerId === q;
+    const isFriend = !!viewerId;
+
+    const canSeeProfile = userPrivacy.showProfile || isSelf;
+    const canSeeStats = !userPrivacy.hideStats || isSelf;
+    const canSeePoints = 
+      userPrivacy.pointsVisibility === 'everyone' || 
+      (userPrivacy.pointsVisibility === 'friends' && isFriend) || 
+      isSelf;
 
     if (discordInfo) {
-      if (!userPrivacy.showProfile) {
+      if (!canSeeProfile) {
         return NextResponse.json({
           results: [
             {
@@ -115,20 +148,20 @@ export async function GET(req: NextRequest) {
       const streaks = streaksRes.status === 'fulfilled' && streaksRes.value.rows.length > 0 ? streaksRes.value.rows[0] : null;
 
       let coinsData = { tasks_remaining: 0, tasks_completed: 0 };
-      try {
-        const fs = require('fs/promises');
-        const path = require('path');
-        const coinsPath = path.join('/root/mtcoins/data/users', `${q}.json`);
-        const coinsContent = await fs.readFile(coinsPath, 'utf-8');
-        const parsedCoins = JSON.parse(coinsContent);
-        if (parsedCoins && parsedCoins.data) {
-          coinsData = {
-            tasks_remaining: parsedCoins.data.tasks_remaining || 0,
-            tasks_completed: parsedCoins.data.tasks_completed || 0
-          };
+      if (canSeePoints) {
+        try {
+          const coinsPath = path.join('/root/mtcoins/data/users', `${q}.json`);
+          const coinsContent = await fs.readFile(coinsPath, 'utf-8');
+          const parsedCoins = JSON.parse(coinsContent);
+          if (parsedCoins && parsedCoins.data) {
+            coinsData = {
+              tasks_remaining: parsedCoins.data.tasks_remaining || 0,
+              tasks_completed: parsedCoins.data.tasks_completed || 0
+            };
+          }
+        } catch (e) {
+          // Ignore if file doesn't exist
         }
-      } catch (e) {
-        // Ignore if file doesn't exist
       }
 
       return NextResponse.json({
@@ -136,8 +169,9 @@ export async function GET(req: NextRequest) {
           {
             ...discordInfo,
             isHidden: false,
-            hideStats: userPrivacy.hideStats,
-            stats: userPrivacy.hideStats ? null : {
+            hideStats: !canSeeStats,
+            hidePoints: !canSeePoints,
+            stats: canSeeStats ? {
               warns: warnsCount,
               timeouts: timeoutsCount,
               bans: bansCount,
@@ -145,7 +179,7 @@ export async function GET(req: NextRequest) {
               completed_today: streaks?.completed_today || false,
               tasks_remaining: coinsData.tasks_remaining,
               tasks_completed: coinsData.tasks_completed,
-            },
+            } : null,
           },
         ],
       });

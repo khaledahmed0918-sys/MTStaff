@@ -18,15 +18,16 @@
   --bg-card-dark: #0a0f1a;
   --text-main: #ffffff;
   --text-muted: #9ca3af;
+  --accent-color: #3b82f6;
 }
 
 .light-theme {
-  --bg-color: #f3f4f6;
-  --text-color: #111827;
+  --bg-color: #f8fafc;
+  --text-color: #0f172a;
   --bg-card: #ffffff;
-  --bg-card-dark: #f9fafb;
-  --text-main: #111827;
-  --text-muted: #4b5563;
+  --bg-card-dark: #f1f5f9;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
 }
 
 body {
@@ -48,11 +49,25 @@ body {
 
 .light-theme .bg-\[\#36393f\] { background-color: #e5e7eb !important; }
 
+/* Text color logic: 
+   In light theme, text on white/light backgrounds should be dark.
+   Text on dark backgrounds (like the site background if it were dark) should stay light.
+   But since our light theme background is light, we generally want dark text.
+*/
 .light-theme .text-white { color: var(--text-main) !important; }
 .light-theme .text-gray-400 { color: var(--text-muted) !important; }
-.light-theme .text-gray-300 { color: #374151 !important; }
-.light-theme .text-gray-200 { color: #1f2937 !important; }
-.light-theme .text-gray-500 { color: #6b7280 !important; }
+.light-theme .text-gray-300 { color: #334155 !important; }
+.light-theme .text-gray-200 { color: #1e293b !important; }
+.light-theme .text-gray-500 { color: #94a3b8 !important; }
+.light-theme .text-blue-100\/70,
+.light-theme .text-blue-200\/70 {
+  color: var(--text-muted) !important;
+}
+
+/* Specific request: text on white background becomes black, 
+   but on dark background stays white. 
+   We'll use a utility class for this if needed, but the overrides above handle most cases.
+*/
 
 .light-theme .border-white\/10 { border-color: rgba(0, 0, 0, 0.1) !important; }
 .light-theme .border-white\/5 { border-color: rgba(0, 0, 0, 0.05) !important; }
@@ -62,6 +77,14 @@ body {
 .light-theme .hover\:bg-white\/5:hover { background-color: rgba(0, 0, 0, 0.05) !important; }
 .light-theme .bg-black\/20 { background-color: rgba(0, 0, 0, 0.05) !important; }
 .light-theme .bg-black\/40 { background-color: rgba(0, 0, 0, 0.08) !important; }
+
+/* Soft muted colors for light theme */
+.light-theme .bg-blue-500\/20 { background-color: rgba(59, 130, 246, 0.1) !important; }
+.light-theme .text-blue-400 { color: #2563eb !important; }
+.light-theme .bg-purple-500\/20 { background-color: rgba(168, 85, 247, 0.1) !important; }
+.light-theme .text-purple-400 { color: #9333ea !important; }
+.light-theme .bg-emerald-500\/20 { background-color: rgba(16, 185, 129, 0.1) !important; }
+.light-theme .text-emerald-400 { color: #059669 !important; }
 
 .reduce-motion *, .reduce-motion ::before, .reduce-motion ::after {
   animation-duration: 0.01ms !important;
@@ -90,3 +113,9 @@ body {
     background: rgba(59, 130, 246, 0.5);
   }
 }
+
+/* RTL/LTR Alignment Utilities */
+[dir="rtl"] .text-start { text-align: right; }
+[dir="ltr"] .text-start { text-align: left; }
+[dir="rtl"] .flex-row-start { flex-direction: row; }
+[dir="ltr"] .flex-row-start { flex-direction: row; }
