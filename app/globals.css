@@ -22,12 +22,12 @@
 }
 
 .light-theme {
-  --bg-color: #f8fafc;
-  --text-color: #0f172a;
-  --bg-card: #ffffff;
-  --bg-card-dark: #f1f5f9;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
+  --bg-color: #030712; /* Keep background dark as requested by "other text stays white" */
+  --text-color: #ffffff;
+  --bg-card: #ffffff; /* Cards become white */
+  --bg-card-dark: #f1f5f9; /* Darker cards also become light */
+  --text-main: #000000; /* Main text for cards */
+  --text-muted: #475569;
 }
 
 body {
@@ -36,52 +36,64 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Light Theme Overrides for Hardcoded Colors */
-.light-theme .bg-\[\#111827\] { background-color: var(--bg-card) !important; }
-.light-theme .bg-\[\#111827\]\/80 { background-color: color-mix(in srgb, var(--bg-card) 80%, transparent) !important; }
-.light-theme .bg-\[\#111827\]\/60 { background-color: color-mix(in srgb, var(--bg-card) 60%, transparent) !important; }
-.light-theme .bg-\[\#111827\]\/50 { background-color: color-mix(in srgb, var(--bg-card) 50%, transparent) !important; }
-.light-theme .bg-\[\#111827\]\/40 { background-color: color-mix(in srgb, var(--bg-card) 40%, transparent) !important; }
-
-.light-theme .bg-\[\#0a0f1a\] { background-color: var(--bg-card-dark) !important; }
-.light-theme .bg-\[\#0a0f1a\]\/80 { background-color: color-mix(in srgb, var(--bg-card-dark) 80%, transparent) !important; }
-.light-theme .bg-\[\#0a0f1a\]\/50 { background-color: color-mix(in srgb, var(--bg-card-dark) 50%, transparent) !important; }
-
-.light-theme .bg-\[\#36393f\] { background-color: #e5e7eb !important; }
-
-/* Text color logic: 
-   In light theme, text on white/light backgrounds should be dark.
-   Text on dark backgrounds (like the site background if it were dark) should stay light.
-   But since our light theme background is light, we generally want dark text.
-*/
-.light-theme .text-white { color: var(--text-main) !important; }
-.light-theme .text-gray-400 { color: var(--text-muted) !important; }
-.light-theme .text-gray-300 { color: #334155 !important; }
-.light-theme .text-gray-200 { color: #1e293b !important; }
-.light-theme .text-gray-500 { color: #94a3b8 !important; }
-.light-theme .text-blue-100\/70,
-.light-theme .text-blue-200\/70 {
-  color: var(--text-muted) !important;
+/* Light Theme Overrides for Cards */
+.light-theme .bg-\[\#111827\],
+.light-theme .bg-\[\#111827\]\/80,
+.light-theme .bg-\[\#111827\]\/60,
+.light-theme .bg-\[\#111827\]\/50,
+.light-theme .bg-\[\#111827\]\/40,
+.light-theme .bg-\[\#0a0f1a\],
+.light-theme .bg-\[\#0a0f1a\]\/80,
+.light-theme .bg-\[\#0a0f1a\]\/50,
+.light-theme .rounded-\[2rem\],
+.light-theme .rounded-3xl,
+.light-theme .rounded-2xl {
+  background-color: var(--bg-card) !important;
+  color: #000000 !important;
 }
 
-/* Specific request: text on white background becomes black, 
-   but on dark background stays white. 
-   We'll use a utility class for this if needed, but the overrides above handle most cases.
-*/
-.light-theme .text-white { color: #000000 !important; }
-.light-theme .text-gray-100 { color: #111827 !important; }
-.light-theme .text-blue-200 { color: #1e40af !important; }
-.light-theme .text-blue-300 { color: #1d4ed8 !important; }
-.light-theme .text-orange-200 { color: #9a3412 !important; }
-.light-theme .text-emerald-200 { color: #065f46 !important; }
-.light-theme .text-red-200 { color: #991b1b !important; }
-.light-theme .text-purple-200 { color: #6b21a8 !important; }
-.light-theme .text-yellow-400 { color: #854d0e !important; }
-.light-theme .text-orange-400 { color: #9a3412 !important; }
-.light-theme .text-red-400 { color: #b91c1c !important; }
-.light-theme .text-emerald-400 { color: #047857 !important; }
-.light-theme .text-blue-400 { color: #1d4ed8 !important; }
-.light-theme .text-purple-400 { color: #7e22ce !important; }
+/* Ensure text inside these light cards is black */
+.light-theme .bg-\[\#111827\] *,
+.light-theme .bg-\[\#111827\]\/80 *,
+.light-theme .bg-\[\#0a0f1a\] *,
+.light-theme .bg-\[\#0a0f1a\]\/80 *,
+.light-theme .rounded-\[2rem\] *,
+.light-theme .rounded-3xl *,
+.light-theme .rounded-2xl * {
+  color: #000000 !important;
+}
+
+/* Exception: Icons and some accents should keep their colors */
+.light-theme .rounded-\[2rem\] .text-blue-400,
+.light-theme .rounded-\[2rem\] .text-emerald-400,
+.light-theme .rounded-\[2rem\] .text-yellow-400,
+.light-theme .rounded-\[2rem\] .text-purple-400 {
+  color: inherit !important; /* Keep the utility class color if it's an icon */
+}
+
+/* Re-apply utility colors for icons specifically if they were overwritten */
+.light-theme .text-blue-400 { color: #2563eb !important; }
+.light-theme .text-emerald-400 { color: #059669 !important; }
+.light-theme .text-yellow-400 { color: #d97706 !important; }
+.light-theme .text-purple-400 { color: #9333ea !important; }
+
+/* Sidebar and Topbar should stay dark with white text */
+.light-theme aside, 
+.light-theme header {
+  --bg-card: #111827;
+  --bg-card-dark: #0a0f1a;
+  background-color: #0a0f1a !important;
+}
+
+.light-theme aside *,
+.light-theme header * {
+  color: #ffffff !important;
+}
+
+.light-theme aside .text-gray-400,
+.light-theme header .text-gray-400 {
+  color: #9ca3af !important;
+}
 
 .light-theme .border-white\/10 { border-color: rgba(0, 0, 0, 0.1) !important; }
 .light-theme .border-white\/5 { border-color: rgba(0, 0, 0, 0.05) !important; }

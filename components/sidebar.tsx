@@ -27,7 +27,7 @@ function SidebarLink({ link, pathname, setIsOpen, isRtl }: { link: any, pathname
         }
         setIsOpen(false);
       }}
-      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${isRtl ? 'flex-row' : 'flex-row-reverse justify-end'} ${
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
         isActive
           ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
           : 'text-gray-400 hover:bg-white/5 hover:text-white border border-transparent'
@@ -72,8 +72,8 @@ export function Sidebar() {
         flex flex-col h-full shadow-2xl transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full md:translate-x-0' : '-translate-x-full md:translate-x-0')}
       `}>
-        <div className={`flex p-6 items-center justify-between border-b border-white/10 ${isRtl ? '' : 'flex-row-reverse'}`}>
-          <div className={`flex items-center gap-4 ${isRtl ? '' : 'flex-row-reverse'}`}>
+        <div className="flex p-6 items-center justify-between border-b border-white/10">
+          <div className="flex items-center gap-4">
             <div className="w-10 h-10 relative rounded-full overflow-hidden border border-white/10 shadow-[0_0_15_rgba(59,130,246,0.3)]">
               <Image
                 src="https://i.postimg.cc/jdLhSPtq/HEIF-Image.jpg"
@@ -103,7 +103,7 @@ export function Sidebar() {
         <div className="p-4 border-t border-white/10">
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
-            className={`flex w-full items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 group ${isRtl ? '' : 'flex-row-reverse'}`}
+            className="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 group"
           >
             <div className="p-2 bg-red-500/10 rounded-lg group-hover:bg-red-500/20 transition-colors">
               <LogOut className="w-5 h-5" />

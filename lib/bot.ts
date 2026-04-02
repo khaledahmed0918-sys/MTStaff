@@ -91,6 +91,8 @@ export async function getServerInfo(guildId: string) {
       memberCount: guild.approximate_member_count || 0,
       onlineCount: guild.approximate_presence_count || 0,
       ownerId: guild.owner_id,
+      premiumTier: guild.premium_tier || 0,
+      premiumSubscriptionCount: guild.premium_subscription_count || 0,
     };
   } catch (err) {
     return null;

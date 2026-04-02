@@ -55,7 +55,7 @@ export function Topbar({ user }: { user: any }) {
   const nameplate = userData?.discord?.nameplate;
 
   return (
-    <header className={`h-16 relative flex items-center justify-between px-4 md:px-6 z-20 shadow-[0_4px_30px_rgba(0,0,0,0.5)] border-b border-white/5 ${isRtl ? '' : 'flex-row-reverse'}`}>
+    <header className="h-16 relative flex items-center justify-between px-4 md:px-6 z-20 shadow-[0_4px_30px_rgba(0,0,0,0.5)] border-b border-white/5">
       {/* Background / Nameplate */}
       <div className="absolute inset-0 overflow-hidden z-0 bg-[#0a0f1a]/90 backdrop-blur-[27px]">
         {nameplate && (
@@ -66,14 +66,14 @@ export function Topbar({ user }: { user: any }) {
         )}
       </div>
 
-      <div className={`flex items-center gap-4 relative z-10 ${isRtl ? '' : 'flex-row-reverse'}`}>
+      <div className="flex items-center gap-4 relative z-10">
         <button 
           onClick={toggle}
           className="md:hidden p-2.5 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 bg-[#111827]/50 border border-white/5"
         >
           <Menu className="w-5 h-5" />
         </button>
-        <div className={`md:hidden flex items-center gap-2 ${isRtl ? '' : 'flex-row-reverse'}`}>
+        <div className="md:hidden flex items-center gap-2">
           <div className="w-8 h-8 relative rounded-full overflow-hidden border border-white/10 shadow-[0_0_10px_rgba(59,130,246,0.3)]">
             <Image
               src="https://i.postimg.cc/jdLhSPtq/HEIF-Image.jpg"
@@ -88,13 +88,13 @@ export function Topbar({ user }: { user: any }) {
         </div>
       </div>
 
-      <div className={`flex items-center gap-3 relative z-10 ${isRtl ? '' : 'flex-row-reverse'}`} ref={dropdownRef}>
+      <div className="flex items-center gap-3 relative z-10" ref={dropdownRef}>
         <div 
-          className={`flex items-center gap-3 cursor-pointer hover:bg-white/5 p-1.5 rounded-full transition-colors border border-transparent hover:border-white/10 ${isRtl ? 'pr-4' : 'pl-4 flex-row-reverse'}`}
+          className={`flex items-center gap-3 cursor-pointer hover:bg-white/5 p-1.5 rounded-full transition-colors border border-transparent hover:border-white/10 ${isRtl ? 'pr-4 pl-1.5 flex-row' : 'pl-1.5 pr-4 flex-row-reverse'}`}
           onClick={() => setDropdownOpen(!dropdownOpen)}
         >
           <div className={`hidden md:block ${isRtl ? 'text-right' : 'text-left'}`}>
-            <p className={`text-sm font-bold text-white tracking-wide flex items-center gap-2 ${isRtl ? '' : 'flex-row-reverse'}`}>
+            <p className="text-sm font-bold text-white tracking-wide flex items-center gap-2">
               {displayName}
               <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
             </p>
@@ -124,7 +124,7 @@ export function Topbar({ user }: { user: any }) {
                   setDropdownOpen(false);
                   router.push('/dashboard/settings');
                 }}
-                className={`w-full px-4 py-2.5 flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/5 transition-colors ${isRtl ? 'text-right' : 'text-left flex-row-reverse'}`}
+                className={`w-full px-4 py-2.5 flex items-center gap-3 text-gray-300 hover:text-white hover:bg-white/5 transition-colors ${isRtl ? 'text-right' : 'text-left'}`}
               >
                 <Settings className="w-4 h-4" />
                 <span className="text-sm font-medium">{t('settings')}</span>
@@ -132,7 +132,7 @@ export function Topbar({ user }: { user: any }) {
               <div className="h-px bg-white/10 my-1 mx-2" />
               <button
                 onClick={() => signOut({ callbackUrl: '/' })}
-                className={`w-full px-4 py-2.5 flex items-center gap-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors ${isRtl ? 'text-right' : 'text-left flex-row-reverse'}`}
+                className={`w-full px-4 py-2.5 flex items-center gap-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors ${isRtl ? 'text-right' : 'text-left'}`}
               >
                 <LogOut className="w-4 h-4" />
                 <span className="text-sm font-medium">{t('logout')}</span>

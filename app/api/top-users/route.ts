@@ -4,11 +4,7 @@ import { client } from '@/lib/bot';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  const guildId = process.env.DISCORD_GUILD_ID;
-
-  if (!guildId) {
-    return NextResponse.json({ error: 'Missing GUILD_ID in env' }, { status: 500 });
-  }
+  const guildId = process.env.DISCORD_GUILD_ID || '852218081837449246';
 
   try {
     if (!client.isReady()) {

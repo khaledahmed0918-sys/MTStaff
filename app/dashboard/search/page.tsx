@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense, useRef } from 'react';
+import { useState, useEffect, Suspense, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search as SearchIcon, ShieldAlert, Clock, Flame, MessageSquare, Calendar, ListTodo, CheckCircle2, Ticket, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
@@ -45,13 +45,7 @@ function SearchContent() {
     return () => observer.disconnect();
   }, [results]);
 
-  const toggleExpand = useCallback(async (id: string) => {
-    if (expandedId === id) {
-      setExpandedId(null);
-      setExpandedData(null);
-      return;
-    }
-
+  const fetchUserDetails = useCallback(async (id: string) => {
     setExpandedId(id);
     setLoadingDetails(true);
     try {
@@ -63,7 +57,16 @@ function SearchContent() {
     } finally {
       setLoadingDetails(false);
     }
-  }, [expandedId]);
+  }, []);
+
+  const toggleExpand = useCallback(async (id: string) => {
+    if (expandedId === id) {
+      setExpandedId(null);
+      setExpandedData(null);
+      return;
+    }
+    fetchUserDetails(id);
+  }, [expandedId, fetchUserDetails]);
 
   useEffect(() => {
     const fetchDefault = async () => {
@@ -73,7 +76,7 @@ function SearchContent() {
           const data = await res.json();
           setResults(data.results || []);
           if (data.results && data.results.length > 0) {
-            toggleExpand(data.results[0].id);
+            fetchUserDetails(data.results[0].id);
           }
         } else {
           const res = await fetchWithRetry('/api/search');
@@ -87,7 +90,7 @@ function SearchContent() {
       }
     };
     fetchDefault();
-  }, [initialQuery, toggleExpand]);
+  }, [initialQuery, fetchUserDetails]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,7 +106,7 @@ function SearchContent() {
       const data = await res.json();
       setResults(data.results || []);
       if (data.results && data.results.length > 0) {
-        toggleExpand(data.results[0].id);
+        fetchUserDetails(data.results[0].id);
       }
     } catch (err) {
       console.error(err);
@@ -116,7 +119,7 @@ function SearchContent() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-12">
       <div className="bg-[#111827]/60 border border-white/10 p-8 rounded-3xl shadow-xl relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.1),transparent_70%)] pointer-events-none group-hover:bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.2),transparent_70%)] transition-colors duration-700" />
-        <h1 className={`text-3xl font-black text-white mb-8 flex items-center gap-4 relative z-10 tracking-tight ${isRtl ? 'flex-row' : 'flex-row-reverse justify-end'}`}>
+        <h1 className={`text-3xl font-black text-white mb-8 flex items-center gap-4 relative z-10 tracking-tight ${isRtl ? 'flex-row' : 'flex-row'}`}>
           <div className="p-3 bg-blue-500/20 rounded-xl border border-blue-500/30">
             <SearchIcon className="w-7 h-7 text-blue-400" />
           </div>
@@ -180,7 +183,7 @@ function SearchContent() {
                 className={`p-8 flex flex-col items-center md:items-start ${user.isHidden ? '' : 'cursor-pointer hover:bg-white/5'} transition-colors relative z-30 ${user.banner ? '-mt-16 md:-mt-24' : ''}`}
                 onClick={() => !user.isHidden && toggleExpand(user.id)}
               >
-                <div className={`flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8 w-full ${isRtl ? '' : 'md:flex-row-reverse'}`}>
+                <div className={`flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8 w-full ${isRtl ? 'flex-row' : 'flex-row'}`}>
                   <div className="w-32 h-32 md:w-44 md:h-44 relative rounded-full overflow-hidden border-4 border-[#111827] bg-[#111827] z-10 shadow-2xl shrink-0">
                     {user.avatar ? (
                       <CachedImage src={user.avatar} alt={user.username} fill className="object-cover" referrerPolicy="no-referrer" />
@@ -202,7 +205,7 @@ function SearchContent() {
                   )}
                 </div>
                 
-                <div className={`flex flex-col md:flex-row items-center gap-4 md:gap-8 mt-8 text-sm text-gray-400 w-full md:w-auto ${isRtl ? '' : 'md:flex-row-reverse'}`}>
+                <div className={`flex flex-col md:flex-row items-center gap-4 md:gap-8 mt-8 text-sm text-gray-400 w-full md:w-auto ${isRtl ? 'flex-row' : 'flex-row'}`}>
                   <div className="flex items-center gap-3 bg-black/40 px-5 py-3 rounded-2xl border border-white/10 w-full md:w-auto justify-center shadow-inner">
                     <Calendar className="w-5 h-5 text-blue-400 shrink-0" />
                     <span className="font-medium">{t('createdAt')}: {formatDate(user.createdAt)}</span>
@@ -288,14 +291,14 @@ function SearchContent() {
                           {!user.hidePoints && (
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                               <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-3xl p-8 space-y-6">
-                                <div className={`flex items-center gap-3 ${isRtl ? '' : 'flex-row-reverse'}`}>
+                                <div className={`flex items-center gap-3 ${isRtl ? 'flex-row' : 'flex-row'}`}>
                                   <ListTodo className="w-6 h-6 text-blue-400" />
                                   <h4 className="text-2xl font-black text-white">{t('tasks')}</h4>
                                 </div>
                                 <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${isRtl ? '' : 'text-left'}`}>
                                   <div className="space-y-3">
                                     <p className="text-sm font-bold text-gray-400">{t('tasksRemaining')}</p>
-                                    <div className={`flex flex-wrap gap-2 ${isRtl ? '' : 'flex-row-reverse'}`}>
+                                    <div className={`flex flex-wrap gap-2 ${isRtl ? 'flex-row' : 'flex-row'}`}>
                                       {(expandedData.db.tasks || []).filter((t: any) => !t.completed).map((task: any, i: number) => (
                                         <span key={i} className="bg-red-500/10 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-xl text-xs font-bold">
                                           {task.task_name}
@@ -305,7 +308,7 @@ function SearchContent() {
                                   </div>
                                   <div className="space-y-3">
                                     <p className="text-sm font-bold text-gray-400">{t('tasksCompleted')}</p>
-                                    <div className={`flex flex-wrap gap-2 ${isRtl ? '' : 'flex-row-reverse'}`}>
+                                    <div className={`flex flex-wrap gap-2 ${isRtl ? 'flex-row' : 'flex-row'}`}>
                                       {(expandedData.db.tasks || []).filter((t: any) => t.completed).map((task: any, i: number) => (
                                         <span key={i} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-xl text-xs font-bold">
                                           {task.task_name}
@@ -352,7 +355,7 @@ function SearchContent() {
 function StatCard({ icon, label, value, subStats, subValue, subValueColor, isRtl }: any) {
   return (
     <div className={`bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4 hover:bg-white/10 transition-colors ${isRtl ? 'text-right' : 'text-left'}`}>
-      <div className={`flex items-center gap-3 ${isRtl ? '' : 'flex-row-reverse'}`}>
+      <div className={`flex items-center gap-3 ${isRtl ? 'flex-row' : 'flex-row'}`}>
         <div className="p-2 bg-white/5 rounded-xl">{icon}</div>
         <h4 className="font-bold text-gray-400 text-sm">{label}</h4>
       </div>
