@@ -192,8 +192,8 @@ export default function DashboardHome() {
         <StatCard 
           icon={<Award className="w-6 h-6 text-emerald-400" />}
           label={t('serverLevel')}
-          value="Level 3"
-          trend="Max Boost"
+          value={t('serverLevelValue')}
+          trend={t('maxBoost')}
           delay={0.6}
           isRtl={isRtl}
         />

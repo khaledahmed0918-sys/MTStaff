@@ -45,6 +45,26 @@ function SearchContent() {
     return () => observer.disconnect();
   }, [results]);
 
+  const toggleExpand = useCallback(async (id: string) => {
+    if (expandedId === id) {
+      setExpandedId(null);
+      setExpandedData(null);
+      return;
+    }
+
+    setExpandedId(id);
+    setLoadingDetails(true);
+    try {
+      const res = await fetchWithRetry(`/api/user/${id}`);
+      const data = await res.json();
+      setExpandedData(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingDetails(false);
+    }
+  }, [expandedId]);
+
   useEffect(() => {
     const fetchDefault = async () => {
       try {
@@ -91,26 +111,6 @@ function SearchContent() {
       setLoading(false);
     }
   };
-
-  const toggleExpand = useCallback(async (id: string) => {
-    if (expandedId === id) {
-      setExpandedId(null);
-      setExpandedData(null);
-      return;
-    }
-
-    setExpandedId(id);
-    setLoadingDetails(true);
-    try {
-      const res = await fetchWithRetry(`/api/user/${id}`);
-      const data = await res.json();
-      setExpandedData(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoadingDetails(false);
-    }
-  }, [expandedId]);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-12">

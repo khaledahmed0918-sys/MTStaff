@@ -68,6 +68,20 @@ body {
    but on dark background stays white. 
    We'll use a utility class for this if needed, but the overrides above handle most cases.
 */
+.light-theme .text-white { color: #000000 !important; }
+.light-theme .text-gray-100 { color: #111827 !important; }
+.light-theme .text-blue-200 { color: #1e40af !important; }
+.light-theme .text-blue-300 { color: #1d4ed8 !important; }
+.light-theme .text-orange-200 { color: #9a3412 !important; }
+.light-theme .text-emerald-200 { color: #065f46 !important; }
+.light-theme .text-red-200 { color: #991b1b !important; }
+.light-theme .text-purple-200 { color: #6b21a8 !important; }
+.light-theme .text-yellow-400 { color: #854d0e !important; }
+.light-theme .text-orange-400 { color: #9a3412 !important; }
+.light-theme .text-red-400 { color: #b91c1c !important; }
+.light-theme .text-emerald-400 { color: #047857 !important; }
+.light-theme .text-blue-400 { color: #1d4ed8 !important; }
+.light-theme .text-purple-400 { color: #7e22ce !important; }
 
 .light-theme .border-white\/10 { border-color: rgba(0, 0, 0, 0.1) !important; }
 .light-theme .border-white\/5 { border-color: rgba(0, 0, 0, 0.05) !important; }
