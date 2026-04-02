@@ -4,13 +4,15 @@ import { useState, useEffect, Suspense, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search as SearchIcon, ChevronDown, ChevronUp, ShieldAlert, Clock, Ban, Flame, MessageSquare, Calendar, ListTodo, Camera, CheckCircle2, History, Ticket } from 'lucide-react';
 import CachedImage from '@/components/cached-image';
-import { formatDateEn, formatVoiceTime, parseDiscordEmoji, generateGradientColors, fetchWithRetry } from '@/lib/utils';
+import { formatVoiceTime, parseDiscordEmoji, generateGradientColors, fetchWithRetry } from '@/lib/utils';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { RolesDisplay } from '@/components/roles-display';
+import { useSettings } from '@/components/settings-context';
 
 function SearchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { formatDate } = useSettings();
   const initialQuery = searchParams.get('q') || '';
   
   const [query, setQuery] = useState(initialQuery);
@@ -196,11 +198,11 @@ function SearchContent() {
                 <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 mt-8 text-sm text-gray-400 w-full md:w-auto">
                   <div className="flex items-center gap-3 bg-[#0a0f1a]/80 px-5 py-3 rounded-2xl border border-white/10 w-full md:w-auto justify-center shadow-inner hover:bg-white/5 hover:border-blue-500/30 transition-all whitespace-nowrap">
                     <Calendar className="w-5 h-5 text-blue-400 shrink-0" />
-                    <span className="font-medium text-xs sm:text-sm">تاريخ الإنشاء: {formatDateEn(user.createdAt)}</span>
+                    <span className="font-medium text-xs sm:text-sm">تاريخ الإنشاء: {formatDate(user.createdAt)}</span>
                   </div>
                   <div className="flex items-center gap-3 bg-[#0a0f1a]/80 px-5 py-3 rounded-2xl border border-white/10 w-full md:w-auto justify-center shadow-inner hover:bg-white/5 hover:border-purple-500/30 transition-all whitespace-nowrap">
                     <Calendar className="w-5 h-5 text-purple-400 shrink-0" />
-                    <span className="font-medium text-xs sm:text-sm">تاريخ الانضمام: {formatDateEn(user.joinedAt)}</span>
+                    <span className="font-medium text-xs sm:text-sm">تاريخ الانضمام: {formatDate(user.joinedAt)}</span>
                   </div>
                 </div>
                 
@@ -439,7 +441,7 @@ function SearchContent() {
                                     </div>
                                     <div className="text-xs text-gray-500 flex items-center gap-1 font-medium">
                                       <Clock className="w-3 h-3" />
-                                      <span>{purchase.date}</span>
+                                      <span>{formatDate(purchase.date)}</span>
                                     </div>
                                   </div>
                                 ))
@@ -484,7 +486,7 @@ function SearchContent() {
                                 <div key={i} className="bg-white/5 border border-white/5 hover:border-red-500/30 rounded-xl p-4 text-sm transition-all">
                                   <div className="flex justify-between items-center mb-2">
                                     <span className="font-mono text-red-300 bg-red-500/20 px-2 py-0.5 rounded-md text-xs">#{w.warn_number}</span>
-                                    <span className="text-[10px] text-gray-500">{formatDateEn(w.date_warn)}</span>
+                                    <span className="text-[10px] text-gray-500">{formatDate(w.date_warn)}</span>
                                   </div>
                                   <p className="text-gray-200 leading-relaxed">{w.reason}</p>
                                 </div>
@@ -510,7 +512,7 @@ function SearchContent() {
                                 <div key={i} className="bg-white/5 border border-white/5 hover:border-yellow-500/30 rounded-xl p-4 text-sm transition-all">
                                   <div className="flex justify-between items-center mb-2">
                                     <span className="font-mono text-yellow-300 bg-yellow-500/20 px-2 py-0.5 rounded-md text-xs">#{w.warn_number}</span>
-                                    <span className="text-[10px] text-gray-500">{formatDateEn(w.date_warn)}</span>
+                                    <span className="text-[10px] text-gray-500">{formatDate(w.date_warn)}</span>
                                   </div>
                                   <p className="text-gray-200 leading-relaxed">{w.reason}</p>
                                 </div>
@@ -536,7 +538,7 @@ function SearchContent() {
                                 <div key={i} className="bg-white/5 border border-white/5 hover:border-orange-500/30 rounded-xl p-4 text-sm transition-all">
                                   <div className="flex justify-between items-center mb-2">
                                     <span className="font-mono text-orange-300 bg-orange-500/20 px-2 py-0.5 rounded-md text-xs">#{t.timeout_number}</span>
-                                    <span className="text-[10px] text-gray-500">{formatDateEn(t.date)}</span>
+                                    <span className="text-[10px] text-gray-500">{formatDate(t.date)}</span>
                                   </div>
                                   <div className="text-xs text-orange-300 mb-2 bg-orange-500/10 inline-block px-2 py-0.5 rounded font-bold">المدة: {t.time}</div>
                                   <p className="text-gray-200 leading-relaxed">{t.reason}</p>
@@ -564,7 +566,7 @@ function SearchContent() {
                                 <div key={i} className="bg-white/5 border border-white/5 hover:border-red-500/30 rounded-xl p-4 text-sm transition-all">
                                   <div className="flex justify-between items-center mb-2">
                                     <span className="font-mono text-red-300 bg-red-500/20 px-2 py-0.5 rounded-md text-xs">#{b.ban_number}</span>
-                                    <span className="text-[10px] text-gray-500">{formatDateEn(b.date)}</span>
+                                    <span className="text-[10px] text-gray-500">{formatDate(b.date)}</span>
                                   </div>
                                   <div className="flex gap-2 mb-2">
                                     <span className="text-xs text-red-300 bg-red-500/10 px-2 py-0.5 rounded font-bold">المدة: {b.time}</span>

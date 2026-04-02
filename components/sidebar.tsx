@@ -47,7 +47,6 @@ export function Sidebar() {
   const links = [
     { href: '/dashboard', label: 'الرئيسية', icon: Home },
     { href: '/dashboard/admin', label: 'الرتب الإدارية', icon: Users },
-    { href: '/dashboard/leaderboard', label: 'التوبات', icon: Trophy },
     { href: '/dashboard/search', label: 'البحث', icon: Search },
     { href: '/dashboard/transcripts', label: 'ترانسكريبت التذاكر', icon: FileText },
     { href: '/dashboard/ticket-points', label: 'نقاط التذاكر', icon: Ticket },

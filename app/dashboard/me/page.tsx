@@ -3,20 +3,15 @@
 import { useEffect, useState } from 'react';
 import CachedImage from '@/components/cached-image';
 import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare, CheckCircle2, Camera, ListTodo, History } from 'lucide-react';
-import { formatVoiceTime, formatDateEn, parseDiscordEmoji, generateGradientColors, fetchWithRetry } from '@/lib/utils';
+import { formatVoiceTime, parseDiscordEmoji, generateGradientColors, fetchWithRetry } from '@/lib/utils';
 import { RolesDisplay } from '@/components/roles-display';
 import { motion } from 'motion/react';
-
-const formatDateTime = (dateString: any) => {
-  if (!dateString) return 'غير محدد';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return 'تاريخ غير صالح';
-  return date.toLocaleString('ar-SA');
-};
+import { useSettings } from '@/components/settings-context';
 
 export default function MyInfoPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { formatDate } = useSettings();
 
   useEffect(() => {
     async function fetchMyInfo() {
@@ -148,12 +143,12 @@ export default function MyInfoPage() {
                 <span className="whitespace-nowrap">ID: {discord.id}</span>
                 <div className="flex items-center gap-1.5 whitespace-nowrap">
                   <Calendar className="w-4 h-4 shrink-0" />
-                  <span className="text-xs sm:text-sm">تاريخ الإنشاء: {formatDateEn(discord.createdAt)}</span>
+                  <span className="text-xs sm:text-sm">تاريخ الإنشاء: {formatDate(discord.createdAt)}</span>
                 </div>
                 {discord.joinedAt && (
                   <div className="flex items-center gap-1.5 whitespace-nowrap">
                     <Calendar className="w-4 h-4 shrink-0" />
-                    <span className="text-xs sm:text-sm">تاريخ الانضمام: {formatDateEn(discord.joinedAt)}</span>
+                    <span className="text-xs sm:text-sm">تاريخ الانضمام: {formatDate(discord.joinedAt)}</span>
                   </div>
                 )}
               </div>
@@ -202,12 +197,12 @@ export default function MyInfoPage() {
                 <div className="text-[10px] text-gray-500 flex flex-col items-start gap-1 w-full max-w-[140px]">
                   <div className="flex items-center gap-1 whitespace-nowrap overflow-hidden text-ellipsis w-full">
                     <Calendar className="w-3 h-3 shrink-0" />
-                    <span className="text-[9px] sm:text-[10px]">الإنشاء: {formatDateEn(discord.createdAt)}</span>
+                    <span className="text-[9px] sm:text-[10px]">الإنشاء: {formatDate(discord.createdAt)}</span>
                   </div>
                   {discord.joinedAt && (
                     <div className="flex items-center gap-1 whitespace-nowrap overflow-hidden text-ellipsis w-full">
                       <Calendar className="w-3 h-3 shrink-0" />
-                      <span className="text-[9px] sm:text-[10px]">الانضمام: {formatDateEn(discord.joinedAt)}</span>
+                      <span className="text-[9px] sm:text-[10px]">الانضمام: {formatDate(discord.joinedAt)}</span>
                     </div>
                   )}
                 </div>
@@ -404,7 +399,7 @@ export default function MyInfoPage() {
                   </div>
                   <div className="text-xs text-gray-500 flex items-center gap-1">
                     <Clock className="w-3 h-3" />
-                    <span>{purchase.date}</span>
+                    <span>{formatDate(purchase.date)}</span>
                   </div>
                 </div>
               ))
@@ -432,7 +427,7 @@ export default function MyInfoPage() {
                 <div key={i} className="bg-[#0a0f1a] border border-white/5 rounded-xl p-4 hover:border-red-500/30 transition-all duration-300">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-mono bg-red-500/20 text-red-300 px-2 py-1 rounded-md">#{warn.warn_number}</span>
-                    <span className="text-xs text-gray-400">{formatDateTime(warn.date_warn)}</span>
+                    <span className="text-xs text-gray-400">{formatDate(warn.date_warn)}</span>
                   </div>
                   <p className="text-sm text-gray-200">{warn.reason}</p>
                 </div>
@@ -455,7 +450,7 @@ export default function MyInfoPage() {
                 <div key={i} className="bg-[#0a0f1a] border border-white/5 rounded-xl p-4 hover:border-yellow-500/30 transition-all duration-300">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-mono bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-md">#{warn.warn_number}</span>
-                    <span className="text-xs text-gray-400">{formatDateTime(warn.date_warn)}</span>
+                    <span className="text-xs text-gray-400">{formatDate(warn.date_warn)}</span>
                   </div>
                   <p className="text-sm text-gray-200">{warn.reason}</p>
                   {warn.attachments && warn.attachments.length > 0 && (
@@ -485,7 +480,7 @@ export default function MyInfoPage() {
                 <div key={i} className="bg-[#0a0f1a] border border-white/5 rounded-xl p-4 hover:border-orange-500/30 transition-all duration-300">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-mono bg-orange-500/20 text-orange-300 px-2 py-1 rounded-md">#{to.timeout_number}</span>
-                    <span className="text-xs text-gray-400">{formatDateTime(to.date)}</span>
+                    <span className="text-xs text-gray-400">{formatDate(to.date)}</span>
                   </div>
                   <div className="mb-2">
                     <span className="text-xs bg-white/10 px-2 py-1 rounded text-gray-300">المدة: {to.time}</span>
@@ -511,7 +506,7 @@ export default function MyInfoPage() {
                 <div key={i} className="bg-[#0a0f1a] border border-white/5 rounded-xl p-4 hover:border-red-500/30 transition-all duration-300">
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-mono bg-red-500/20 text-red-300 px-2 py-1 rounded-md">#{ban.ban_number}</span>
-                    <span className="text-xs text-gray-400">{formatDateTime(ban.date)}</span>
+                    <span className="text-xs text-gray-400">{formatDate(ban.date)}</span>
                   </div>
                   <div className="flex gap-2 mb-2">
                     <span className="text-xs bg-white/10 px-2 py-1 rounded text-gray-300">المدة: {ban.time}</span>

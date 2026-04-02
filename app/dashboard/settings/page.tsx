@@ -6,7 +6,7 @@ import { motion } from 'motion/react';
 import { Settings as SettingsIcon, Palette, Globe, Shield, Zap, Moon, Sun, Type, Square, Circle, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 export default function SettingsPage() {
-  const { settings, updateSettings } = useSettings();
+  const { settings, updateSettings, t } = useSettings();
   const [savingPrivacy, setSavingPrivacy] = useState(false);
   const [privacySettings, setPrivacySettings] = useState({
     showProfile: true,
@@ -107,19 +107,19 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">تنسيق الوقت</label>
+              <label className="block text-sm font-medium text-gray-400 mb-2">{t('timeFormat')}</label>
               <div className="flex gap-2">
                 <button 
                   onClick={() => updateSettings({ timeFormat: '12h' })}
-                  className={`flex-1 py-2 rounded-xl border transition-all ${settings.timeFormat === '12h' ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
+                  className={`flex-1 py-2 rounded-xl border transition-all ${settings.timeFormat === '12h' ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
                 >
-                  12 ساعة
+                  12h (AM/PM)
                 </button>
                 <button 
                   onClick={() => updateSettings({ timeFormat: '24h' })}
-                  className={`flex-1 py-2 rounded-xl border transition-all ${settings.timeFormat === '24h' ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
+                  className={`flex-1 py-2 rounded-xl border transition-all ${settings.timeFormat === '24h' ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
                 >
-                  24 ساعة
+                  24h
                 </button>
               </div>
             </div>
@@ -135,30 +135,30 @@ export default function SettingsPage() {
         >
           <div className="flex items-center gap-3 border-b border-white/10 pb-4">
             <Palette className="w-5 h-5 text-purple-400" />
-            <h2 className="text-xl font-bold text-white">تخصيص الواجهة (UI)</h2>
+            <h2 className="text-xl font-bold text-white">{t('uiCustomization')}</h2>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">الوضع</label>
+              <label className="block text-sm font-medium text-gray-400 mb-2">{t('theme')}</label>
               <div className="flex gap-2">
                 <button 
                   onClick={() => updateSettings({ theme: 'dark' })}
-                  className={`flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.theme === 'dark' ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
+                  className={`flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.theme === 'dark' ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
                 >
-                  <Moon className="w-4 h-4" /> داكن
+                  <Moon className="w-4 h-4" /> {t('dark')}
                 </button>
                 <button 
                   onClick={() => updateSettings({ theme: 'light' })}
-                  className={`flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.theme === 'light' ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
+                  className={`flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.theme === 'light' ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
                 >
-                  <Sun className="w-4 h-4" /> فاتح
+                  <Sun className="w-4 h-4" /> {t('light')}
                 </button>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">لون الموقع</label>
+              <label className="block text-sm font-medium text-gray-400 mb-2">{t('accentColor')}</label>
               <div className="flex gap-3">
                 {(['blue', 'purple', 'emerald', 'rose', 'amber'] as AccentColor[]).map(color => (
                   <button
@@ -178,13 +178,13 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">حجم الخط</label>
+              <label className="block text-sm font-medium text-gray-400 mb-2">{t('fontSize')}</label>
               <div className="flex gap-2">
                 {(['small', 'medium', 'large'] as FontSize[]).map(size => (
                   <button 
                     key={size}
                     onClick={() => updateSettings({ fontSize: size })}
-                    className={`flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.fontSize === size ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
+                    className={`flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.fontSize === size ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
                   >
                     <Type className={`w-4 h-4 ${size === 'small' ? 'scale-75' : size === 'large' ? 'scale-125' : ''}`} />
                   </button>
@@ -193,11 +193,11 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">شكل الكروت</label>
+              <label className="block text-sm font-medium text-gray-400 mb-2">{t('cardShape')}</label>
               <div className="flex gap-2">
                 <button 
                   onClick={() => updateSettings({ cardShape: 'rounded' })}
-                  className={`flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.cardShape === 'rounded' ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
+                  className={`flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.cardShape === 'rounded' ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
                 >
                   <Circle className="w-4 h-4" /> دائرية
                 </button>
@@ -222,7 +222,7 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div className="flex items-center gap-3">
               <Shield className="w-5 h-5 text-emerald-400" />
-              <h2 className="text-xl font-bold text-white">الخصوصية (Privacy)</h2>
+              <h2 className="text-xl font-bold text-white">{t('privacy')}</h2>
             </div>
             {savingPrivacy && <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />}
           </div>
@@ -230,40 +230,40 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <label className="block text-sm font-medium text-white">إظهار الملف الشخصي</label>
+                <label className="block text-sm font-medium text-white">{t('profileVisibility')}</label>
                 <p className="text-xs text-gray-400">السماح للآخرين برؤية ملفك في البحث</p>
               </div>
               <button 
                 onClick={() => handlePrivacyChange('showProfile', !privacySettings.showProfile)}
-                className={`w-12 h-6 rounded-full transition-colors relative ${privacySettings.showProfile ? 'bg-emerald-500' : 'bg-gray-600'}`}
+                className={`w-12 h-6 rounded-full transition-colors relative ${privacySettings.showProfile ? 'bg-[var(--color-primary)]' : 'bg-gray-600'}`}
               >
-                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${privacySettings.showProfile ? 'left-1' : 'right-1'}`} />
+                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${privacySettings.showProfile ? (settings.language === 'ar' ? 'left-1' : 'right-1') : (settings.language === 'ar' ? 'right-1' : 'left-1')}`} />
               </button>
             </div>
 
             <div className="flex items-center justify-between">
               <div>
-                <label className="block text-sm font-medium text-white">إخفاء الإحصائيات</label>
+                <label className="block text-sm font-medium text-white">{t('hideStats')}</label>
                 <p className="text-xs text-gray-400">إخفاء الرسائل، الفويس، الخ عن الآخرين</p>
               </div>
               <button 
                 onClick={() => handlePrivacyChange('hideStats', !privacySettings.hideStats)}
-                className={`w-12 h-6 rounded-full transition-colors relative ${privacySettings.hideStats ? 'bg-emerald-500' : 'bg-gray-600'}`}
+                className={`w-12 h-6 rounded-full transition-colors relative ${privacySettings.hideStats ? 'bg-[var(--color-primary)]' : 'bg-gray-600'}`}
               >
-                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${privacySettings.hideStats ? 'left-1' : 'right-1'}`} />
+                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${privacySettings.hideStats ? (settings.language === 'ar' ? 'left-1' : 'right-1') : (settings.language === 'ar' ? 'right-1' : 'left-1')}`} />
               </button>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">من يقدر يشوف نقاطك</label>
+              <label className="block text-sm font-medium text-gray-400 mb-2">{t('pointsVisibility')}</label>
               <select 
                 value={privacySettings.pointsVisibility}
                 onChange={(e) => handlePrivacyChange('pointsVisibility', e.target.value)}
-                className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-emerald-500/50"
+                className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:border-[var(--color-primary)]"
               >
-                <option value="everyone">الجميع</option>
-                <option value="friends">الأصدقاء فقط</option>
-                <option value="nobody">لا أحد</option>
+                <option value="everyone">{t('everyone')}</option>
+                <option value="friends">{t('friends')}</option>
+                <option value="nobody">{t('nobody')}</option>
               </select>
             </div>
           </div>
@@ -278,37 +278,37 @@ export default function SettingsPage() {
         >
           <div className="flex items-center gap-3 border-b border-white/10 pb-4">
             <Zap className="w-5 h-5 text-amber-400" />
-            <h2 className="text-xl font-bold text-white">الأداء (Performance)</h2>
+            <h2 className="text-xl font-bold text-white">{t('performance')}</h2>
           </div>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <label className="block text-sm font-medium text-white">تقليل الأنيميشن</label>
+                <label className="block text-sm font-medium text-white">{t('reducedAnimations')}</label>
                 <p className="text-xs text-gray-400">مفيد للأجهزة الضعيفة</p>
               </div>
               <button 
                 onClick={() => updateSettings({ reducedAnimations: !settings.reducedAnimations })}
-                className={`w-12 h-6 rounded-full transition-colors relative ${settings.reducedAnimations ? 'bg-amber-500' : 'bg-gray-600'}`}
+                className={`w-12 h-6 rounded-full transition-colors relative ${settings.reducedAnimations ? 'bg-[var(--color-primary)]' : 'bg-gray-600'}`}
               >
-                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${settings.reducedAnimations ? 'left-1' : 'right-1'}`} />
+                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${settings.reducedAnimations ? (settings.language === 'ar' ? 'left-1' : 'right-1') : (settings.language === 'ar' ? 'right-1' : 'left-1')}`} />
               </button>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">تحميل الترانسكريبت</label>
+              <label className="block text-sm font-medium text-gray-400 mb-2">{t('transcriptLoading')}</label>
               <div className="flex gap-2">
                 <button 
                   onClick={() => updateSettings({ transcriptLoading: 'auto' })}
-                  className={`flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.transcriptLoading === 'auto' ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
+                  className={`flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.transcriptLoading === 'auto' ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
                 >
-                  تلقائي
+                  {t('auto')}
                 </button>
                 <button 
                   onClick={() => updateSettings({ transcriptLoading: 'manual' })}
-                  className={`flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.transcriptLoading === 'manual' ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
+                  className={`flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.transcriptLoading === 'manual' ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
                 >
-                  يدوي
+                  {t('manual')}
                 </button>
               </div>
             </div>

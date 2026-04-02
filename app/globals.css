@@ -1,6 +1,75 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@theme {
+  --color-blue-400: var(--color-primary, #60a5fa);
+  --color-blue-500: var(--color-primary, #3b82f6);
+  --color-blue-600: var(--color-primary, #2563eb);
+  
+  --radius-xl: var(--card-radius, 0.75rem);
+  --radius-2xl: var(--card-radius, 1rem);
+  --radius-3xl: var(--card-radius, 1.5rem);
+}
+
+:root {
+  --bg-color: #030712;
+  --text-color: white;
+  --bg-card: #111827;
+  --bg-card-dark: #0a0f1a;
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+}
+
+.light-theme {
+  --bg-color: #f3f4f6;
+  --text-color: #111827;
+  --bg-card: #ffffff;
+  --bg-card-dark: #f9fafb;
+  --text-main: #111827;
+  --text-muted: #4b5563;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Light Theme Overrides for Hardcoded Colors */
+.light-theme .bg-\[\#111827\] { background-color: var(--bg-card) !important; }
+.light-theme .bg-\[\#111827\]\/80 { background-color: color-mix(in srgb, var(--bg-card) 80%, transparent) !important; }
+.light-theme .bg-\[\#111827\]\/60 { background-color: color-mix(in srgb, var(--bg-card) 60%, transparent) !important; }
+.light-theme .bg-\[\#111827\]\/50 { background-color: color-mix(in srgb, var(--bg-card) 50%, transparent) !important; }
+.light-theme .bg-\[\#111827\]\/40 { background-color: color-mix(in srgb, var(--bg-card) 40%, transparent) !important; }
+
+.light-theme .bg-\[\#0a0f1a\] { background-color: var(--bg-card-dark) !important; }
+.light-theme .bg-\[\#0a0f1a\]\/80 { background-color: color-mix(in srgb, var(--bg-card-dark) 80%, transparent) !important; }
+.light-theme .bg-\[\#0a0f1a\]\/50 { background-color: color-mix(in srgb, var(--bg-card-dark) 50%, transparent) !important; }
+
+.light-theme .bg-\[\#36393f\] { background-color: #e5e7eb !important; }
+
+.light-theme .text-white { color: var(--text-main) !important; }
+.light-theme .text-gray-400 { color: var(--text-muted) !important; }
+.light-theme .text-gray-300 { color: #374151 !important; }
+.light-theme .text-gray-200 { color: #1f2937 !important; }
+.light-theme .text-gray-500 { color: #6b7280 !important; }
+
+.light-theme .border-white\/10 { border-color: rgba(0, 0, 0, 0.1) !important; }
+.light-theme .border-white\/5 { border-color: rgba(0, 0, 0, 0.05) !important; }
+.light-theme .bg-white\/5 { background-color: rgba(0, 0, 0, 0.05) !important; }
+.light-theme .bg-white\/10 { background-color: rgba(0, 0, 0, 0.1) !important; }
+.light-theme .hover\:bg-white\/10:hover { background-color: rgba(0, 0, 0, 0.1) !important; }
+.light-theme .hover\:bg-white\/5:hover { background-color: rgba(0, 0, 0, 0.05) !important; }
+.light-theme .bg-black\/20 { background-color: rgba(0, 0, 0, 0.05) !important; }
+.light-theme .bg-black\/40 { background-color: rgba(0, 0, 0, 0.08) !important; }
+
+.reduce-motion *, .reduce-motion ::before, .reduce-motion ::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
 @layer utilities {
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
@@ -10,6 +79,9 @@
     background: rgba(255, 255, 255, 0.02);
     border-radius: 10px;
   }
+  .light-theme .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+  }
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: rgba(59, 130, 246, 0.3);
     border-radius: 10px;
@@ -17,9 +89,4 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(59, 130, 246, 0.5);
   }
-}
-
-body {
-  background-color: #030712; /* Very dark blue/gray */
-  color: white;
 }

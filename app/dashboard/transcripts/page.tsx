@@ -22,7 +22,7 @@ interface Transcript {
 export default function TranscriptsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { settings } = useSettings();
+  const { settings, formatDate } = useSettings();
   
   const [transcripts, setTranscripts] = useState<Transcript[]>([]);
   const [loading, setLoading] = useState(true);
@@ -158,21 +158,21 @@ export default function TranscriptsPage() {
           </div>
           <div className="relative flex gap-2">
             <div className="relative flex-1">
-              <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
               <input
                 type="date"
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pr-10 pl-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all appearance-none"
-                style={{ colorScheme: 'dark' }}
+                className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                style={{ colorScheme: settings.theme === 'dark' ? 'dark' : 'light' }}
               />
             </div>
             {dateFilter && (
               <button 
                 onClick={() => setDateFilter('')}
-                className="px-4 py-2.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition-all font-bold text-sm whitespace-nowrap"
+                className="px-4 py-2.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition-all font-bold text-sm whitespace-nowrap flex items-center gap-1"
               >
-                Reset
+                <XCircle className="w-4 h-4" />
+                إلغاء
               </button>
             )}
           </div>
@@ -211,10 +211,10 @@ export default function TranscriptsPage() {
                 <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                   <div className="text-right">
                     <p className="text-sm text-gray-300">
-                      {new Date(t.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      {formatDate(t.date, { hour: undefined, minute: undefined })}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {new Date(t.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                      {formatDate(t.date, { year: undefined, month: undefined, day: undefined })}
                     </p>
                   </div>
                   <div className="p-2 bg-white/5 rounded-lg">
@@ -304,7 +304,7 @@ export default function TranscriptsPage() {
                           <div>
                             <p className="text-xs text-gray-400">تاريخ الإنشاء</p>
                             <p className="text-sm font-bold text-white">
-                              {t.details?.createdAt ? new Date(t.details.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'غير متوفر'}
+                              {t.details?.createdAt ? formatDate(t.details.createdAt) : 'غير متوفر'}
                             </p>
                           </div>
                         </div>
@@ -328,7 +328,7 @@ export default function TranscriptsPage() {
                             </p>
                             {t.details?.closedAt && (
                               <p className="text-xs text-gray-500 mt-1">
-                                {new Date(t.details.closedAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                {formatDate(t.details.closedAt)}
                               </p>
                             )}
                           </div>
@@ -336,13 +336,13 @@ export default function TranscriptsPage() {
                       </div>
                       
                       {/* Transcript Viewer */}
-                      <div className="md:col-span-2 mt-4 border border-white/10 rounded-2xl overflow-hidden bg-[#36393f] relative h-[600px] flex items-center justify-center">
+                      <div className="md:col-span-2 mt-4 border border-white/10 rounded-2xl overflow-hidden bg-[#36393f] relative h-[700px] flex items-center justify-center shadow-inner">
                         {loadedIframes[t.fileName] ? (
                           <iframe 
                             src={`/api/tickets/transcripts/download?file=${encodeURIComponent(t.fileName)}`}
                             className="w-full h-full border-none absolute inset-0"
                             title="Transcript Viewer"
-                            sandbox="allow-same-origin allow-scripts"
+                            allow="fullscreen"
                           />
                         ) : (
                           <div className="text-center space-y-4">
