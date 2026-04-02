@@ -237,7 +237,6 @@ export function LeaderboardClient() {
               key={user.id}
               elementId={`user-card-${user.id}`} 
               fileName={`mt-user-${user.username}.png`}
-              memberData={user}
             >
               <motion.div
                 layout
@@ -253,7 +252,6 @@ export function LeaderboardClient() {
                   <ScreenshotButton 
                     elementId={`user-card-${user.id}`} 
                     fileName={`mt-user-${user.username}.png`}
-                    memberData={user}
                   />
                 </div>
               {/* Nameplate / Banner Effect */}

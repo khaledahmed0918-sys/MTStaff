@@ -175,7 +175,6 @@ export function AdminSection({ initialCategories }: { initialCategories: any[] }
                         key={member.id}
                         elementId={`admin-card-${member.id}`} 
                         fileName={`${member.username}-admin-card.png`} 
-                        memberData={member}
                         className="w-full block"
                       >
                         <motion.div
