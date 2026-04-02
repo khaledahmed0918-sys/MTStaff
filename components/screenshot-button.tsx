@@ -1,20 +1,26 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Camera, X, Download, Loader2, Share2, CheckCircle2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { motion, AnimatePresence } from 'motion/react';
 import Image from 'next/image';
 
 interface ScreenshotModalProps {
-  elementId: string;
+  elementId?: string;
   fileName?: string;
   className?: string;
-  memberData?: any;
   variant?: 'global' | 'card';
 }
 
-export function ScreenshotButton({ elementId, fileName = 'mt-capture.png', className = '', memberData, variant = 'card', children }: ScreenshotModalProps & { children?: React.ReactNode }) {
+export function ScreenshotButton({
+  elementId,
+  fileName = 'mt-capture.png',
+  className = '',
+  variant = 'global',
+  children
+}: ScreenshotModalProps & { children?: React.ReactNode }) {
+
   const [isOpen, setIsOpen] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,155 +28,137 @@ export function ScreenshotButton({ elementId, fileName = 'mt-capture.png', class
   const [isSharing, setIsSharing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Disable scroll when modal is open
+  // منع السكرول وقت المودال
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    document.body.style.overflow = isOpen ? 'hidden' : 'unset';
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
 
-  const handleCapture = async (e?: React.MouseEvent) => {
-    if (e) {
-      e.stopPropagation();
-      e.preventDefault();
-    }
-    
-    const element = document.getElementById(elementId);
-    if (!element) return;
+  // 🔴 إنشاء ختم احترافي
+  const createStamp = () => {
+    const stamp = document.createElement('div');
+    stamp.className = 'mt-stamp';
 
-    setLoading(true);
-    setError(null);
-    
-    // iPhone-like flash effect
-    setShowFlash(true);
-    setTimeout(() => setShowFlash(false), 300);
+    Object.assign(stamp.style, {
+      position: 'fixed',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%) rotate(-12deg)',
+      width: '260px',
+      height: '260px',
+      border: '6px double rgba(255,0,0,0.6)',
+      borderRadius: '50%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'rgba(255,0,0,0.6)',
+      fontWeight: '900',
+      textAlign: 'center',
+      pointerEvents: 'none',
+      zIndex: '99999',
+      backdropFilter: 'blur(1px)',
+    });
 
+    stamp.innerHTML = `
+      <div style="font-size:22px; letter-spacing:2px;">MT COMMUNITY</div>
+      <div style="margin:8px 0; width:70%; height:2px; background:red;"></div>
+      <div style="font-size:16px;">ADMINS</div>
+    `;
+
+    document.body.appendChild(stamp);
+    return stamp;
+  };
+
+  // 📸 الالتقاط
+  const handleCapture = async () => {
     try {
-      // Wait for fonts to be ready
-      if (typeof document !== 'undefined' && 'fonts' in document) {
-        await (document as any).fonts.ready;
+      setLoading(true);
+      setError(null);
+
+      await document.fonts.ready;
+
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 200);
+
+      const stamp = createStamp();
+
+      let canvas: HTMLCanvasElement;
+
+      // 🌍 تصوير الشاشة الحالية
+      if (variant === 'global') {
+        canvas = await html2canvas(document.body, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: null,
+          width: window.innerWidth,
+          height: window.innerHeight,
+          x: window.scrollX,
+          y: window.scrollY,
+          scrollX: 0,
+          scrollY: 0,
+          foreignObjectRendering: true,
+          logging: false,
+        });
+      } else {
+        // 📦 تصوير عنصر محدد
+        const element = document.getElementById(elementId!);
+        if (!element) throw new Error('Element not found');
+
+        canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: null,
+          scrollY: 0,
+          foreignObjectRendering: true,
+        });
       }
 
-      // Create a temporary container for the stamp to be rendered by html2canvas
-      const stampContainer = document.createElement('div');
-      stampContainer.className = 'screenshot-stamp-container';
-      stampContainer.style.position = 'absolute';
-      stampContainer.style.inset = '0';
-      stampContainer.style.display = 'flex';
-      stampContainer.style.alignItems = 'center';
-      stampContainer.style.justifyContent = 'center';
-      stampContainer.style.pointerEvents = 'none';
-      stampContainer.style.zIndex = '9999';
-      
-      // The Red Professional Stamp SVG - More beautiful and detailed
-      stampContainer.innerHTML = `
-        <div style="transform: rotate(-15deg); opacity: 0.3; border: 8px double red; border-radius: 50%; width: 320px; height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: red; font-family: 'Inter', sans-serif; text-align: center; background: rgba(255,0,0,0.02);">
-          <div style="font-size: 28px; font-weight: 900; letter-spacing: 2px; margin-bottom: 5px;">MT COMMUNITY</div>
-          <div style="width: 80%; height: 2px; background: red; margin: 10px 0;"></div>
-          <div style="font-size: 20px; font-weight: 700;">OFFICIAL RECORD</div>
-          <div style="font-size: 14px; font-weight: 500; margin-top: 10px;">${new Date().toLocaleDateString('en-GB')}</div>
-          <div style="font-size: 12px; font-weight: 400; margin-top: 5px;">VERIFIED SYSTEM</div>
-        </div>
-      `;
-
-      // Append stamp temporarily to the element
-      const originalPosition = element.style.position;
-      
-      if (!originalPosition || originalPosition === 'static') {
-        element.style.position = 'relative';
-      }
-      element.appendChild(stampContainer);
-
-      // Wrap html2canvas in a promise with timeout
-      const capturePromise = html2canvas(element, {
-        scale: 3, // Increased scale for better quality
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: null,
-        logging: true,
-        scrollY: -window.scrollY,
-        onclone: (clonedDoc) => {
-          const clonedElement = clonedDoc.getElementById(elementId);
-          if (clonedElement) {
-            // Ensure everything is visible in the clone
-            const scrollableElements = clonedElement.querySelectorAll('.overflow-y-auto, .overflow-auto');
-            scrollableElements.forEach((el) => {
-              (el as HTMLElement).style.overflow = 'visible';
-              (el as HTMLElement).style.maxHeight = 'none';
-              (el as HTMLElement).style.height = 'auto';
-            });
-            
-            // Force some styles for better capture
-            clonedElement.style.borderRadius = '24px';
-            clonedElement.style.boxShadow = 'none';
-          }
-        }
-      });
-
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Capture timed out')), 20000)
-      );
-      
-      const canvas = await Promise.race([capturePromise, timeoutPromise]) as HTMLCanvasElement;
-
-      // Cleanup stamp
-      if (element.contains(stampContainer)) {
-        element.removeChild(stampContainer);
-      }
-      if (!originalPosition || originalPosition === 'static') {
-        element.style.position = originalPosition;
-      }
+      stamp.remove();
 
       const dataUrl = canvas.toDataURL('image/png');
       setImage(dataUrl);
       setIsOpen(true);
+
     } catch (err) {
       console.error('Capture failed:', err);
-      setError('فشل التقاط الصورة. يرجى المحاولة مرة أخرى.');
-      // Ensure cleanup if it fails
-      const stamps = element.querySelectorAll('.screenshot-stamp-container');
-      stamps.forEach(s => element.removeChild(s));
+      setError('فشل التقاط الصورة');
     } finally {
       setLoading(false);
     }
   };
 
+  // تحميل
   const handleDownload = () => {
     if (!image) return;
     const link = document.createElement('a');
     link.href = image;
     link.download = fileName;
-    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
   };
 
+  // مشاركة
   const handleShare = async () => {
     if (!image) return;
     setIsSharing(true);
+
     try {
-      const response = await fetch(image);
-      const blob = await response.blob();
+      const res = await fetch(image);
+      const blob = await res.blob();
       const file = new File([blob], fileName, { type: 'image/png' });
-      
+
       if (navigator.share) {
         await navigator.share({
           files: [file],
-          title: 'MT Community Capture',
-          text: 'Check out this capture from MT Community Dashboard!',
+          title: 'MT Capture',
         });
       } else {
-        // Fallback: copy to clipboard or just download
         handleDownload();
-        alert('تم تحميل الصورة (متصفحك لا يدعم المشاركة المباشرة)');
       }
-    } catch (err) {
-      console.error('Share failed:', err);
+    } catch (e) {
+      console.error(e);
     } finally {
       setIsSharing(false);
     }
@@ -178,147 +166,78 @@ export function ScreenshotButton({ elementId, fileName = 'mt-capture.png', class
 
   return (
     <>
-      {/* Flash Effect */}
+      {/* Flash */}
       <AnimatePresence>
         {showFlash && (
           <motion.div
+            className="fixed inset-0 bg-white z-[9999]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] bg-white pointer-events-none"
           />
         )}
       </AnimatePresence>
 
-      <div 
-        onDoubleClick={handleCapture} 
-        className={`${className} relative group/screenshot`}
-      >
+      {/* زر */}
+      <div onClick={handleCapture} className={className}>
         {children || (
-          <button 
-            onClick={handleCapture}
-            disabled={loading}
-            className={variant === 'global' 
-              ? "p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300 group relative overflow-hidden flex items-center gap-2"
-              : `p-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg transition-all duration-300 group ${className}`
-            }
-            title="التقاط صورة"
-          >
-            {loading ? (
-              <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />
-            ) : (
-              <Camera className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
-            )}
-            {variant === 'global' && (
-              <>
-                <span className="text-sm font-bold text-gray-300 group-hover:text-white hidden sm:inline">التقاط الشاشة</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-              </>
-            )}
+          <button className="p-3 bg-blue-600 text-white rounded-xl flex items-center gap-2">
+            {loading ? <Loader2 className="animate-spin" /> : <Camera />}
+            تصوير
           </button>
         )}
-        
-        {/* Error Message */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="absolute top-full mt-2 right-0 bg-red-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-lg z-[60] whitespace-nowrap border border-red-400/50"
-            >
-              {error}
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setError(null);
-                }}
-                className="ml-2 hover:text-red-200"
-              >
-                <X className="w-3 h-3 inline" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
+      {/* خطأ */}
+      {error && (
+        <div className="fixed bottom-5 right-5 bg-red-500 text-white px-4 py-2 rounded">
+          {error}
+        </div>
+      )}
+
+      {/* مودال */}
       <AnimatePresence>
         {isOpen && image && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-[30px]"
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            
+            <div 
+              className="absolute inset-0 bg-black/60"
               onClick={() => setIsOpen(false)}
             />
-            
+
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 40 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 40 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-4xl bg-[#111827]/80 border border-white/10 rounded-[32px] shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh]"
+              className="relative bg-white p-5 rounded-2xl max-w-3xl w-full"
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
             >
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-white/10 bg-white/5">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/20 rounded-xl">
-                    <Camera className="w-6 h-6 text-blue-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-black text-white tracking-tight">معاينة الالتقاط</h3>
-                    <p className="text-xs text-gray-400 font-medium">تمت إضافة الختم الرسمي بنجاح</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all"
-                >
-                  <X className="w-6 h-6" />
+              <div className="flex justify-between mb-3">
+                <h2 className="font-bold">المعاينة</h2>
+                <button onClick={() => setIsOpen(false)}>
+                  <X />
                 </button>
               </div>
-              
-              {/* Image Preview */}
-              <div className="p-8 overflow-auto flex-1 flex items-center justify-center bg-black/20 custom-scrollbar relative">
-                <div className="relative group/preview max-w-full w-full aspect-video sm:aspect-[16/9]">
-                  <Image 
-                    src={image} 
-                    alt="Screenshot" 
-                    fill
-                    className="object-contain rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 transition-transform duration-500 group-hover/preview:scale-[1.02]" 
-                    unoptimized
-                  />
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-                </div>
+
+              <div className="relative w-full h-[400px]">
+                <Image
+                  src={image}
+                  alt="preview"
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
               </div>
 
-              {/* Footer Actions */}
-              <div className="p-6 border-t border-white/10 bg-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-2 text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span className="text-xs font-bold">جاهز للتحميل والمشاركة</span>
-                </div>
+              <div className="flex gap-3 mt-4">
+                <button onClick={handleDownload} className="bg-blue-600 text-white px-4 py-2 rounded flex gap-2 items-center">
+                  <Download /> تحميل
+                </button>
 
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <button
-                    onClick={handleShare}
-                    disabled={isSharing}
-                    className="flex-1 sm:flex-none px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all font-bold flex items-center justify-center gap-2 border border-white/10"
-                  >
-                    {isSharing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Share2 className="w-5 h-5" />}
-                    مشاركة
-                  </button>
-                  <button
-                    onClick={handleDownload}
-                    className="flex-1 sm:flex-none px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl transition-all font-bold flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(37,99,235,0.3)]"
-                  >
-                    <Download className="w-5 h-5" />
-                    تحميل بجودة عالية
-                  </button>
-                </div>
+                <button onClick={handleShare} className="bg-gray-300 px-4 py-2 rounded flex gap-2 items-center">
+                  <Share2 /> مشاركة
+                </button>
               </div>
             </motion.div>
+
           </div>
         )}
       </AnimatePresence>
