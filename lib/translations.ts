@@ -219,6 +219,12 @@ export const translations = {
     loadAndView: 'تحميل وعرض',
     openInNewWindow: 'فتح في نافذة جديدة',
     failedToFetchTranscripts: 'فشل في جلب الترانسكريبت بعد عدة محاولات',
+    createInvite: 'إنشاء دعوة',
+    copyInvite: 'نسخ الدعوة',
+    copyInviteLink: 'نسخ رابط الدعوة',
+    close: 'إغلاق',
+    inviteErrorTitle: 'خطأ في الدعوة',
+    inviteErrorMessage: 'يُرجى الطلب من إحدى الإداريين إنشاء رابط الانڤايت مرة اخرى .',
   },
   en: {
     dashboard: 'Dashboard',
@@ -440,6 +446,12 @@ export const translations = {
     loadAndView: 'Load & View',
     openInNewWindow: 'Open in New Window',
     failedToFetchTranscripts: 'Failed to fetch transcripts after several attempts',
+    createInvite: 'Create Invite',
+    copyInvite: 'Copy Invite',
+    copyInviteLink: 'Copy Invite Link',
+    close: 'Close',
+    inviteErrorTitle: 'Invite Error',
+    inviteErrorMessage: 'Please ask an admin to recreate the invite link.',
   }
 };
 

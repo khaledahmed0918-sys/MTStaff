@@ -8,6 +8,7 @@ import { formatVoiceTime, fetchWithRetry } from '@/lib/utils';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { RolesDisplay } from '@/components/roles-display';
 import { useSettings } from '@/components/settings-context';
+import { InviteButton } from '@/components/invite-button';
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -196,7 +197,10 @@ function SearchContent() {
                       {user.displayName}
                     </h3>
                     <p className="text-xl text-gray-400 font-medium">@{user.username}</p>
-                    <p className="text-sm text-gray-500 mt-3 font-mono bg-black/40 px-4 py-1.5 rounded-xl inline-block border border-white/10">{t('idLabel')}: {user.id}</p>
+                    <div className={`flex flex-wrap items-center justify-center md:justify-start gap-3 mt-3 ${isRtl ? 'md:justify-start' : 'md:justify-start'}`}>
+                      <p className="text-sm text-gray-500 font-mono bg-black/40 px-4 py-1.5 rounded-xl border border-white/10">{t('idLabel')}: {user.id}</p>
+                      <InviteButton userId={user.id} />
+                    </div>
                   </div>
                   {!user.isHidden && (
                     <div className="hidden md:block">
