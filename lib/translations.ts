@@ -224,7 +224,7 @@ export const translations = {
     copyInviteLink: 'نسخ رابط الدعوة',
     close: 'إغلاق',
     inviteErrorTitle: 'خطأ في الدعوة',
-    inviteErrorMessage: 'يُرجى الطلب من إحدى الإداريين إنشاء رابط الانڤايت مرة اخرى .',
+    inviteErrorMessage: 'يُرجى الطلب من إحدى الإداريين إنشاء رابط الدعوة مرة اخرى .',
   },
   en: {
     dashboard: 'Dashboard',

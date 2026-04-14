@@ -37,7 +37,7 @@ export default async function InvitePage({ params }: { params: Promise<{ userId:
           </div>
           <h1 className="text-2xl md:text-3xl font-black text-white mb-4">رابط غير صالح</h1>
           <p className="text-gray-400 text-lg leading-relaxed">
-            يُرجى الطلب من إحدى الإداريين إنشاء رابط الانڤايت مرة اخرى .
+            يُرجى الطلب من إحدى الإداريين إنشاء رابط الدعوة مرة اخرى .
           </p>
         </div>
       </div>

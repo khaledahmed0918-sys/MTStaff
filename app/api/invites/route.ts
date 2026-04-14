@@ -16,7 +16,10 @@ export async function POST(req: NextRequest) {
     `);
 
     // Generate link
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || new URL(req.url).origin;
+    let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || new URL(req.url).origin;
+    if (baseUrl.includes('localhost')) {
+      baseUrl = baseUrl.replace('localhost', '62.77.156.58');
+    }
     const inviteLink = `${baseUrl}/invite/${userId}`;
 
     // Insert or update
