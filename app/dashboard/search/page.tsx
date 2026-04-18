@@ -9,7 +9,6 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { RolesDisplay } from '@/components/roles-display';
 import { useSettings } from '@/components/settings-context';
 import { InviteButton } from '@/components/invite-button';
-import { ScreenshotButton } from '@/components/screenshot-button';
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -206,7 +205,6 @@ function SearchContent() {
                     {!user.isHidden && (
                       <div className="hidden md:flex flex-col items-end gap-2">
                         {expandedId === user.id ? <ChevronUp className="w-8 h-8 text-gray-500" /> : <ChevronDown className="w-8 h-8 text-gray-500" />}
-                        <ScreenshotButton targetSelector={`#user-card-${user.id}`} label={isRtl ? "لقطة شاشة" : "Screenshot"} />
                       </div>
                     )}
                   </div>

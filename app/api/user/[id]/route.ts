@@ -52,7 +52,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const [discordRes, warnsRes, swarnsRes, timeoutsRes, bansRes, streaksRes, messagesRes, voiceRes] = await Promise.allSettled([
       getUserInfo(guildId, id),
       query(`SELECT * FROM "warns_${id}" ORDER BY date_warn DESC`),
-      query(`SELECT * FROM "swarns_${id}" ORDER BY date_warn DESC`),
+      query(`SELECT * FROM "swarns_${id}" ORDER BY date DESC`),
       query(`SELECT * FROM "timeouts_${id}" ORDER BY date DESC`),
       query(`SELECT * FROM "bans_${id}" ORDER BY date DESC`),
       query(`SELECT * FROM streaks WHERE user_id = $1`, [id]),

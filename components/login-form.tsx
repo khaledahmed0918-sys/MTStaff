@@ -9,22 +9,24 @@ import { useSearchParams } from 'next/navigation';
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
 
-  const [particles, setParticles] = useState<any[]>([]);
-
-  useEffect(() => {
-    // Generate particles only on the client
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setParticles([...Array(20)].map(() => ({
+  const particles = useMemo(() => {
+    if (!isMounted) return [];
+    return [...Array(20)].map(() => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
       opacity: Math.random() * 0.5 + 0.1,
       scale: Math.random() * 0.5 + 0.5,
       targetY: Math.random() * -200 - 100,
       duration: Math.random() * 10 + 10,
-    })));
+    }));
+  }, [isMounted]);
+
+  useEffect(() => {
+    setIsMounted(true);
   }, []);
 
   const handleLogin = async () => {

@@ -78,8 +78,7 @@ export function AdminSection({ initialCategories }: { initialCategories: any[] }
         }, 0);
         return () => clearTimeout(timer);
       } else {
-        const timer = setTimeout(() => setLoading(false), 0);
-        return () => clearTimeout(timer);
+        setLoading(false); // Enable manual fetching completely
       }
     }
   }, [initialCategories, settings.transcriptLoading]);

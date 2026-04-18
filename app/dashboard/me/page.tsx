@@ -6,7 +6,6 @@ import { Calendar, ShieldAlert, Ban, Clock, Flame, MessageSquare, CheckCircle2, 
 import { formatVoiceTime, parseDiscordEmoji, generateGradientColors, fetchWithRetry } from '@/lib/utils';
 import { RolesDisplay } from '@/components/roles-display';
 import { InviteButton } from '@/components/invite-button';
-import { ScreenshotButton } from '@/components/screenshot-button';
 import { motion } from 'motion/react';
 import { useSettings } from '@/components/settings-context';
 
@@ -144,7 +143,6 @@ export default function MyInfoPage() {
               <div className="text-sm text-gray-500 mt-2 flex flex-wrap items-center gap-4 justify-start">
                 <span className="whitespace-nowrap">ID: {discord.id}</span>
                 <InviteButton userId={discord.id} />
-                <ScreenshotButton targetSelector="#my-profile-card" label="لقطة شاشة" />
                 <div className="flex items-center gap-1.5 whitespace-nowrap">
                   <Calendar className="w-4 h-4 shrink-0" />
                   <span className="text-xs sm:text-sm">{t('createdAt')}: {formatDate(discord.createdAt)}</span>
@@ -200,7 +198,6 @@ export default function MyInfoPage() {
               <div className="flex flex-col items-start gap-2 pt-16">
                 <div className="flex items-center gap-2">
                   <InviteButton userId={discord.id} />
-                  <ScreenshotButton targetSelector="#my-profile-card" label="لقطة شاشة" className="px-2 py-1 text-xs" />
                 </div>
                 <div className="text-[10px] text-gray-500 flex flex-col items-start gap-1 w-full max-w-[140px]">
                   <div className="flex items-center gap-1 whitespace-nowrap overflow-hidden text-ellipsis w-full">

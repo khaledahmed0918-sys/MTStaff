@@ -11,7 +11,6 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt" as SessionStrategy,
-    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
     async jwt({ token, user, account, profile }: { token: any; user: any; account: any; profile?: any; }) {
@@ -46,7 +45,6 @@ export const authOptions = {
         sameSite: "lax", // Lax is safer for HTTP
         path: "/",
         secure: false, // Must be false for HTTP
-        maxAge: 30 * 24 * 60 * 60, // Persist for 30 days
       },
     },
   },
