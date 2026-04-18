@@ -53,8 +53,8 @@ export function Sidebar() {
     { href: '/dashboard/search', label: t('search'), icon: Search },
     { href: '/dashboard/transcripts', label: t('transcripts'), icon: FileText },
     { href: '/dashboard/ticket-points', label: t('ticketPoints'), icon: Ticket },
-    { href: '/dashboard/settings', label: t('settings'), icon: Settings },
     { href: '/dashboard/me', label: t('profile'), icon: User },
+    { href: '/dashboard/settings', label: t('settings'), icon: Settings },
   ];
 
   return (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
 import Image from 'next/image';
 import { LogIn, Loader2, AlertCircle, Sparkles, Star, Heart, Zap, Music, Cloud } from 'lucide-react';
@@ -9,8 +9,25 @@ import { useSearchParams } from 'next/navigation';
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
+
+  const particles = useMemo(() => {
+    if (!isMounted) return [];
+    return [...Array(20)].map(() => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      opacity: Math.random() * 0.5 + 0.1,
+      scale: Math.random() * 0.5 + 0.5,
+      targetY: Math.random() * -200 - 100,
+      duration: Math.random() * 10 + 10,
+    }));
+  }, [isMounted]);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleLogin = async () => {
     setIsLoading(true);
@@ -72,22 +89,17 @@ export function LoginForm() {
         />
         
         {/* Floating Particles */}
-        {[...Array(20)].map((_, i) => (
+        {particles.map((p, i) => (
           <motion.div
             key={i}
             className="absolute w-1.5 h-1.5 bg-white rounded-full"
-            initial={{
-              x: typeof window !== 'undefined' ? Math.random() * window.innerWidth : Math.random() * 1000,
-              y: typeof window !== 'undefined' ? Math.random() * window.innerHeight : Math.random() * 1000,
-              opacity: Math.random() * 0.5 + 0.1,
-              scale: Math.random() * 0.5 + 0.5,
-            }}
+            initial={{ x: p.x, y: p.y, opacity: p.opacity, scale: p.scale }}
             animate={{
-              y: [null, Math.random() * -200 - 100],
+              y: [null, p.targetY],
               opacity: [null, 0],
             }}
             transition={{
-              duration: Math.random() * 10 + 10,
+              duration: p.duration,
               repeat: Infinity,
               ease: "linear",
             }}

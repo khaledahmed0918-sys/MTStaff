@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { AntiScreenshotOverlay } from '@/components/anti-screenshot';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -24,6 +25,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           <div className="absolute inset-0 bg-[#0a192f]/60 backdrop-blur-[80px]"></div>
         </div>
         
+        <AntiScreenshotOverlay />
         {children}
       </body>
     </html>

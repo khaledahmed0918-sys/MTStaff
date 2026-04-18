@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image, { ImageProps } from 'next/image';
+import { motion, AnimatePresence } from 'motion/react';
 
 const DB_NAME = 'discord-dashboard-images';
 const STORE_NAME = 'images';
@@ -45,7 +46,6 @@ const getCachedImage = async (url: string): Promise<string | null> => {
       request.onerror = () => reject(request.error);
     });
   } catch (err) {
-    // Error handling removed
     return null;
   }
 };
@@ -61,74 +61,129 @@ const setCachedImage = async (url: string, blob: Blob): Promise<void> => {
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
-  } catch (err) {
-    // Error handling removed
-  }
+  } catch (err) {}
 };
 
 interface CachedImageProps extends Omit<ImageProps, 'src'> {
   src: string;
 }
 
+const getUrlWithSize = (src: string, size: number) => {
+  try {
+    const url = new URL(src);
+    if (url.hostname.includes('discordapp')) {
+      url.searchParams.set('size', size.toString());
+      return url.toString();
+    }
+  } catch (e) {}
+  return src; 
+};
+
 export default function CachedImage({ src, alt, ...props }: CachedImageProps) {
-  const [imgSrc, setImgSrc] = useState<string | null>(null);
+  const [currentSrc, setCurrentSrc] = useState<string | null>(null);
+  const [loadingStep, setLoadingStep] = useState(0); // 0: init, 1: low, 2: mid, 3: high
 
   useEffect(() => {
     let isMounted = true;
+    let onlineHandler: () => void;
 
-    const loadImage = async () => {
+    const loadProgressive = async () => {
       if (!src) return;
       
-      // Skip caching for Discord banners/gifs as they often fail CORS
-      if (src.includes('discordapp.com/banners/') || src.includes('.gif')) {
-        if (isMounted) setImgSrc(src);
-        return;
-      }
-
-      // Try to get from cache first
+      // Attempt cache for final image first
       try {
         const cachedUrl = await getCachedImage(src);
         if (cachedUrl) {
-          if (isMounted) setImgSrc(cachedUrl);
+          if (isMounted) {
+            setCurrentSrc(cachedUrl);
+            setLoadingStep(3);
+          }
           return;
         }
-      } catch (e) {
-        // Ignore cache read errors
+      } catch (e) {}
+
+      // If network is offline, wait for it
+      if (!navigator.onLine) {
+        return new Promise<void>((resolve) => {
+          onlineHandler = () => {
+            window.removeEventListener('online', onlineHandler);
+            resolve(loadProgressive());
+          };
+          window.addEventListener('online', onlineHandler);
+        });
       }
 
-      // If not in cache, fetch it
-      try {
-        const response = await fetch(src, { mode: 'cors', credentials: 'omit' });
-        if (!response.ok) throw new Error('Network response was not ok');
-        const blob = await response.blob();
+      // Load steps based on url type
+      const isDiscordUrl = src.includes('cdn.discordapp.com');
+      const sizes = isDiscordUrl ? [32, 256, 1024] : [0]; 
+      
+      for (let i = 0; i < sizes.length; i++) {
+        if (!isMounted) break;
         
-        // Store in cache
-        await setCachedImage(src, blob);
+        const sizeSrc = isDiscordUrl ? getUrlWithSize(src, sizes[i]) : src;
         
-        // Create object URL and set it
-        if (isMounted) {
-          setImgSrc(URL.createObjectURL(blob));
+        try {
+          const response = await fetch(sizeSrc, { mode: 'cors', credentials: 'omit' });
+          if (!response.ok) throw new Error('Fetch failed');
+          const blob = await response.blob();
+          const objectUrl = URL.createObjectURL(blob);
+          
+          if (isMounted) {
+            setCurrentSrc(objectUrl);
+            setLoadingStep(isDiscordUrl ? i + 1 : 3);
+            if (i === sizes.length - 1 || !isDiscordUrl) {
+              await setCachedImage(src, blob);
+            }
+          }
+        } catch (error) {
+          if (!navigator.onLine && isMounted) {
+            // Wait for online to resume from this step
+            await new Promise<void>((resolve) => {
+              const resumeHandler = () => {
+                window.removeEventListener('online', resumeHandler);
+                resolve();
+              };
+              window.addEventListener('online', resumeHandler);
+            });
+            i--; // retries current step
+          } else if (i === sizes.length - 1 && isMounted) {
+            // fallback if it fails fully
+            setCurrentSrc(src);
+          }
         }
-      } catch (error) {
-        // Fallback to original src if fetch fails
-        if (isMounted) setImgSrc(src);
       }
     };
 
-    loadImage();
+    loadProgressive();
 
     return () => {
       isMounted = false;
-      // Note: We don't revoke the object URL here because it might be used by other instances
-      // of the same image. In a more complex implementation, we might want to reference count
-      // the object URLs to know when it's safe to revoke them.
+      if (onlineHandler) window.removeEventListener('online', onlineHandler);
     };
   }, [src]);
 
-  if (!imgSrc) {
-    // Render a placeholder or nothing while loading
-    return <div className={`animate-pulse bg-gray-800 ${props.className || ''}`} />;
-  }
+  const { fill, unoptimized, objectFit, ...rest } = props as any;
 
-  return <Image src={imgSrc} alt={alt} unoptimized {...props} />;
+  return (
+    <div className={`relative overflow-hidden ${props.className || ''}`}>
+      {!currentSrc && (
+        <div className="absolute inset-0 bg-gray-800 animate-pulse" />
+      )}
+      <AnimatePresence>
+        {currentSrc && (
+          <motion.img
+            key={currentSrc} // force unmount/remount on src change for crossfade
+            src={currentSrc}
+            alt={alt}
+            initial={{ opacity: 0, filter: loadingStep < 3 ? 'blur(10px)' : 'none' }}
+            animate={{ opacity: 1, filter: loadingStep < 3 ? 'blur(10px)' : 'none' }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: 'easeInOut' }}
+            className={`absolute inset-0 w-full h-full object-cover transition-all duration-700`}
+            {...rest}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
 }
