@@ -101,7 +101,7 @@ export default function MyInfoPage() {
         <div className="aspect-[5/2] w-full relative bg-[#0a0f1a] overflow-hidden">
           {discord.banner ? (
             <CachedImage
-              src={discord.banner}
+              src={`${discord.banner}?size=512`}
               alt="Banner"
               fill
               className="object-cover w-full h-full"
@@ -121,10 +121,10 @@ export default function MyInfoPage() {
               <div className="w-full h-full relative rounded-full overflow-hidden border-4 border-[#111827] shadow-[0_0_30px_rgba(59,130,246,0.4)] bg-[#111827]">
                 {discord.avatar ? (
                   <CachedImage
-                    src={discord.avatar}
+                    src={`${discord.avatar}?size=128`}
                     alt={discord.username}
                     fill
-                    className="object-cover"
+                    className="object-cover rounded-full"
                     referrerPolicy="no-referrer"
                   />
                 ) : (
@@ -226,10 +226,10 @@ export default function MyInfoPage() {
                   <div className="w-full h-full relative rounded-full overflow-hidden border-4 border-[#111827] shadow-[0_0_30px_rgba(59,130,246,0.4)] bg-[#111827]">
                     {discord.avatar ? (
                       <CachedImage
-                        src={discord.avatar}
+                        src={`${discord.avatar}?size=128`}
                         alt={discord.username}
                         fill
-                        className="object-cover"
+                        className="object-cover rounded-full"
                         referrerPolicy="no-referrer"
                       />
                     ) : (

@@ -27,9 +27,9 @@ const defaultSettings: Settings = {
   cardShape: 'rounded',
   reducedAnimations: false,
   language: 'ar',
-  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Riyadh',
+  timezone: 'Asia/Riyadh',
   timeFormat: '12h',
-  transcriptLoading: 'auto',
+  transcriptLoading: 'manual',
 };
 
 interface SettingsContextType {
@@ -109,8 +109,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (!dateString) return t('noData');
     try {
       const date = new Date(dateString);
-      return date.toLocaleString(settings.language === 'ar' ? 'ar-SA' : 'en-US', {
-        timeZone: settings.timezone,
+      // Force 'en-US' locale and 'Asia/Riyadh' to comply with requirements, ignoring user's app language config for Dates
+      return date.toLocaleString('en-US', {
+        timeZone: 'Asia/Riyadh',
         hour12: settings.timeFormat === '12h',
         year: 'numeric',
         month: 'short',
@@ -122,7 +123,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       return String(dateString);
     }
-  }, [settings.language, settings.timezone, settings.timeFormat, t]);
+  }, [settings.timeFormat, t]);
 
   const contextValue = useMemo(() => ({
     settings,

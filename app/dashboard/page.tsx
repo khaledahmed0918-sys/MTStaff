@@ -64,7 +64,7 @@ export default function DashboardHome() {
         <div className="relative min-h-[200px] md:min-h-[250px] w-full rounded-3xl overflow-hidden shadow-2xl border border-white/10">
           {displayInfo.banner ? (
             <CachedImage
-              src={displayInfo.banner}
+              src={`${displayInfo.banner}?size=256`}
               alt="Server Banner"
               fill
               className="object-cover opacity-60"
@@ -76,13 +76,13 @@ export default function DashboardHome() {
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1a] via-[#0a0f1a]/60 to-transparent" />
           
           <div className={`absolute bottom-0 left-0 right-0 p-6 flex flex-col md:flex-row items-center md:items-end gap-4 text-center ${isRtl ? 'md:text-right' : 'md:text-left'}`}>
-            <div className="w-24 h-24 relative rounded-full overflow-hidden border-4 border-[#0a0f1a] shadow-[0_0_20px_rgba(59,130,246,0.3)] shrink-0">
+            <div className="w-24 h-24 relative rounded-full overflow-hidden border-4 border-[#0a0f1a] shadow-[0_0_20px_rgba(59,130,246,0.3)] shrink-0 bg-[#0a0f1a]">
               {displayInfo.icon ? (
                 <CachedImage
-                  src={displayInfo.icon}
+                  src={`${displayInfo.icon}?size=128`}
                   alt="Server Icon"
                   fill
-                  className="object-cover"
+                  className="object-cover rounded-full"
                   referrerPolicy="no-referrer"
                 />
               ) : (

@@ -72,12 +72,16 @@ export function AdminSection({ initialCategories }: { initialCategories: any[] }
 
   useEffect(() => {
     if (initialCategories.length === 0) {
-      const timer = setTimeout(() => {
-        fetchAdminData();
-      }, 0);
-      return () => clearTimeout(timer);
+      if (settings.transcriptLoading === 'auto') {
+        const timer = setTimeout(() => {
+          fetchAdminData();
+        }, 0);
+        return () => clearTimeout(timer);
+      } else {
+        setLoading(false); // Enable manual fetching completely
+      }
     }
-  }, [initialCategories]);
+  }, [initialCategories, settings.transcriptLoading]);
 
   useEffect(() => {
     if (document.body.style.overflow === 'hidden') {

@@ -165,9 +165,9 @@ export default function CachedImage({ src, alt, ...props }: CachedImageProps) {
   const { fill, unoptimized, objectFit, ...rest } = props as any;
 
   return (
-    <div className={`relative overflow-hidden ${props.className || ''}`}>
+    <div className={`relative overflow-hidden w-full h-full ${props.className || ''}`}>
       {!currentSrc && (
-        <div className="absolute inset-0 bg-gray-800 animate-pulse" />
+        <div className="absolute inset-0 bg-gray-800 animate-pulse w-full h-full" />
       )}
       <AnimatePresence>
         {currentSrc && (
@@ -181,6 +181,7 @@ export default function CachedImage({ src, alt, ...props }: CachedImageProps) {
             transition={{ duration: 0.5, ease: 'easeInOut' }}
             className={`absolute inset-0 w-full h-full object-cover transition-all duration-700`}
             {...rest}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         )}
       </AnimatePresence>

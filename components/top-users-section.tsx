@@ -21,20 +21,25 @@ export function TopUsersSection({ guildId, initialData }: { guildId: string, ini
       return;
     }
 
+    if (settings.transcriptLoading === 'manual') {
+      setLoading(false);
+      return;
+    }
+
     async function fetchTopUsers() {
       try {
         const res = await fetchWithRetry('/api/top-users');
         const json = await res.json();
         setData(json);
       } catch (err) {
-        console.error('Failed to fetch top users', err);
+        // Silently fail to avoid console logs as requested
       } finally {
         setLoading(false);
       }
     }
 
     fetchTopUsers();
-  }, [initialData]);
+  }, [initialData, settings.transcriptLoading]);
 
   const sections = [
     { key: 'topDay', title: t('topDaily'), icon: Flame, color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/30', glow: 'rgba(249,115,22,0.15)' },
@@ -69,9 +74,27 @@ export function TopUsersSection({ guildId, initialData }: { guildId: string, ini
           </div>
           <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-l from-white to-purple-200 tracking-tight drop-shadow-sm">{t('topUsers')}</h2>
         </div>
-        <div className="flex justify-center py-20 text-gray-400 bg-[#0a0f1a]/80 backdrop-blur-2xl rounded-[2rem] border border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.5)] font-medium text-lg">
-          {t('noData')}
-        </div>
+        {!data && settings.transcriptLoading === 'manual' ? (
+          <div className="flex flex-col justify-center items-center py-20 bg-[#0a0f1a]/80 backdrop-blur-2xl rounded-[2rem] border border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.5)]">
+            <button 
+              onClick={() => {
+                setLoading(true);
+                fetchWithRetry('/api/top-users')
+                  .then(res => res.json())
+                  .then(json => setData(json))
+                  .catch(() => {})
+                  .finally(() => setLoading(false));
+              }}
+              className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-colors shadow-lg"
+            >
+              {isRtl ? 'تحميل بيانات التوب' : 'Load Top Data'}
+            </button>
+          </div>
+        ) : (
+          <div className="flex justify-center py-20 text-gray-400 bg-[#0a0f1a]/80 backdrop-blur-2xl rounded-[2rem] border border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.5)] font-medium text-lg">
+            {t('noData')}
+          </div>
+        )}
       </section>
     );
   }
@@ -94,53 +117,47 @@ export function TopUsersSection({ guildId, initialData }: { guildId: string, ini
           const Icon = sec.icon;
 
           return (
-            <ScreenshotButton 
+            <motion.div 
+              id={`top-user-card-${member.id}`}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              whileHover={{ y: -8, scale: 1.02 }}
+              transition={{ duration: 0.4, type: "spring", stiffness: 300 }}
+              onClick={() => router.push(`/dashboard/search?q=${member.id}`)}
+              className={`relative overflow-hidden rounded-[2rem] border ${sec.border} bg-[#0a0f1a]/80 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.5)] cursor-pointer group h-full hover:shadow-[0_0_40px_${sec.glow}] transition-all duration-500 flex flex-col justify-between`}
               key={sec.key}
-              elementId={`top-user-card-${member.id}`} 
-              fileName={`${member.username}-top-user.png`}
-              className="block"
             >
-              <motion.div 
-                id={`top-user-card-${member.id}`}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ duration: 0.4, type: "spring", stiffness: 300 }}
-                onClick={() => router.push(`/dashboard/search?q=${member.id}`)}
-                className={`relative overflow-hidden rounded-[2rem] border ${sec.border} bg-[#0a0f1a]/80 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.5)] cursor-pointer group h-full hover:shadow-[0_0_40px_${sec.glow}] transition-all duration-500`}
-              >
-                <div className={`absolute top-0 right-0 w-48 h-48 bg-[radial-gradient(circle_at_top_right,${sec.glow.replace('0.15', '0.2')},transparent_70%)] group-hover:bg-[radial-gradient(circle_at_top_right,${sec.glow.replace('0.15', '0.3')},transparent_70%)] transition-colors duration-700`} />
-                <div className={`absolute bottom-0 left-0 w-full h-1 ${sec.bg.replace('/10', '')} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`} />
-                <div className="absolute -right-12 -top-12 opacity-5 group-hover:opacity-10 group-hover:rotate-12 group-hover:scale-110 transition-all duration-700">
-                  <Icon className="w-48 h-48" />
-                </div>
+              <div className={`absolute top-0 right-0 w-48 h-48 bg-[radial-gradient(circle_at_top_right,${sec.glow.replace('0.15', '0.2')},transparent_70%)] group-hover:bg-[radial-gradient(circle_at_top_right,${sec.glow.replace('0.15', '0.3')},transparent_70%)] transition-colors duration-700`} />
+              <div className={`absolute bottom-0 left-0 w-full h-1 ${sec.bg.replace('/10', '')} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left`} />
+              <div className="absolute -right-12 -top-12 opacity-5 group-hover:opacity-10 group-hover:rotate-12 group-hover:scale-110 transition-all duration-700">
+                <Icon className="w-48 h-48" />
+              </div>
 
-                <div className="relative z-10 flex flex-col items-center text-center">
-                  <div className={`p-4 rounded-2xl ${sec.bg} mb-6 group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500 shadow-[0_0_20px_${sec.glow}] border ${sec.border}`}>
-                    <Icon className={`w-8 h-8 ${sec.color}`} />
+              <div className="relative z-10 flex flex-col items-center text-center">
+                <div className={`p-4 rounded-2xl ${sec.bg} mb-6 group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500 shadow-[0_0_20px_${sec.glow}] border ${sec.border}`}>
+                  <Icon className={`w-8 h-8 ${sec.color}`} />
+                </div>
+                <h3 className="text-xl font-bold text-white/90 mb-6 tracking-wide">{sec.title}</h3>
+                
+                <div className="relative w-28 h-28 mb-6 group-hover:scale-110 transition-transform duration-500">
+                  <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#0a0f1a] shadow-[0_0_20px_rgba(0,0,0,0.5)] relative z-10" style={{ borderColor: member.roleColor }}>
+                    <CachedImage src={member.avatar} alt={member.displayName} fill className="object-cover rounded-full" referrerPolicy="no-referrer" />
                   </div>
-                  <h3 className="text-xl font-bold text-white/90 mb-6 tracking-wide">{sec.title}</h3>
-                  
-                  <div className="relative w-28 h-28 mb-6 group-hover:scale-110 transition-transform duration-500">
-                    <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#0a0f1a] shadow-[0_0_20px_rgba(0,0,0,0.5)] relative z-10" style={{ borderColor: member.roleColor }}>
-                      <CachedImage src={member.avatar} alt={member.displayName} fill className="object-cover" referrerPolicy="no-referrer" />
+                  {member.avatarDecoration && (
+                    <div className="absolute -inset-5 z-20 pointer-events-none">
+                      <CachedImage src={member.avatarDecoration} alt="Decoration" fill className="object-cover" referrerPolicy="no-referrer" />
                     </div>
-                    {member.avatarDecoration && (
-                      <div className="absolute -inset-5 z-20 pointer-events-none">
-                        <CachedImage src={member.avatarDecoration} alt="Decoration" fill className="object-cover" referrerPolicy="no-referrer" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 rounded-full blur-md -z-10 opacity-50 transition-opacity duration-500 group-hover:opacity-100" style={{ backgroundColor: member.roleColor }} />
-                  </div>
-
-                  <h4 className="text-2xl font-black text-white truncate w-full drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] mb-1" style={{ color: member.roleColor }}>
-                    {member.displayName}
-                  </h4>
-                  <p className="text-sm text-gray-400 font-medium tracking-wide uppercase">{member.roleName}</p>
+                  )}
+                  <div className="absolute inset-0 rounded-full blur-md -z-10 opacity-50 transition-opacity duration-500 group-hover:opacity-100" style={{ backgroundColor: member.roleColor }} />
                 </div>
-              </motion.div>
-            </ScreenshotButton>
+
+                <h4 className="text-2xl font-black text-white truncate w-full drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] mb-1" style={{ color: member.roleColor }}>
+                  {member.displayName}
+                </h4>
+                <p className="text-sm text-gray-400 font-medium tracking-wide uppercase">{member.roleName}</p>
+              </div>
+            </motion.div>
           );
         })}
       </div>

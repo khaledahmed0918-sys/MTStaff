@@ -297,18 +297,21 @@ export default function SettingsPage() {
               </button>
             </div>
 
-            <div className={isRtl ? 'text-right' : 'text-left'}>
-              <label className="block text-sm font-medium text-gray-400 mb-2">{t('transcriptLoading')}</label>
+            <div className={`flex items-center justify-between ${isRtl ? '' : 'flex-row-reverse'}`}>
+              <div className={isRtl ? 'text-right' : 'text-left'}>
+                <label className="block text-sm font-medium text-white">{t('transcriptLoading')}</label>
+                <p className="text-xs text-gray-400">{t('transcriptLoadingDesc')}</p>
+              </div>
               <div className="flex gap-2">
                 <button 
                   onClick={() => updateSettings({ transcriptLoading: 'auto' })}
-                  className={`flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.transcriptLoading === 'auto' ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
+                  className={`px-4 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.transcriptLoading === 'auto' ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
                 >
                   {t('auto')}
                 </button>
                 <button 
                   onClick={() => updateSettings({ transcriptLoading: 'manual' })}
-                  className={`flex-1 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.transcriptLoading === 'manual' ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
+                  className={`px-4 py-2 rounded-xl border transition-all flex items-center justify-center gap-2 ${settings.transcriptLoading === 'manual' ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`}
                 >
                   {t('manual')}
                 </button>

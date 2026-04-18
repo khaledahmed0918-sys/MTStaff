@@ -9,6 +9,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { RolesDisplay } from '@/components/roles-display';
 import { useSettings } from '@/components/settings-context';
 import { InviteButton } from '@/components/invite-button';
+import { ScreenshotButton } from '@/components/screenshot-button';
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -163,7 +164,7 @@ function SearchContent() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: (index % 20) * 0.05 }}
           >
-            <div className="bg-[#111827]/60 border border-white/10 rounded-3xl overflow-hidden shadow-lg transition-all duration-500 relative group hover:border-[var(--color-primary)]/50">
+            <div id={`user-card-${user.id}`} className="bg-[#111827]/60 border border-white/10 rounded-3xl overflow-hidden shadow-lg transition-all duration-500 relative group hover:border-[var(--color-primary)]/50">
               
               {user.isHidden && (
                 <div className="absolute inset-0 z-50 bg-[#0a0f1a]/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6">
@@ -187,7 +188,7 @@ function SearchContent() {
                 <div className={`flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8 w-full ${isRtl ? 'flex-row' : 'flex-row'}`}>
                   <div className="w-32 h-32 md:w-44 md:h-44 relative rounded-full overflow-hidden border-4 border-[#111827] bg-[#111827] z-10 shadow-2xl shrink-0">
                     {user.avatar ? (
-                      <CachedImage src={user.avatar} alt={user.username} fill className="object-cover" referrerPolicy="no-referrer" />
+                      <CachedImage src={user.avatar} alt={user.username} fill className="object-cover rounded-full" referrerPolicy="no-referrer" />
                     ) : (
                       <div className="w-full h-full bg-blue-600 flex items-center justify-center font-bold text-5xl">{user.username.charAt(0)}</div>
                     )}
@@ -197,19 +198,20 @@ function SearchContent() {
                       {user.displayName}
                     </h3>
                     <p className="text-xl text-gray-400 font-medium">@{user.username}</p>
-                    <div className={`flex flex-wrap items-center justify-center md:justify-start gap-3 mt-3 ${isRtl ? 'md:justify-start' : 'md:justify-start'}`}>
-                      <p className="text-sm text-gray-500 font-mono bg-black/40 px-4 py-1.5 rounded-xl border border-white/10">{t('idLabel')}: {user.id}</p>
-                      <InviteButton userId={user.id} />
+                      <div className={`flex flex-wrap items-center justify-center md:justify-start gap-3 mt-3 ${isRtl ? 'md:justify-start' : 'md:justify-start'}`}>
+                        <p className="text-sm text-gray-500 font-mono bg-black/40 px-4 py-1.5 rounded-xl border border-white/10">{t('idLabel')}: {user.id}</p>
+                        <InviteButton userId={user.id} />
+                      </div>
                     </div>
+                    {!user.isHidden && (
+                      <div className="hidden md:flex flex-col items-end gap-2">
+                        {expandedId === user.id ? <ChevronUp className="w-8 h-8 text-gray-500" /> : <ChevronDown className="w-8 h-8 text-gray-500" />}
+                        <ScreenshotButton targetSelector={`#user-card-${user.id}`} label={isRtl ? "لقطة شاشة" : "Screenshot"} />
+                      </div>
+                    )}
                   </div>
-                  {!user.isHidden && (
-                    <div className="hidden md:block">
-                      {expandedId === user.id ? <ChevronUp className="w-8 h-8 text-gray-500" /> : <ChevronDown className="w-8 h-8 text-gray-500" />}
-                    </div>
-                  )}
-                </div>
-                
-                <div className={`flex flex-col md:flex-row items-center gap-4 md:gap-8 mt-8 text-sm text-gray-400 w-full md:w-auto ${isRtl ? 'flex-row' : 'flex-row'}`}>
+                  
+                  <div className={`flex flex-col md:flex-row items-center gap-4 md:gap-8 mt-8 text-sm text-gray-400 w-full md:w-auto ${isRtl ? 'flex-row' : 'flex-row'}`}>
                   <div className="flex items-center gap-3 bg-black/40 px-5 py-3 rounded-2xl border border-white/10 w-full md:w-auto justify-center shadow-inner">
                     <Calendar className="w-5 h-5 text-blue-400 shrink-0" />
                     <span className="font-medium">{t('createdAt')}: {formatDate(user.createdAt)}</span>
